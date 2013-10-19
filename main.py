@@ -39,14 +39,22 @@ def parse_command(command, what):
             args = command[command.index(" ")+1:]
             return_output("Fetching track "+args)
             dl = urllib2.urlopen(args)
+            fnameline=""
+            for line in str(dl.info()).split("\r\n"):
+                if "filename=" in line:
+                    fnameline = line
+                    break
             if dl.info().maintype == "audio":
-                track = open(os.path.join(os.path.join(MUSIC_PATH, NICK+"_downloaded_music"), args[args.rindex("/")+1:]), "wb")
+                fname = args[args.rindex("/")+1:]
+                if not fnameline == "":
+                    fname = fnameline[fnameline.index("filename=")+10:fnameline.rindex("\"")]
+                track = open(os.path.join(os.path.join(MUSIC_PATH, NICK+"_downloaded_music"), fname), "wb")
                 track.write(dl.read())
                 track.close()
                 mpc.update()
                 time.sleep(5)
-                mpc.searchadd("file", args[args.rindex("/")+1:])
-                return_output(args+" fetched and queued")
+                mpc.searchadd("file", fname)
+                return_output(fname+" fetched and queued")
             else:
                 return_output("Mime type "+dl.info().type+" not allowed.")
         except Exception, e:
@@ -94,6 +102,8 @@ def parse_command(command, what):
             pass
 
 def return_output(text):
+    #hopefully fixes issue where the first line of a message is sometimes dropped
+    s.send("PRIVMSG "+HOME_CHANNEL+" :\r\n")
     #can only send 5 lines at a time on Rizon before being kicked for flood
     text=str(text)
     for msg in text.split("\n"):
