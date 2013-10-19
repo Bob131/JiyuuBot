@@ -3,6 +3,7 @@ import mpd
 import ssl
 import os
 import urllib2
+import thread
 
 MPD_HOST = "127.0.0.1"
 MPD_PORT = 6600
@@ -38,6 +39,7 @@ def parse_command(command):
         track = open(os.path.join(os.path.join(MUSIC_PATH, NICK+"_downloaded_music"), args[args.rindex("/")+1:]), "wb")
         dl = urllib2.urlopen(args)
         track.write(dl.read())
+        track.close()
         return_output(args+" fetched")
         mpc.update()
     elif command.startswith("add"):
@@ -115,7 +117,8 @@ while 1:
             if "*" in command:
                 return_output("NOPE")
             elif command.startswith("."):
-                parse_command(command[1:])
+                print command
+                thread.start_new_thread(parse_command, command[1:])
     except Exception, e:
         return_output(e)
         return_output("I dun goofed, soz aye m80.")
