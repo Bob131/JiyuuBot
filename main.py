@@ -1,6 +1,8 @@
 import socket
 import mpd
 import ssl
+import os
+import urllib2
 
 MPD_HOST = "127.0.0.1"
 MPD_PORT = 6600
@@ -10,6 +12,8 @@ HOME_CHANNEL = "#AcuallyOS"
 NICK = "JiyuuRadio"
 PORT = 9999
 SSL = True
+
+MUSIC_PATH = "/media/music/Music"
 
 mpc = mpd.MPDClient()
 mpc.connect(MPD_HOST, MPD_PORT)
@@ -23,9 +27,20 @@ s.send("USER "+ NICK +" "+ NICK +" "+ NICK +" :"+NICK+"\n")
 s.send("NICK "+ NICK +"\r\n")
 s.send("JOIN "+ HOME_CHANNEL +"\r\n")
 
+if not os.path.exists(os.path.join(MUSIC_PATH, NICK+"_downloaded_music")):
+    os.mkdir(os.path.join(MUSIC_PATH, NICK+"_downloaded_music"))
+
 
 def parse_command(command):
-    if command.startswith("add"):
+    if command.startswith("download") or command.startswith("dl"):
+        args = command[command.index(" ")+1:]
+        return_output("Fetching track "+args)
+        track = open(os.path.join(os.path.join(MUSIC_PATH, NICK+"_downloaded_music"), args[args.rindex("/")+1:]), "wb")
+        dl = urllib2.urlopen(args)
+        track.write(dl.read())
+        return_output(args+" fetched")
+        mpc.update()
+    elif command.startswith("add"):
         args = command[4:]
         mpc.searchadd("any", args)
     elif command == "play":
@@ -44,7 +59,7 @@ def parse_command(command):
     elif command == "clear":
         mpc.clear()
     elif command.startswith("help"):
-        return_output("Available commands: .add .play .next .current .queue .stats .clear")
+        return_output("Available commands: .add .play .next .current .queue .stats .clear .download")
 
         try:
             args = command[5:]
@@ -65,6 +80,8 @@ def parse_command(command):
                 return_output(".stats - shows stats")
             elif args == "clear":
                 return_output(".clear - clears curent queue")
+            elif args == "download" or "dl":
+                return_output(".download | .dl - downloads track from URL and updates db")
         except:
             pass
 
@@ -94,7 +111,7 @@ while 1:
         if "PING" in line:
             s.send("PONG :"+line[6:])
         elif "PRIVMSG" in line and not "NOTICE" in line and HOME_CHANNEL in line:
-            command = line[line.rindex(":")+1:]
+            command = line[line.rindex(HOME_CHANNEL+" :")+len(HOME_CHANNEL)+2:]
             if "*" in command:
                 return_output("NOPE")
             elif command.startswith("."):
