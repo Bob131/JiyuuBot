@@ -3,6 +3,7 @@ import mpd
 import ssl
 import os
 import urllib2
+import urllib
 import threading
 import time
 import sys
@@ -47,10 +48,10 @@ def reconnect_mpd():
 
 
 def cmd_play(command):
-        mpc.play()
+    mpc.play()
 
 def cmd_next(command):
-        mpc.next()
+    mpc.next()
 
 def cmd_download(command):
     try:
@@ -63,7 +64,7 @@ def cmd_download(command):
                 fnameline = line
                 break
         if dl.info().maintype == "audio":
-            fname = args[args.rindex("/") + 1 : ]
+            fname = urllib.url2pathname(args[args.rindex("/") + 1 : ])
             if not fnameline == "":
                 fname = fnameline[fnameline.index("filename=") + 10 : fnameline.rindex("\"")]
             track = open(os.path.join(os.path.join(MUSIC_PATH, NICK + "_downloaded_music"), fname), "wb")
