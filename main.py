@@ -31,7 +31,8 @@ HELP_DICT = {"add": ".add [search term] - queues tracks for playback",
     "stats": ".stats - shows stats",
     "download": "<.download | .dl> [url] - downloads track from URL and queues it",
     "dl": "<.download | .dl> [url] - downloads track from URL and queues it",
-    "random": ".random - adds 10 random tracks to playlist"}
+    "random": ".random - adds 10 random tracks to playlist",
+    "announce": ".announce - adds an intro track to the queue"}
 
 
 mpc = mpd.MPDClient()
@@ -62,18 +63,28 @@ def reconnect_mpd():
 def auto_wait():
     while 1:
         time.sleep(30)
-        if len(mpc.playlist()) < 4:
-            cmd_add_songs("")
+        try:
+            if len(mpc.playlist()) < 5:
+                cmd_add_songs("")
+        except mpd.ConnectionError:
+            reconnect_mpd()
+            if len(mpc.playlist()) < 5:
+                cmd_add_songs("")
 
 def announce_wait():
     while 1:
-        announce()
+        try:
+            cmd_announce("")
+        except mpd.ConnectionError:
+            reconnect_mpd()
+            cmd_announce("")
         time.sleep(ANNOUNCE_INTERVAL)
 
-def announce():
+def cmd_announce(command):
     filelist = os.listdir(os.path.join(MUSIC_PATH, NICK + "_intros"))
     filepath = filelist[random.randint(0, len(filelist)-1)]
     filepath = os.path.join(NICK + "_intros", filepath)
+    print filepath
     mpc.addid(filepath, 1)
 
 def cmd_add_songs(command):
@@ -135,7 +146,7 @@ def cmd_stats(command):
     return_output(mpc.stats())
 
 def cmd_help(command):
-    return_output("Available commands: .add .play .next .current .queue .stats .download .random")
+    return_output("Available commands: .add .play .next .current .queue .stats .download .random .announce")
     try:
         args = command[5:]
         if args.startswith("."):
@@ -169,7 +180,7 @@ def parse_command(command):
 
 
 
-COMMAND_MAPPING = {"dl": cmd_download, "download": cmd_download, "add": cmd_add, "play": cmd_play, "next": cmd_next, "current": cmd_current, "queue": cmd_queue, "stats": cmd_stats, "help": cmd_help, "random": cmd_add_songs}
+COMMAND_MAPPING = {"dl": cmd_download, "download": cmd_download, "add": cmd_add, "play": cmd_play, "next": cmd_next, "current": cmd_current, "queue": cmd_queue, "stats": cmd_stats, "help": cmd_help, "random": cmd_add_songs, "announce": cmd_announce}
 
 print "*** Connecting... ***"
 while 1:
@@ -189,7 +200,6 @@ if ANNOUNCE:
 t = threading.Thread(target = auto_wait, args=())
 t.daemon = 1
 t.start()
-
 
 while 1:
     try:
