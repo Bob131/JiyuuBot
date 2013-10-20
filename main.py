@@ -23,7 +23,15 @@ MUSIC_PATH = "/media/music/Music"
 ANNOUNCE = True
 ANNOUNCE_INTERVAL = 900
 
-HELP_DICT = {"add": ".add [search term] - queues tracks for playback", "play": ".play - starts playing (useful for when the stream dies due to lack of queued tracks", "next": ".next - next track", "current": ".current - prints infor about current track", "queue": ".queue - shows next 4 songs", "stats": ".stats - shows stats", "download": "<.download | .dl> [url] - downloads track from URL and queues it", "dl": "<.download | .dl> [url] - downloads track from URL and queues it"}
+HELP_DICT = {"add": ".add [search term] - queues tracks for playback",
+    "play": ".play - starts playing (useful for when the stream dies due to lack of queued tracks",
+    "next": ".next - next track",
+    "current": ".current - prints infor about current track",
+    "queue": ".queue - shows next 4 songs",
+    "stats": ".stats - shows stats",
+    "download": "<.download | .dl> [url] - downloads track from URL and queues it",
+    "dl": "<.download | .dl> [url] - downloads track from URL and queues it",
+    "random": ".random - adds 10 random tracks to playlist"}
 
 
 mpc = mpd.MPDClient()
@@ -51,16 +59,29 @@ def reconnect_mpd():
     mpc.connect(MPD_HOST, MPD_PORT)
 
 
+def auto_wait():
+    while 1:
+        time.sleep(30)
+        if len(mpc.playlist()) < 4:
+            cmd_add_songs("")
+
 def announce_wait():
     while 1:
-        time.sleep(ANNOUNCE_INTERVAL)
         announce()
+        time.sleep(ANNOUNCE_INTERVAL)
 
 def announce():
     filelist = os.listdir(os.path.join(MUSIC_PATH, NICK + "_intros"))
     filepath = filelist[random.randint(0, len(filelist)-1)]
     filepath = os.path.join(NICK + "_intros", filepath)
     mpc.addid(filepath, 1)
+
+def cmd_add_songs(command):
+    filelist = os.listdir(os.path.join(MUSIC_PATH, NICK + "_downloaded_music"))
+    for i in range(1,10):
+        filepath = filelist[random.randint(0, len(filelist)-1)]
+        filepath = os.path.join(NICK + "_downloaded_music", filepath)
+        mpc.add(filepath)
 
 def cmd_play(command):
     mpc.play()
@@ -87,7 +108,7 @@ def cmd_download(command):
             track.close()
             mpc.update()
             time.sleep(5)
-            mpc.searchadd("file", fname)
+            mpc.addid(os.path.join(NICK + "_downloaded_music", fname), 2)
             return_output(fname + " fetched and queued")
         else:
             return_output("Mime type " + dl.info().type + " not allowed.")
@@ -114,7 +135,7 @@ def cmd_stats(command):
     return_output(mpc.stats())
 
 def cmd_help(command):
-    return_output("Available commands: .add .play .next .current .queue .stats .download")
+    return_output("Available commands: .add .play .next .current .queue .stats .download .random")
     try:
         args = command[5:]
         if args.startswith("."):
@@ -148,7 +169,7 @@ def parse_command(command):
 
 
 
-COMMAND_MAPPING = {"dl": cmd_download, "download": cmd_download, "add": cmd_add, "play": cmd_play, "next": cmd_next, "current": cmd_current, "queue": cmd_queue, "stats": cmd_stats, "help": cmd_help}
+COMMAND_MAPPING = {"dl": cmd_download, "download": cmd_download, "add": cmd_add, "play": cmd_play, "next": cmd_next, "current": cmd_current, "queue": cmd_queue, "stats": cmd_stats, "help": cmd_help, "random": cmd_add_songs}
 
 print "*** Connecting... ***"
 while 1:
@@ -164,6 +185,11 @@ if ANNOUNCE:
     t = threading.Thread(target = announce_wait, args=())
     t.daemon = 1
     t.start()
+
+t = threading.Thread(target = auto_wait, args=())
+t.daemon = 1
+t.start()
+
 
 while 1:
     try:
