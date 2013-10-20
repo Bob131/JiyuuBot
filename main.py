@@ -7,6 +7,7 @@ import urllib
 import threading
 import time
 import sys
+import random
 
 MPD_HOST = "127.0.0.1"
 MPD_PORT = 6600
@@ -18,6 +19,9 @@ PORT = 9999
 SSL = True
 
 MUSIC_PATH = "/media/music/Music"
+
+ANNOUNCE = True
+ANNOUNCE_INTERVAL = 900
 
 HELP_DICT = {"add": ".add [search term] - queues tracks for playback", "play": ".play - starts playing (useful for when the stream dies due to lack of queued tracks", "next": ".next - next track", "current": ".current - prints infor about current track", "queue": ".queue - shows next 4 songs", "stats": ".stats - shows stats", "download": "<.download | .dl> [url] - downloads track from URL and queues it", "dl": "<.download | .dl> [url] - downloads track from URL and queues it"}
 
@@ -46,6 +50,17 @@ def reconnect_mpd():
         pass
     mpc.connect(MPD_HOST, MPD_PORT)
 
+
+def announce_wait():
+    while 1:
+        time.sleep(ANNOUNCE_INTERVAL)
+        announce()
+
+def announce():
+    filelist = os.listdir(os.path.join(MUSIC_PATH, NICK + "_intros"))
+    filepath = filelist[random.randint(0, len(filelist)-1)]
+    filepath = os.path.join(NICK + "_intros", filepath)
+    mpc.addid(filepath, 1)
 
 def cmd_play(command):
     mpc.play()
@@ -144,6 +159,11 @@ while 1:
 	break
     else:
 	print line
+
+if ANNOUNCE:
+    t = threading.Thread(target = announce_wait, args=())
+    t.daemon = 1
+    t.start()
 
 while 1:
     try:
