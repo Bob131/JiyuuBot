@@ -1,3 +1,4 @@
+# coding: utf-8
 import socket
 import mpd
 import ssl
@@ -62,23 +63,33 @@ def reconnect_mpd():
 
 def auto_wait():
     while 1:
-        time.sleep(30)
         try:
-            if len(mpc.playlist()) < 5:
-                cmd_add_songs("")
-        except mpd.ConnectionError:
-            reconnect_mpd()
-            if len(mpc.playlist()) < 5:
-                cmd_add_songs("")
+            time.sleep(30)
+            try:
+                if len(mpc.playlist()) < 5:
+                    cmd_add_songs("")
+            except mpd.ConnectionError:
+                reconnect_mpd()
+                if len(mpc.playlist()) < 5:
+                    cmd_add_songs("")
+        except:
+            pass
 
 def announce_wait():
     while 1:
         try:
-            cmd_announce("")
-        except mpd.ConnectionError:
-            reconnect_mpd()
-            cmd_announce("")
-        time.sleep(ANNOUNCE_INTERVAL)
+            try:
+                cmd_announce("")
+            except mpd.ConnectionError:
+                reconnect_mpd()
+                cmd_announce("")
+            time.sleep(ANNOUNCE_INTERVAL)
+        except:
+            pass
+
+def cmd_booty_hour(command):
+    for i in range(1,90):
+        mpc.add(NICK+"_downloaded_music/How to pronounce ( ͡° ͜ʖ ͡°) - from YouTube by Offliberty.mp3")
 
 def cmd_announce(command):
     filelist = os.listdir(os.path.join(MUSIC_PATH, NICK + "_intros"))
@@ -92,7 +103,10 @@ def cmd_add_songs(command):
     for i in range(1,10):
         filepath = filelist[random.randint(0, len(filelist)-1)]
         filepath = os.path.join(NICK + "_downloaded_music", filepath)
-        mpc.add(filepath)
+        try:
+            mpc.add(filepath)
+        except:
+            pass
 
 def cmd_play(command):
     mpc.play()
@@ -180,7 +194,7 @@ def parse_command(command):
 
 
 
-COMMAND_MAPPING = {"dl": cmd_download, "download": cmd_download, "add": cmd_add, "play": cmd_play, "next": cmd_next, "current": cmd_current, "queue": cmd_queue, "stats": cmd_stats, "help": cmd_help, "random": cmd_add_songs, "announce": cmd_announce}
+COMMAND_MAPPING = {"dl": cmd_download, "download": cmd_download, "add": cmd_add, "play": cmd_play, "next": cmd_next, "current": cmd_current, "queue": cmd_queue, "stats": cmd_stats, "help": cmd_help, "random": cmd_add_songs, "announce": cmd_announce, "bootyhour": cmd_booty_hour}
 
 print "*** Connecting... ***"
 while 1:
