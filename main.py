@@ -10,31 +10,8 @@ import time
 import sys
 import random
 
-MPD_HOST = "127.0.0.1"
-MPD_PORT = 6600
-
-HOST = "irc.rizon.net"
-HOME_CHANNEL = "#JiyuuRadio"
-NICK = "JiyuuRadio"
-PORT = 9999
-SSL = True
-
-MUSIC_PATH = "/media/music/Music"
-
-ANNOUNCE = True
-ANNOUNCE_INTERVAL = 900
-
-HELP_DICT = {"add": ".add [search term] - queues tracks for playback",
-    "play": ".play - starts playing (useful for when the stream dies due to lack of queued tracks",
-    "next": ".next - next track",
-    "current": ".current - prints infor about current track",
-    "queue": ".queue - shows next 4 songs",
-    "stats": ".stats - shows stats",
-    "download": "<.download | .dl> [url] - downloads track from URL and queues it",
-    "dl": "<.download | .dl> [url] - downloads track from URL and queues it",
-    "random": ".random - adds 10 random tracks to playlist",
-    "announce": ".announce - adds an intro track to the queue"}
-
+# read config
+exec(open(os.path.join(os.path.dirname(__file__), "config.py"), "r").read())
 
 mpc = mpd.MPDClient()
 mpc.connect(MPD_HOST, MPD_PORT)
@@ -195,6 +172,17 @@ def parse_command(command):
 
 
 COMMAND_MAPPING = {"dl": cmd_download, "download": cmd_download, "add": cmd_add, "play": cmd_play, "next": cmd_next, "current": cmd_current, "queue": cmd_queue, "stats": cmd_stats, "help": cmd_help, "random": cmd_add_songs, "announce": cmd_announce, "bootyhour": cmd_booty_hour}
+
+HELP_DICT = {"add": ".add [search term] - queues tracks for playback",
+    "play": ".play - starts playing (useful for when the stream dies due to lack of queued tracks",
+    "next": ".next - next track",
+    "current": ".current - prints infor about current track",
+    "queue": ".queue - shows next 4 songs",
+    "stats": ".stats - shows stats",
+    "download": "<.download | .dl> [url] - downloads track from URL and queues it",
+    "dl": "<.download | .dl> [url] - downloads track from URL and queues it",
+    "random": ".random - adds 10 random tracks to playlist",
+    "announce": ".announce - adds an intro track to the queue"}
 
 print "*** Connecting... ***"
 while 1:
