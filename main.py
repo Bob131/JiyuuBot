@@ -28,6 +28,7 @@ s.send("JOIN " + HOME_CHANNEL + "\r\n")
 if not os.path.exists(os.path.join(MUSIC_PATH, NICK+"_downloaded_music")):
     os.mkdir(os.path.join(MUSIC_PATH, NICK+"_downloaded_music"))
 
+lastAnnounce = ""
 
 
 def reconnect_mpd():
@@ -72,7 +73,12 @@ def cmd_announce(command):
     filelist = os.listdir(os.path.join(MUSIC_PATH, NICK + "_intros"))
     filepath = filelist[random.randint(0, len(filelist)-1)]
     filepath = os.path.join(NICK + "_intros", filepath)
-    mpc.addid(filepath, 1)
+    global lastAnnounce
+    if filepath != lastAnnounce:
+        mpc.addid(filepath, 1)
+    else:
+        cmd_announce()
+    lastAnnounce = filepath
 
 def cmd_add_songs(command):
     filelist = os.listdir(os.path.join(MUSIC_PATH, NICK + "_downloaded_music"))
