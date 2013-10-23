@@ -3,7 +3,7 @@ MPD_PORT = 6600 # MPD port, 6600 default
 
 HOST = "irc.rizon.net" # IRC server
 HOME_CHANNEL = "#JiyuuRadio" # IRC Channel
-NICK = "JiyuuRadioTest" # IRC Nick
+NICK = "JiyuuRadio" # IRC Nick
 PORT = 9999 # IRC port, often 9999 for SSL
 SSL = True # Use SSL connction?
 
