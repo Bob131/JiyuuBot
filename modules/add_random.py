@@ -6,7 +6,10 @@ def add_random(self, command):
         filepath = os.path.join(NICK + "_downloaded_music", filepath)
         # this is just a quick solution so that we didn't have so much fucking Dragonforce playing all the time
         if not os.path.isdir(filepath):
-            self.conman.mpc.add(filepath)
+            try:
+                self.conman.mpc.add(filepath)
+            except mpd.MPDError:
+                pass
 
 self.map_command("random", add_random)
 self.map_help("random", ".random - adds 10 random tracks to the queue")
