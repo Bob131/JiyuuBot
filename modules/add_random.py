@@ -1,7 +1,6 @@
 def add_random(self, command):
     import random
     filelist = os.listdir(os.path.join(MUSIC_PATH, NICK + "_downloaded_music"))
-    self.conman.privmsg(filelist)
     for i in range(1,10):
         filepath = filelist[random.randint(0, len(filelist)-1)]
         filepath = os.path.join(NICK + "_downloaded_music", filepath)

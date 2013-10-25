@@ -24,6 +24,6 @@ def download(self, args):
         self.conman.privmsg("Mime type " + dl.info().type + " not allowed.")
 
 self.map_command("download", download)
-self.map_command("dl", download)
+self.map_command("dl", download, False)
 self.map_help("download", "< .download | .dl > URL - downloads track and queues for playback")
 self.map_help("dl", "< .download | .dl > URL - downloads track and queues for playback")

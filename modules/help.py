@@ -1,7 +1,7 @@
 #Help module to display command definitions to channel
 def display_help(self, command):
     cmdlist = "Available commands: "
-    for keys in self.commandlist.keys():
+    for keys in self.helpcommandlist:
         cmdlist += ".%s " % keys
     self.conman.privmsg(cmdlist)
     if not command == "":
