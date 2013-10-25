@@ -8,6 +8,3 @@ PORT = 9999 # IRC port, often 9999 for SSL
 SSL = True # Use SSL connction?
 
 MUSIC_PATH = "/media/music/Music" # Music folder used by MPD
-
-ANNOUNCE = True # Add intro tracks
-ANNOUNCE_INTERVAL = 900 # Time in seconds to wait before adding track
