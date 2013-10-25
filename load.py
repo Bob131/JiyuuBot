@@ -13,11 +13,14 @@ class PluginMan:
         try:
             self.commandlist[command](self, arg)
         except Exception as e:
-            if type(e) == mpd.ConnectionError:
+            if type(e) == KeyError:
+                self.conman.privmsg("Command %s not found" % e)
+            elif type(e) == mpd.ConnectionError:
+                self.conman.privmsg("Connection to MPD lost. Retrying...")
                 self.conman.reconnect_mpd()
-                t.start()
+                self.trywrapper(command, arg)
             else:
-                self.conman.privmsg("Error: %s" % e)
+                self.conman.privmsg("Error executing %s: %s" % (command, e))
 
     def execute_command(self, command):
         try:
@@ -32,10 +35,14 @@ class PluginMan:
 
 	#Define commands to their help message
     def map_help(self, command, message):
+        if " " in command:
+            raise Exception("Spaces not allowed in the command argument for help mapping")
         self.helplist[command] = message
 	
 	#Define commands to their function
     def map_command(self, command, function):
+        if " " in command:
+            raise Exception("Spaces not allowed in the command argument for command mapping")
         self.commandlist[command] = function
 
 	#Define function to load modules
@@ -44,9 +51,16 @@ class PluginMan:
         self.commandlist = {"reload": self.load}
         self.helplist = {"reload": ".reload - reloads modules"}
         pluginlist = glob.glob(self.modulespath + "*.py")
+        plugincount = 0
+        failcount = 0
         for plugin in pluginlist:
-            exec(open(plugin, "r").read())
-        self.conman.privmsg("Successfully loaded %s modules" % len(pluginlist))
+            try:
+                exec(open(plugin, "r").read())
+                plugincount += 1
+            except Exception as e:
+                self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
+                failcount += 1
+        self.conman.privmsg("Successfully loaded %s modules, %s failed to load" % (plugincount, failcount))
 
 	#Define initialization function
     def __init__(self):

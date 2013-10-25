@@ -11,6 +11,7 @@ def display_help(self, command):
             self.conman.privmsg(self.helplist[command])
         except:
             self.conman.privmsg("Help for %s not available" % command)
+
 #Maps command and help text for command
 self.map_command("help", display_help)
 self.map_help("help", ".help - displays help")

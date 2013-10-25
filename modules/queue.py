@@ -5,6 +5,7 @@ def queue(self, command):
     for track in queue[ : 4]:
         queuestr += str(track)+"\n"
     self.conman.privmsg(queuestr)
+
 #Maps command and help text for command
 self.map_command("queue", queue)
 self.map_help("queue", ".queue - displays the next 4 queued songs")
