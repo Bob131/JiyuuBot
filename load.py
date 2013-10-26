@@ -40,10 +40,7 @@ class ConfigMan:
         except:
             pass
         config = open("%s%s%s.py" % (self.configpath, os.sep, modname), "w")
-        if type(value) == str:
-            newconfig += "%s = \"%s\"\n" % (valname, value)
-        else:
-            newconfig += "%s = %s\n" % (valname, value)
+        newconfig += "%s = %s\n" % (valname, value)
         config.write(newconfig)
         config.flush()
         config.close()
