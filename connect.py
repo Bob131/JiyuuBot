@@ -23,6 +23,16 @@ class ConnectionMan:
         self.s.send("NICK " + NICK + "\r\n")
         self.s.send("JOIN " + HOME_CHANNEL + "\r\n")
 
+        print "*** Connecting... ***"
+        while 1:
+            line = self.s.recv(2048)
+            line = line.strip("\r\n")
+            if("End of /NAMES list." in line):
+	        print "\n*** Connected! ***\n"
+	        break
+            else:
+	        print line
+
 	#Define private message function
     def privmsg(self, text):
         self.s.send("PRIVMSG " + HOME_CHANNEL + " :\r\n")

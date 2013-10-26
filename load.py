@@ -1,6 +1,5 @@
 import os
 import glob
-import connect
 import mpd
 import threading
 
@@ -14,7 +13,7 @@ class PluginMan:
             self.commandlist[command](self, arg)
         except Exception as e:
             if type(e) == KeyError:
-                self.conman.privmsg("Command %s not found" % e)
+                pass
             elif type(e) == mpd.ConnectionError:
                 self.conman.reconnect_mpd()
                 self.trywrapper(command, arg)
@@ -65,8 +64,58 @@ class PluginMan:
         self.conman.privmsg("Successfully loaded %s modules, %s failed to load" % (plugincount, failcount))
 
 	#Define initialization function
-    def __init__(self):
+    def __init__(self, conman_instance):
         self.modulespath = os.path.join(os.path.dirname(__file__), "modules") + os.sep
+        self.conman = conman_instance
+        self.load()
+
+
+
+
+
+
+
+class ServiceMan:
+    def trywrapper(self, func, recur = 0):
+        try:
+            func(self)
+        except Exception as e:
+            if type(e) == mpd.ConnectionError:
+                self.conman.reconnect_mpd()
+                self.trywrapper(func)
+            else:
+                if recur < 2:
+                    self.conman.privmsg("Service %s failed. Restarting..." % func.__name__)
+                    self.trywrapper(func, recur+1)
+                else:
+                    self.conman.privmsg("Service module %s damaged. Halting thread. Error: %s" % (func.__name__, e))
+
+    def start_services(self):
+        for func in self.funclist:
+            t = threading.Thread(target = self.trywrapper, args=(func,))
+            t.daemon = 1
+            t.start()
+
+    def map_service(self, function):
+        self.funclist.append(function)
+
+    def load(self):
+        servlist = glob.glob(self.servicespath + "*.py")
+        servcount = 0
+        failcount = 0
+        for service in servlist:
+            try:
+                exec(open(service, "r").read())
+                servcount += 1
+            except Exception as e:
+                self.conman.privmsg("Error loading service %s: %s" % (os.path.basename(service), e))
+                failcount += 1
+        self.conman.privmsg("Successfully loaded %s services, %s failed to load" % (servcount, failcount))
+        self.start_services()
+
+    def __init__(self, conman_instance, plugman_instance):
         self.servicespath = os.path.join(os.path.dirname(__file__), "services") + os.sep
-        self.conman = connect.ConnectionMan()
+        self.conman = conman_instance
+        self.plugman = plugman_instance
+        self.funclist = []
         self.load()
