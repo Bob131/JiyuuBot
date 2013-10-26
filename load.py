@@ -4,7 +4,7 @@ import mpd
 import threading
 
 #Load config file from config.py
-exec(open(os.path.join(os.path.dirname(__file__), "config.py"), "r").read())
+exec(open(os.path.join(os.path.dirname(__file__), "configs" + os.sep + "config.py"), "r").read())
 
 class ConfigMan:
     def __init__(self, conftype):
@@ -21,8 +21,10 @@ class ConfigMan:
                 if line.startswith("%s = " % valname):
                     value = line
                     break
-            exec(value)
-            exec("return %s" % valname)
+            if not value == "":
+                return value[value.index("=")+1:]
+            else:
+                raise Exception
         except:
             self.set_value(modname, valname, default)
             return default
@@ -38,7 +40,10 @@ class ConfigMan:
         except:
             pass
         config = open("%s%s%s.py" % (self.configpath, os.sep, modname), "w")
-        newconfig += "%s = \"%s\"\n" % (valname, value)
+        if type(value) == str:
+            newconfig += "%s = \"%s\"\n" % (valname, value)
+        else:
+            newconfig += "%s = %s\n" % (valname, value)
         config.write(newconfig)
         config.flush()
         config.close()
