@@ -45,6 +45,8 @@ class ConfigMan:
         config.flush()
         config.close()
 
+
+
 #define Plugin Manager class
 class PluginMan:
     def trywrapper(self, command, arg):
