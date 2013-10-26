@@ -6,6 +6,45 @@ import threading
 #Load config file from config.py
 exec(open(os.path.join(os.path.dirname(__file__), "config.py"), "r").read())
 
+class ConfigMan:
+    def __init__(self, conftype):
+        if conftype == "module" or conftype == "service":
+            self.configpath = os.path.join(os.path.dirname(__file__), "configs" + os.sep + conftype)
+        else:
+            raise Exception("Invalid config type")
+
+    def get_value(self, modname, valname, default=""):
+        try:
+            config = open("%s%s%s.py" % (self.configpath, os.sep, modname), "r")
+            value = ""
+            for line in config.read().split("\n"):
+                if line.startswith("%s = " % valname):
+                    value = line
+                    break
+            exec(value)
+            exec("return %s" % valname)
+        except:
+            self.set_value(modname, valname, default)
+            return default
+
+    def set_value(self, modname, valname, value):
+        newconfig = ""
+        try:
+            config = open("%s%s%s.py" % (self.configpath, os.sep, modname), "r")
+            for line in config.read().split("\n"):
+                if not line.startswith("%s = " % valname):
+                    newconfig += line + "\n"
+            config.close()
+        except:
+            pass
+        config = open("%s%s%s.py" % (self.configpath, os.sep, modname), "w")
+        newconfig += "%s = \"%s\"\n" % (valname, value)
+        config.write(newconfig)
+        config.flush()
+        config.close()
+
+
+
 #define Plugin Manager class
 class PluginMan:
     def trywrapper(self, command, arg):
@@ -67,11 +106,8 @@ class PluginMan:
     def __init__(self, conman_instance):
         self.modulespath = os.path.join(os.path.dirname(__file__), "modules") + os.sep
         self.conman = conman_instance
+        self.confman = ConfigMan("module")
         self.load()
-
-
-
-
 
 
 
@@ -117,5 +153,6 @@ class ServiceMan:
         self.servicespath = os.path.join(os.path.dirname(__file__), "services") + os.sep
         self.conman = conman_instance
         self.plugman = plugman_instance
+        self.confman = ConfigMan("service")
         self.funclist = []
         self.load()
