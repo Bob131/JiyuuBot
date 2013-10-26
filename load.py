@@ -124,7 +124,7 @@ class ServiceMan:
                     self.conman.privmsg("Service %s failed. Restarting..." % func.__name__)
                     self.trywrapper(func, recur+1)
                 else:
-                    self.conman.privmsg("Service module %s damaged. Halting thread. Error: %s" % (func.__name__, e))
+                    self.conman.privmsg("Error in service module %s. Halting thread. Error: %s" % (func.__name__, e))
 
     def start_services(self):
         for func in self.funclist:
