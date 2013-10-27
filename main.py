@@ -22,12 +22,7 @@ while 1:
             conman.s.send("PONG :" + line[6 : ])
         elif "PRIVMSG" in line and not "NOTICE" in line and HOME_CHANNEL in line:
             command = line[line.rindex(HOME_CHANNEL + " :") + len(HOME_CHANNEL) + 2 : ]
-            nick = line[1:line.index("!")]
             if command.startswith("."):
-                split = command.split(" ")
-                if plugman.accesslvl(plugman, split[0], nick):
-                    plugman.execute_command(command[1:])
-                else:
-                    conman.privmsg("Permissions not high enough")
+                plugman.execute_command(command[1:])
     except KeyboardInterrupt:
         sys.exit()
