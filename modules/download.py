@@ -12,7 +12,7 @@ def download(self, args):
     if dl.info().maintype == "audio":
         fname = urllib.url2pathname(args[args.rindex("/") + 1 : ])
         if not fnameline == "":
-            fname = fnameline[fnameline.index("filename=") + 10 : fnameline.rindex("\"")]
+            fname = fnameline[fnameline.index("filename=") + 10 : fnameline.rindex("\"")].replace("/", " ")
         track = open(os.path.join(os.path.join(MUSIC_PATH, NICK + "_downloaded_music"), fname), "wb")
         track.write(dl.read())
         track.close()
