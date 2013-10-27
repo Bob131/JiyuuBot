@@ -16,10 +16,19 @@ def rmAccess(self, nick)
     self.confman.set_value("permissions", nick, "0")
 def cmdLevel(self, command, level)
     self.confman.set_value("command_levels", command, str(level))
+def access(self, arg, nick, level="100")
+    if arg == "add":
+        self.addAccess(nick, level)
+    elif arg == "rm":
+        self.rmAccess(nick)
+    else:
+        return "Invalid sub-command"
 
-self.map_command("access add", addAccess)
-self.map_command("access rm", rmAccess)
+
+self.accesslvl = accesslvl
+self.rmAccess = rmAccess
+self.addAccess = addAccess
+self.map_command("access", access)
 self.map_command("commandlevel", cmdLevel)
-self.map_help("access add", ".access add - adds a user with specified access level")
-self.map_help("access rm", ".access rm - sets specified user's access to 0")
+self.map_help("access", ".access: add - adds a user with specified access level. rm - sets specified user's access to 0")
 self.map_help("commandlevel", ".commandlevel - sets specified command's required auth level")
