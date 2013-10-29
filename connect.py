@@ -1,44 +1,27 @@
 import socket
+import mpd
 import ssl
 import os
 
 #Load config file from config.py
 exec(open(os.path.join(os.path.dirname(__file__), "configs" + os.sep + "config.py"), "r").read())
 
-if not TESTING:
-    import mpd
-else:
-    mpd = ""
-
 #Define connection class
 class ConnectionMan:
     def __init__(self):
 	#connect to mpd server
-        if not TESTING:
-            self.mpc = mpd.MPDClient()
-            self.mpc.connect(MPD_HOST, MPD_PORT)
+        self.mpc = mpd.MPDClient()
+        self.mpc.connect(MPD_HOST, MPD_PORT)
 
-	    #If SSL is enabled use ssl
-            if(SSL):
-                self.s = ssl.wrap_socket(socket.socket( ))
-            else:
-                self.s = socket.socket( )
-            self.s.connect((HOST, PORT))
-            self.s.send("USER " + NICK + " " + NICK + " " + NICK + " :" + NICK + "\n")
-            self.s.send("NICK " + NICK + "\r\n")
-            self.s.send("JOIN " + HOME_CHANNEL + "\r\n")
+	#If SSL is enabled use ssl
+        if(SSL):
+            self.s = ssl.wrap_socket(socket.socket( ))
         else:
-            self.mpc = ""
-
-	    #If SSL is enabled use ssl
-            if(SSL):
-                self.s = ssl.wrap_socket(socket.socket( ))
-            else:
-                self.s = socket.socket( )
-            self.s.connect((HOST, PORT))
-            self.s.send("USER " + NICK + " " + NICK + " " + NICK + " :" + NICK + "\n")
-            self.s.send("NICK " + NICK + "\r\n")
-            self.s.send("JOIN " + HOME_CHANNEL + "\r\n")
+            self.s = socket.socket( )
+        self.s.connect((HOST, PORT))
+        self.s.send("USER " + NICK + " " + NICK + " " + NICK + " :" + NICK + "\n")
+        self.s.send("NICK " + NICK + "\r\n")
+        self.s.send("JOIN " + HOME_CHANNEL + "\r\n")
 
         print "*** Connecting... ***"
         while 1:
