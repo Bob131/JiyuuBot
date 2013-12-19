@@ -19,8 +19,6 @@ class PermsMan:
     def get_perms(self, nick, command):
         userlvl = self.get_nick_perms(nick)
         cmdlvl = self.get_cmd_perms(command)
-        print userlvl
-        print cmdlvl
         if userlvl >= cmdlvl:
             return True
         else:
