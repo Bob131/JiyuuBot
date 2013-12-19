@@ -29,15 +29,16 @@ while 1:
             nick = line[1:line.index("!")]
             cmd = command.split(" ")
             permitted = True
-            try:
-                permitted = permsman.get_perms(nick, cmd[0])
-            except Exception as e:
-                if str(e) == "Permissions config files malformed: Permission values must be integers in between 0 and 999":
-                    conman.privmsg("Permissions config files malformed: Permission values must be integers in between 0 and 999")
+            if command.startswith("."):
+                try:
+                    permitted = permsman.get_perms(nick, cmd[0])
+                except Exception as e:
+                    conman.privmsg(str(e))
                     conman.privmsg("Assuming user is authorized")
-            if command.startswith(".") and permitted:
-                plugman.execute_command(command[1:])
-            elif command.startswith(".") and not permitted:
-                conman.privmsg("You are not permitted to execute this command")
+                    permitted = True
+                if permitted:
+                    plugman.execute_command(command[1:])
+                elif not permitted:
+                    conman.privmsg("You are not permitted to execute this command")
     except KeyboardInterrupt:
         sys.exit()

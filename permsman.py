@@ -1,5 +1,3 @@
-
-
 from configman import *
 
 class PermsMan:
@@ -25,20 +23,17 @@ class PermsMan:
             raise Exception("Permissions level must be an integer between 0 and 999")
 
     def get_perms(self, nick, command):
-        try:
-            userlvl = self.get_nick_perms(nick)
-            cmdlvl = self.get_cmd_perms(command)
-            print userlvl
-            print cmdlvl
-            if userlvl >= cmdlvl:
-                return True
-            else:
-                return False
-        except:
-            Exception("Permissions config files malformed: Permission values must be integers in between 0 and 999")
+        userlvl = self.get_nick_perms(nick)
+        cmdlvl = self.get_cmd_perms(command)
+        print userlvl
+        print cmdlvl
+        if userlvl >= cmdlvl:
+            return True
+        else:
+            return False
 
     def get_cmd_perms(self, command):
-        return self.conman.get_value("command", command, 100, False)
+        return self.confman.get_value("command", command, 100, False)
 
     def get_nick_perms(self, nick):
-        return self.conman.get_value("nick", nick, 100, False)
+        return self.confman.get_value("nick", nick, 100, False)
