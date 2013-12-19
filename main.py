@@ -31,7 +31,7 @@ while 1:
             permitted = True
             if command.startswith("."):
                 try:
-                    permitted = permsman.get_perms(nick, cmd[0])
+                    permitted = permsman.get_perms(nick, cmd[0][1:])
                 except Exception as e:
                     conman.privmsg(str(e))
                     conman.privmsg("Assuming user is authorized")

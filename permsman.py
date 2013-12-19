@@ -5,22 +5,16 @@ class PermsMan:
         self.confman = ConfigMan("perms")
 
     def set_cmd_perms(self, cmd, value):
-        try:
-            value = int(value)
-            if value < 0 or value > 999:
-                raise Exception()
-            self.confman.set_value("command", cmd, value)
-        except:
+        value = int(value)
+        if value < 0 or value > 999:
             raise Exception("Permissions level must be an integer between 0 and 999")
+        self.confman.set_value("command", cmd, value)
 
     def set_nick_perms(self, nick, value):
-        try:
-            value = int(value)
-            if value < 0 or value > 999:
-                raise Exception()
-            self.confman.set_value("nick", nick, value)
-        except:
+        value = int(value)
+        if value < 0 or value > 999:
             raise Exception("Permissions level must be an integer between 0 and 999")
+        self.confman.set_value("nick", nick, value)
 
     def get_perms(self, nick, command):
         userlvl = self.get_nick_perms(nick)
