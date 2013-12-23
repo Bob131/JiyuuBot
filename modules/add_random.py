@@ -1,7 +1,11 @@
 def add_random(self, command):
     import random
     global selected_songs
-    filelist = os.listdir(os.path.join(MUSIC_PATH, NICK + "_downloaded_music"))
+    filelist = []
+    for root, dirs, files in os.walk(MUSIC_PATH):
+        for name in files:
+            root = root.replace(MUSIC_PATH + os.sep, "")
+            filelist.append(os.path.join(root, name))
     numsongs = int(self.confman.get_value("add_random", "NUMBER_OF_SONGS", 10))
     for i in range(1,numsongs):
         if len(selected_songs) == len(filelist):
@@ -9,9 +13,7 @@ def add_random(self, command):
         filepath = ""
         while 1:
             filepath = filelist[random.randint(0, len(filelist)-1)]
-            filepath = os.path.join(NICK + "_downloaded_music", filepath)
-            # this is just a quick solution so that we didn't have so much fucking Dragonforce playing all the time
-            if not os.path.isdir(os.path.join(MUSIC_PATH, filepath)) and not filepath in selected_songs:
+            if not filepath.endswith(".m3u") and not filepath in selected_songs and not NICK + "_intros" + os.sep in filepath:
                 break
         selected_songs.append(filepath)
         try:
