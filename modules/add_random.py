@@ -23,4 +23,4 @@ def add_random(self, command):
 
 selected_songs = []
 self.map_command("random", add_random)
-self.map_help("random", ".random - adds 10 random tracks to the queue")
+self.map_help("random", ".random - adds %s random tracks to the queue" % self.confman.get_value("add_random", "NUMBER_OF_SONGS", 10))
