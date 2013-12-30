@@ -51,7 +51,8 @@ class PluginMan:
         try:
             return self.funcs[name](self, args)
         except Exception as e:
-            raise e
+            self.conman.privmsg("Error executing helper function %s: %s" % (name, e))
+            return None
 
     def reg_func(self, name, func):
         if name in self.funcs.keys():
