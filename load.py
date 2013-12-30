@@ -47,6 +47,10 @@ class PluginMan:
         if helplist:
             self.helpcommandlist.append(command)
 
+    def require(self, module):
+        if not module in self.loadedplugins:
+            Exception("Module %s not loaded" % module)
+
 	#Define function to load modules
     def load(self, wut=None, wuty=None):
         #not in __init__ so that .reload removes entries for old modules
@@ -56,10 +60,12 @@ class PluginMan:
         pluginlist = glob.glob(self.modulespath + "*.py")
         plugincount = 0
         failcount = 0
+        self.loadedplugins = []
         for plugin in pluginlist:
             try:
                 exec(open(plugin, "r").read())
                 plugincount += 1
+                self.loadedplugins.append(plugin)
             except Exception as e:
                 self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
                 failcount += 1
