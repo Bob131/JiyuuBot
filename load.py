@@ -14,7 +14,9 @@ class PluginMan:
         try:
             self.commandlist[command](self, arg)
         except Exception as e:
-            if type(e) == KeyError:
+            if type(e) == TypeError:
+            	self.trywrapper(self.commandlist[command], arg)
+            elif type(e) == KeyError:
                 pass
             elif type(e) == mpd.ConnectionError:
                 self.conman.reconnect_mpd()
@@ -29,8 +31,6 @@ class PluginMan:
         except ValueError:
             mapped = command
             arg = ""
-        if type(mapped) == str:
-            mapped = self.commandlist[mapped]
         t = threading.Thread(target = self.trywrapper, args = (mapped, arg))
         t.daemon = 1
         t.start()
