@@ -5,7 +5,7 @@ def queue(self, command):
     queuestr = "Next 4 of %s tracks:\n" % len(queue)
     for track in queue[ : 4]:
         track = track.replace("file: ", "")
-        queuestr += self.funcs["format_song_details"](self, track)+"\n"
+        queuestr += self.run_func("format_song_details", [track])+"\n"
     self.conman.privmsg(queuestr)
 
 #Maps command and help text for command

@@ -47,6 +47,12 @@ class PluginMan:
         if helplist:
             self.helpcommandlist.append(command)
 
+    def run_func(self, name, args):
+        try:
+            return self.funcs[name](self, args)
+        except Exception as e:
+            raise e
+
     def reg_func(self, name, func):
         if name in self.funcs.keys():
             raise Exception("Function %s already registered" % name)

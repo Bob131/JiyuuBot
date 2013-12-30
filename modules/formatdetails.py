@@ -1,4 +1,5 @@
 def format_song_details(self, uri):
+    uri = uri[0]
     info = self.conman.mpc.listallinfo(uri)[0]
     m, s = divmod(int(info["time"]), 60)
     time = "%d:%d" % (m, s)
