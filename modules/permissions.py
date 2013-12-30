@@ -18,5 +18,5 @@ def set_perm_argparser(self, args):
         self.conman.privmsg("Setting permission level for %s: %s" % (args[1], args[2]))
         self.permsman.set_cmd_perms(args[1], args[2])
 
-self.map_command("getperm", get_perm_argparser, False)
-self.map_command("setperm", set_perm_argparser, False)
+self._map("command", "getperm", get_perm_argparser)
+self._map("command", "setperm", set_perm_argparser)

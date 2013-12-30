@@ -23,7 +23,6 @@ def download(self, args):
     else:
         self.conman.privmsg("Mime type " + dl.info().type + " not allowed.")
 
-self.map_command("download", download)
-self.map_command("dl", download, False)
-self.map_help("download", "< .download | .dl > URL - downloads track and queues for playback")
-self.map_help("dl", "< .download | .dl > URL - downloads track and queues for playback")
+self._map("command", "download", download)
+self._map("help", "download", ".download URL - downloads track and queues for playback") # map help first so that the help entry is copied when the command is aliased
+self._map("alias", "dl", "download")

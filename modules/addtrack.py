@@ -11,5 +11,5 @@ def add_tracks(self, arg):
     else:
         self.conman.mpc.add(matches[0]["file"])
 
-self.map_command("add", add_tracks)
-self.map_help("add", ".add - adds tracks to the queue")
+self._map("command", "add", add_tracks)
+self._map("help", "add", ".add - adds tracks to the queue")

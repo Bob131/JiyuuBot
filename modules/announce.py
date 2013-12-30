@@ -14,5 +14,5 @@ def announce(self, command):
     self.conman.mpc.addid(filepath, 1)
 
 selected_intros = []
-self.map_command("announce", announce)
-self.map_help("announce", ".announce - adds an intro track to the queue")
+self._map("command", "announce", announce)
+self._map("help", "announce", ".announce - adds an intro track to the queue")

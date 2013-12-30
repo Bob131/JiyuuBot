@@ -19,5 +19,5 @@ def queue(self, command):
     self.conman.privmsg(queuestr)
 
 #Maps command and help text for command
-self.map_command("queue", queue)
-self.map_help("queue", ".queue [song id] - displays the next 4 queued songs, optionally starting from a particular song number")
+self._map("command", "queue", queue)
+self._map("help", "queue", ".queue [song id] - displays the next 4 queued songs, optionally starting from a particular song number")

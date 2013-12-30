@@ -6,5 +6,5 @@ def stats(self, cmd):
     self.conman.privmsg("Artists: %s - Albums: %s - Songs: %s" % (statsdict["artists"], statsdict["albums"], statsdict["songs"]))
 
 #Maps command and help text for command
-self.map_command("stats", stats)
-self.map_help("stats", ".stats - prints MPD statistics")
+self._map("command", "stats", stats)
+self._map("help", "stats", ".stats - prints MPD statistics")

@@ -29,23 +29,25 @@ class PluginMan:
         except ValueError:
             mapped = command
             arg = ""
+        if type(mapped) == str:
+            mapped = self.commandlist[mapped]
         t = threading.Thread(target = self.trywrapper, args = (mapped, arg))
         t.daemon = 1
         t.start()
 
-	#Define commands to their help message
-    def map_help(self, command, message):
-        if " " in command:
-            raise Exception("Spaces not allowed in the command argument for help mapping")
-        self.helplist[command] = message
-	
-	#Define commands to their function
-    def map_command(self, command, function, helplist=True):
+    def _map(self, maptype, command, function):
         if " " in command:
             raise Exception("Spaces not allowed in the command argument for command mapping")
-        self.commandlist[command] = function
-        if helplist:
-            self.helpcommandlist.append(command)
+        if maptype == "command":
+            self.commandlist[command] = function
+        elif maptype == "alias":
+            if not type(command) == str:
+                raise Exception("Alias mapping must be to a string")
+            self.commandlist[command] = function
+            if function in self.helplist.keys():
+                self.helplist[command] = self.helplist[function]
+        elif maptype == "help":
+            self.helplist[command] = function # here function is the help message
 
     def run_func(self, name, args):
         try:
@@ -69,7 +71,6 @@ class PluginMan:
         #not in __init__ so that .reload removes entries for old modules
         self.commandlist = {"reload": self.load}
         self.helplist = {"reload": ".reload - reloads modules"}
-        self.helpcommandlist = ["reload"]
         self.funcs = {}
         pluginlist = glob.glob(self.modulespath + "*.py")
         plugincount = 0

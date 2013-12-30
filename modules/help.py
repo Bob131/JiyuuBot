@@ -1,7 +1,7 @@
 #Help module to display command definitions to channel
 def display_help(self, command):
-    cmdlist = "%s commands available: " % len(self.helpcommandlist)
-    for keys in self.helpcommandlist:
+    cmdlist = "%s commands available: " % len(self.helplist)
+    for keys in self.helplist.keys():
         cmdlist += ".%s " % keys
     self.conman.privmsg(cmdlist)
     if not command == "":
@@ -13,5 +13,5 @@ def display_help(self, command):
             self.conman.privmsg("Help for %s not available" % command)
 
 #Maps command and help text for command
-self.map_command("help", display_help)
-self.map_help("help", ".help - displays help")
+self._map("command", "help", display_help)
+self._map("help", "help", ".help - displays help")

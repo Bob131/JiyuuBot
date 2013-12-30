@@ -3,5 +3,5 @@ def current(self, lel):
     currentTrack = self.conman.mpc.currentsong()
     self.conman.privmsg(self.run_func("format_song_details", [currentTrack["file"]]))
 
-self.map_command("current", current)
-self.map_help("current", ".current - displays current track info")
+self._map("command", "current", current)
+self._map("help", "current", ".current - displays current track info")
