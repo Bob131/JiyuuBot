@@ -2,12 +2,22 @@
 def queue(self, command):
     self.require("format_song_details")
     queue = self.conman.mpc.playlist()
-    queuestr = "Next 4 of %s tracks:\n" % len(queue)
-    for track in queue[ : 4]:
+    try:
+        if not command == "":
+            if int(command) <= 0 or int(command) == len(queue):
+                raise Exception("")
+            queue = queue[int(command):]
+    except:
+        raise Exception("Invalid song id")
+    num = 4
+    if len(queue) < 4:
+        num = len(queue)
+    queuestr = "Next %s of %s tracks:\n" % (num, len(queue))
+    for track in queue[ : num]:
         track = track.replace("file: ", "")
         queuestr += self.run_func("format_song_details", [track])+"\n"
     self.conman.privmsg(queuestr)
 
 #Maps command and help text for command
 self.map_command("queue", queue)
-self.map_help("queue", ".queue - displays the next 4 queued songs")
+self.map_help("queue", ".queue [song id] - displays the next 4 queued songs, optionally starting from a particular song number")
