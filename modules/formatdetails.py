@@ -5,8 +5,8 @@ def format_song_details(self, uri):
     try:
         title = info['title']
     except KeyError:
-        title = os.path.basename(uri.replace(" - ", " ")
+        title = os.path.basename(uri.replace(" - ", " "))
     parse = info['artist'] + " - " + info['album'] + " - " + title + " - " + time
     return parse
 
-self.format_song_details = format_song_details
+self.reg_func("format_song_details", format_song_details)

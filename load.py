@@ -47,9 +47,15 @@ class PluginMan:
         if helplist:
             self.helpcommandlist.append(command)
 
-    def require(self, module):
-        if not module in self.loadedplugins:
-            Exception("Module %s not loaded" % module)
+    def reg_func(self, name, func):
+        if name in self.funcs.keys():
+            raise Exception("Function %s already registered" % name)
+        else:
+            self.funcs[name] = func
+
+    def require(self, func):
+        if not func in self.funcs.keys():
+            raise Exception("Module %s not loaded" % func)
 
 	#Define function to load modules
     def load(self, wut=None, wuty=None):
@@ -57,15 +63,14 @@ class PluginMan:
         self.commandlist = {"reload": self.load}
         self.helplist = {"reload": ".reload - reloads modules"}
         self.helpcommandlist = ["reload"]
+        self.funcs = {}
         pluginlist = glob.glob(self.modulespath + "*.py")
         plugincount = 0
         failcount = 0
-        self.loadedplugins = []
         for plugin in pluginlist:
             try:
                 exec(open(plugin, "r").read())
                 plugincount += 1
-                self.loadedplugins.append(plugin)
             except Exception as e:
                 self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
                 failcount += 1
