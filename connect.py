@@ -2,6 +2,7 @@ import socket
 import mpd
 import ssl
 import os
+import time
 
 #Load config file from config.py
 exec(open(os.path.join(os.path.dirname(__file__), "configs" + os.sep + "config.py"), "r").read())
@@ -42,6 +43,8 @@ class ConnectionMan:
 	        break
             else:
 	        print line
+
+	time.sleep(1) # allows chan join to complete before messages are sent
 
 	#Define private message function
     def privmsg(self, text):
