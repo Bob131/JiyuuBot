@@ -21,9 +21,19 @@ class ConnectionMan:
         self.s.connect((HOST, PORT))
         self.s.send("USER " + NICK + " " + NICK + " " + NICK + " :" + NICK + "\n")
         self.s.send("NICK " + NICK + "\r\n")
-        self.s.send("JOIN " + HOME_CHANNEL + "\r\n")
 
         print "*** Connecting... ***"
+
+        while 1:
+            line = self.s.recv(2048)
+            line = line.strip("\r\n")
+            if("End of /MOTD command." in line):
+	        break
+            else:
+	        print line
+
+        self.s.send("JOIN " + HOME_CHANNEL + "\r\n")
+
         while 1:
             line = self.s.recv(2048)
             line = line.strip("\r\n")
