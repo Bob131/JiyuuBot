@@ -40,5 +40,7 @@ while 1:
                     plugman.execute_command(command[1:])
                 elif not permitted:
                     conman.privmsg("You are not permitted to execute this command")
+        elif line == "":
+            conman.reconnect_irc()
     except KeyboardInterrupt:
         sys.exit()
