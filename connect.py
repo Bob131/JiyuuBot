@@ -2,6 +2,8 @@ import socket
 import mpd
 import ssl
 import os
+import Queue
+import threading
 import time
 
 #Load config file from config.py
@@ -14,8 +16,25 @@ class ConnectionMan:
         self.mpc = mpd.MPDClient()
         self.mpc.connect(MPD_HOST, MPD_PORT)
 
+        # Could impose a limit, but not doing it yet
+        self.queue = Queue.Queue()
+
         self.connect_irc()
 
+    # Trifecta of evil. Do with these as you please, but try not to break the functionality.
+    def queue_raw(self, text):
+        self.queue.put(str(text) + "\r\n", True)
+    
+    # You may bypass the queue, if needed.
+    def send_raw(self, text):
+        self.s.send(str(text))
+
+    def queue_tick(self):
+        while True:
+            self.send_raw(self.queue.get(True))
+            time.sleep(OUTGOING_DELAY / 1000.0)
+
+    
     def connect_irc(self):
 	#If SSL is enabled use ssl
         if(SSL):
@@ -24,8 +43,14 @@ class ConnectionMan:
             self.s = socket.socket( )
 
         self.s.connect((HOST, PORT))
-        self.s.send("USER " + NICK + " " + NICK + " " + NICK + " :" + NICK + "\n")
-        self.s.send("NICK " + NICK + "\r\n")
+
+        thread = threading.Thread(target = self.queue_tick)
+        thread.daemon = True
+        thread.start()
+
+        # As of RFC 2812, USER message params are: <user> <mode> <unused> <realname>
+        self.queue_raw("USER " + NICK + " 0 * :" + NICK)
+        self.queue_raw("NICK " + NICK)
 
         print "*** Connecting... ***"
 
@@ -37,7 +62,7 @@ class ConnectionMan:
             else:
 	        print line
 
-        self.s.send("JOIN " + HOME_CHANNEL + "\r\n")
+        self.queue_raw("JOIN " + HOME_CHANNEL)
 
         while 1:
             line = self.s.recv(2048)
@@ -66,10 +91,9 @@ class ConnectionMan:
         self.s = None
         self.connect_irc()
 
-	#Define private message function
+    #Define private message function
+    # Splitting is something that should be taken care of beforehand.
     def privmsg(self, text):
-        self.s.send("PRIVMSG " + HOME_CHANNEL + " :\r\n")
-        #can only send 5 lines at a time on Rizon before being kicked for flood
-        text=str(text)
-        for msg in text.split("\n"):
-            self.s.send("PRIVMSG " + HOME_CHANNEL + " :" + str(msg) + "\r\n")
+        for msg in str(text).split("\n"):
+            self.queue_raw("PRIVMSG " + HOME_CHANNEL + " :" + str(msg))
+

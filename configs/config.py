@@ -8,3 +8,6 @@ PORT = 9999 # IRC port, often 9999 for SSL
 SSL = True # Use SSL connction?
 
 MUSIC_PATH = "/media/music/Music" # Music folder used by MPD
+
+# Outgoing message delay
+OUTGOING_DELAY = 300
