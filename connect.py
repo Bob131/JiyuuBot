@@ -27,7 +27,9 @@ class ConnectionMan:
     
     # You may bypass the queue, if needed.
     def send_raw(self, text):
+        lock.acquire()
         self.s.send(str(text))
+        lock.release()
 
     def queue_tick(self):
         while True:
@@ -43,6 +45,8 @@ class ConnectionMan:
             self.s = socket.socket( )
 
         self.s.connect((HOST, PORT))
+        
+        self.lock = threading.Lock()
 
         thread = threading.Thread(target = self.queue_tick)
         thread.daemon = True
