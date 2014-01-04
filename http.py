@@ -19,12 +19,16 @@ class httpd_api:
     def http_parse(self, environ, start_response):
         path = environ["PATH_INFO"][1:].replace("/", "")
         path = urllib.unquote_plus(path)
-        tid = self.plugman.execute_command(path, "HTTP")
-        while 1:
-            if tid in http_responses.keys():
-                break
-            time.sleep(1)
-        toreturn = http_responses[tid]
-        del http_responses[tid]
+        toreturn = ""
+        if path == "robots.txt":
+            toreturn = "User-agent: *\nDisallow: /"
+        else:
+            tid = self.plugman.execute_command(path, "HTTP")
+            while 1:
+                if tid in http_responses.keys():
+                    break
+                time.sleep(1)
+            toreturn = http_responses[tid]
+            del http_responses[tid]
         start_response("200 OK", [("Content-type", "text/plain")])
         return [toreturn]
