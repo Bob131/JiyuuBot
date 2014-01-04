@@ -8,27 +8,30 @@ from configman import *
 
 #Load config file from config.py
 exec(open(os.path.join(os.path.dirname(__file__), "configs" + os.sep + "config.py"), "r").read())
-global thread_types
 
 #define Plugin Manager class
 class PluginMan:
-    def trywrapper(self, command, arg, source):
+    def trywrapper(self, command, arg, source="PRIVMSG"):
         thread_types[threading.current_thread().ident] = source
+        if source == "HTTP":
+            commlist = self.httplist
+        else:
+            commlist = self.commandlist
         try:
-            self.commandlist[command](self, arg)
+            commlist[command](self, arg)
         except Exception as e:
             if type(e) == TypeError:
-            	self.trywrapper(self.commandlist[command], arg)
+            	self.trywrapper(commlist[command], arg)
             elif type(e) == KeyError:
                 pass
             elif type(e) == mpd.ConnectionError:
                 self.conman.reconnect_mpd()
                 self.trywrapper(command, arg)
             else:
-                self.conman.privmsg("Error executing %s: %s" % (command, e))
+                self.conman.gen_send("Error executing %s: %s" % (command, e))
         del thread_types[threading.current_thread().ident]
 
-    def execute_command(self, command, source):
+    def execute_command(self, command, source="PRIVMSG"):
         try:
             mapped = command[:command.index(" ")]
             arg = command[command.index(" ")+1:]
@@ -38,6 +41,7 @@ class PluginMan:
         t = threading.Thread(target = self.trywrapper, args = (mapped, arg, source))
         t.daemon = 1
         t.start()
+        return t.ident
 
     def _map(self, maptype, command, function):
         if " " in command:

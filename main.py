@@ -5,18 +5,21 @@ import sys
 import connect
 import load
 import permsman
+import http
 
 
 #Load config file from config.py
 exec(open(os.path.join(os.path.dirname(__file__), "configs" + os.sep + "config.py"), "r").read())
 
 thread_types = {}
+http_responses = {}
 
 #initialize plugin manager and load plugins
-conman = connect.ConnectionMan(thread_types)
+conman = connect.ConnectionMan(thread_types, http_responses)
 permsman = permsman.PermsMan()
 plugman = load.PluginMan(conman, permsman, thread_types)
 servman = load.ServiceMan(conman, plugman)
+httpd = http.httpd_api(plugman, http_responses)
 
 #Main active loop
 while 1:

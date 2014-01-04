@@ -8,13 +8,14 @@ import time
 
 #Load config file from config.py
 exec(open(os.path.join(os.path.dirname(__file__), "configs" + os.sep + "config.py"), "r").read())
-global thread_types
 
 #Define connection class
 class ConnectionMan:
-    def __init__(self, threaddict):
+    def __init__(self, threaddict, httpresp):
         global thread_types
         thread_types = threaddict
+        global http_responses
+        http_responses = httpresp
 
 	#connect to mpd server
         self.mpc = mpd.MPDClient()
@@ -39,7 +40,6 @@ class ConnectionMan:
         while True:
             self.send_raw(self.queue.get(True))
             time.sleep(OUTGOING_DELAY / 1000.0)
-
     
     def connect_irc(self):
 	#If SSL is enabled use ssl
@@ -104,6 +104,8 @@ class ConnectionMan:
         ret_type = thread_types[threading.current_thread().ident]
         if ret_type == "PRIVMSG":
             self.privmsg(text)
+        elif ret_type == "HTTP":
+            http_responses[threading.current_thread().ident] = text
 
     #Define private message function
     # Splitting is something that should be taken care of beforehand.
