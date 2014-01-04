@@ -32,13 +32,16 @@ class httpd_api:
             toreturn = "User-agent: *\nDisallow: /"
         elif command in self.plugman.httplist.keys():
             tid = self.plugman.execute_command(path, "HTTP")
-            while 1:
+            for x in range(1,10):
                 if tid in http_responses.keys():
                     break
                 time.sleep(1)
-            toreturn = http_responses[tid]
-            del http_responses[tid]
+            try:
+                toreturn = http_responses[tid]
+                del http_responses[tid]
+            except KeyError:
+                toreturn = "\"No output\""
         else:
-            toreturn = "{ \"Invalid command\" }"
+            toreturn = "\"Invalid command\""
         start_response("200 OK", [("Content-type", "text/plain")])
         return [toreturn]
