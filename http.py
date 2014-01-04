@@ -12,9 +12,10 @@ class httpd_api:
         http_responses = httpreps
         self.plugman = plugman_instance
         self.httpd = wsgiref.simple_server.make_server(HTTPD_IP, HTTPD_PORT, self.http_parse)
-        t = threading.Thread(target = self.httpd_serve)
-        t.daemon = True
-        t.start()
+        for x in range(0,4):
+            t = threading.Thread(target = self.httpd_serve)
+            t.daemon = True
+            t.start()
 
     def httpd_serve(self):
         while 1:
@@ -32,7 +33,7 @@ class httpd_api:
             toreturn = "User-agent: *\nDisallow: /"
         elif command in self.plugman.httplist.keys():
             tid = self.plugman.execute_command(path, "HTTP")
-            for x in range(1,10):
+            for x in range(0,10):
                 if tid in http_responses.keys():
                     break
                 time.sleep(1)
