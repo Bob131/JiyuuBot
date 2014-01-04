@@ -1,4 +1,4 @@
-import wsgiref.simple_server
+import mtwsgi.mtwsgi as mtwsgi
 import urllib
 import threading
 import os
@@ -11,18 +11,8 @@ class httpd_api:
         global http_responses
         http_responses = httpreps
         self.plugman = plugman_instance
-        self.httpd = wsgiref.simple_server.make_server(HTTPD_IP, HTTPD_PORT, self.http_parse)
-        for x in range(0,4):
-            t = threading.Thread(target = self.httpd_serve)
-            t.daemon = True
-            t.start()
-
-    def httpd_serve(self):
-        while 1:
-            try:
-                self.httpd.serve_forever()
-            except Exception as e:
-                print str(e)
+        self.httpd = mtwsgi.make_server(HTTPD_IP, HTTPD_PORT, self.http_parse, 4)
+        self.httpd.serve_forever()
 
     def http_parse(self, environ, start_response):
         path = environ["PATH_INFO"][1:]
