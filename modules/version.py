@@ -17,4 +17,3 @@ def version(self, command):
 
 self._map("command", "version", version)
 self._map("help", "version", ".version - Prints commit hash and last git pull")
-version(self, "")
