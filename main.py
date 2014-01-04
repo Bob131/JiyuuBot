@@ -10,10 +10,12 @@ import permsman
 #Load config file from config.py
 exec(open(os.path.join(os.path.dirname(__file__), "configs" + os.sep + "config.py"), "r").read())
 
+thread_types = {}
+
 #initialize plugin manager and load plugins
-conman = connect.ConnectionMan()
+conman = connect.ConnectionMan(thread_types)
 permsman = permsman.PermsMan()
-plugman = load.PluginMan(conman, permsman)
+plugman = load.PluginMan(conman, permsman, thread_types)
 servman = load.ServiceMan(conman, plugman)
 
 #Main active loop
@@ -37,7 +39,7 @@ while 1:
                     conman.privmsg("Assuming user is authorized")
                     permitted = True
                 if permitted:
-                    plugman.execute_command(command[1:])
+                    plugman.execute_command(command[1:], "PRIVMSG")
                 elif not permitted:
                     conman.privmsg("You are not permitted to execute this command")
         elif line == "":

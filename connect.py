@@ -8,10 +8,14 @@ import time
 
 #Load config file from config.py
 exec(open(os.path.join(os.path.dirname(__file__), "configs" + os.sep + "config.py"), "r").read())
+global thread_types
 
 #Define connection class
 class ConnectionMan:
-    def __init__(self):
+    def __init__(self, threaddict):
+        global thread_types
+        thread_types = threaddict
+
 	#connect to mpd server
         self.mpc = mpd.MPDClient()
         self.mpc.connect(MPD_HOST, MPD_PORT)
@@ -95,9 +99,14 @@ class ConnectionMan:
         self.s = None
         self.connect_irc()
 
+    #generic send function
+    def gen_send(self, text):
+        ret_type = thread_types[threading.current_thread().ident]
+        if ret_type == "PRIVMSG":
+            self.privmsg(text)
+
     #Define private message function
     # Splitting is something that should be taken care of beforehand.
     def privmsg(self, text):
         for msg in str(text).split("\n"):
             self.queue_raw("PRIVMSG " + HOME_CHANNEL + " :" + str(msg))
-

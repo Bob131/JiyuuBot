@@ -2,15 +2,18 @@ import os
 import mpd
 import glob
 import threading
+import json
 
 from configman import *
 
 #Load config file from config.py
 exec(open(os.path.join(os.path.dirname(__file__), "configs" + os.sep + "config.py"), "r").read())
+global thread_types
 
 #define Plugin Manager class
 class PluginMan:
-    def trywrapper(self, command, arg):
+    def trywrapper(self, command, arg, source):
+        thread_types[threading.current_thread().ident] = source
         try:
             self.commandlist[command](self, arg)
         except Exception as e:
@@ -23,15 +26,16 @@ class PluginMan:
                 self.trywrapper(command, arg)
             else:
                 self.conman.privmsg("Error executing %s: %s" % (command, e))
+        del thread_types[threading.current_thread().ident]
 
-    def execute_command(self, command):
+    def execute_command(self, command, source):
         try:
             mapped = command[:command.index(" ")]
             arg = command[command.index(" ")+1:]
         except ValueError:
             mapped = command
             arg = ""
-        t = threading.Thread(target = self.trywrapper, args = (mapped, arg))
+        t = threading.Thread(target = self.trywrapper, args = (mapped, arg, source))
         t.daemon = 1
         t.start()
 
@@ -40,6 +44,8 @@ class PluginMan:
             raise Exception("Spaces not allowed in the command argument for command mapping")
         if maptype == "command":
             self.commandlist[command] = function
+        elif maptype == "http":
+            self.httplist[command] = function
         elif maptype == "alias":
             if not type(command) == str:
                 raise Exception("Alias mapping must be to a string")
@@ -48,6 +54,8 @@ class PluginMan:
                 self.helplist[command] = self.helplist[function]
         elif maptype == "help":
             self.helplist[command] = function # here function is the help message
+        else:
+            raise Exception("Invalid map type %s" % maptype)
 
     def run_func(self, name, args):
         try:
@@ -67,10 +75,11 @@ class PluginMan:
             raise Exception("Module %s not loaded" % func)
 
 	#Define function to load modules
-    def load(self, wut=None, wuty=None):
+    def load(self):
         #not in __init__ so that .reload removes entries for old modules
         self.commandlist = {"reload": self.load}
         self.helplist = {"reload": ".reload - reloads modules"}
+        self.httplist = {}
         self.funcs = {}
         pluginlist = glob.glob(self.modulespath + "*.py")
         plugincount = 0
@@ -85,7 +94,9 @@ class PluginMan:
         self.conman.privmsg("Successfully loaded %s modules, %s failed to load" % (plugincount, failcount))
 
 	#Define initialization function
-    def __init__(self, conman_instance, permsman_instance):
+    def __init__(self, conman_instance, permsman_instance, threaddict):
+        global thread_types
+        thread_types = threaddict
         self.modulespath = os.path.join(os.path.dirname(__file__), "modules") + os.sep
         self.conman = conman_instance
         self.confman = ConfigMan("module")
