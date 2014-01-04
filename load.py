@@ -79,7 +79,8 @@ class PluginMan:
             raise Exception("Module %s not loaded" % func)
 
 	#Define function to load modules
-    def load(self):
+        #Two unused vars are required so that .reload executes correctly
+    def load(self, unused = None, alsoUnused = None):
         #not in __init__ so that .reload removes entries for old modules
         self.commandlist = {"reload": self.load}
         self.helplist = {"reload": ".reload - reloads modules"}

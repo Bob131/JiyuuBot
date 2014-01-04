@@ -16,4 +16,5 @@ def version(self, command):
         self.conman.gen_send(vers)
 
 self._map("command", "version", version)
+self._map("http", "version", version)
 self._map("help", "version", ".version - Prints commit hash and last git pull")

@@ -2,7 +2,10 @@
 def queue(self, command):
     queue = self.conman.mpc.playlist()
     if thread_types[threading.current_thread().ident] == "HTTP":
-        self.conman.gen_send(json.dumps(queue, sort_keys=True, indent=4, separators=(',', ': ')))
+        newlist = []
+        for song in queue:
+            newlist.append(self.conman.mpc.listallinfo(song[6:])[0])
+        self.conman.gen_send(json.dumps(newlist, sort_keys=True, indent=4, separators=(',', ': ')))
     else:
         self.require("format_song_details")
         try:
