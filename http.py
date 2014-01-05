@@ -26,7 +26,9 @@ class httpd_api:
             path = ""
             for line in req.split("\n"):
                 if line.startswith("GET"):
-                    print "HTTPD: '%s' from %s at %s" % (line, addr, time.strftime("%Y-%m-%d %H:%M:%S"))
+                    print line
+                    print addr
+                    print time.strftime("%Y-%m-%d %H:%M:%S")
                     path = line.split(" ")[1]
                     break
             path = urllib.unquote_plus(path[1:])
