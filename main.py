@@ -28,7 +28,7 @@ while 1:
         line = line.strip("\r\n")
         print line
         if "PING" in line:
-            conman.s.send("PONG :" + line[6 : ])
+            conman.queue_raw("PONG :" + line[6 : ])
         elif "PRIVMSG" in line and not "NOTICE" in line and HOME_CHANNEL in line:
             command = line[line.rindex(HOME_CHANNEL + " :") + len(HOME_CHANNEL) + 2 : ]
             nick = line[1:line.index("!")]

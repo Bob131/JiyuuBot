@@ -111,4 +111,5 @@ class ConnectionMan:
     # Splitting is something that should be taken care of beforehand.
     def privmsg(self, text):
         for msg in str(text).split("\n"):
-            self.queue_raw("PRIVMSG " + HOME_CHANNEL + " :" + str(msg))
+            if not msg.split() == "":
+                self.queue_raw("PRIVMSG " + HOME_CHANNEL + " :" + str(msg))
