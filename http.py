@@ -1,8 +1,8 @@
-import mtwsgi.mtwsgi as mtwsgi
 import urllib
-import threading
 import os
 import time
+import threading
+import socket
 
 exec(open(os.path.join(os.path.dirname(__file__), "configs" + os.sep + "config.py"), "r").read())
 
@@ -11,13 +11,26 @@ class httpd_api:
         global http_responses
         http_responses = httpreps
         self.plugman = plugman_instance
-        self.httpd = mtwsgi.make_server(HTTPD_IP, HTTPD_PORT, self.http_parse, 4)
-        self.httpd.serve_forever()
+        serv = socket.socket()
+        serv.bind((HTTPD_IP, HTTPD_PORT))
+        serv.listen(5)
+        for x in range(0,4):
+            t = threading.Thread(target = self.http_parse, args = (serv,))
+            t.daemon = True
+            t.start()
 
-    def http_parse(self, environ, start_response):
-        path = environ["PATH_INFO"][1:]
-        path = urllib.unquote_plus(path)
+    def http_parse(self, sock):
+        client, addr = sock.accept()
+        req = client.recv(2048)
+        path = ""
+        for line in req.split("\n"):
+            if line.startswith("GET"):
+                print "HTTPD: '%s' from %s at %s" % (line, addr, time.strftime("%Y-%m-%d %H:%M:%S"))
+                path = line.split(" ")[1]
+                break
+        path = urllib.unquote_plus(path[1:])
         command = path.split(" ")[0]
+        resp_code = "200 OK"
         toreturn = ""
         if path == "robots.txt":
             toreturn = "User-agent: *\nDisallow: /"
@@ -34,5 +47,7 @@ class httpd_api:
                 toreturn = "\"No output\""
         else:
             toreturn = "\"Invalid command\""
-        start_response("200 OK", [("Content-type", "text/plain")])
-        return [toreturn]
+            resp_code = "404 Not Found"
+        toreturn = "HTTP/1.1 %s\nServer: Jiyuu Radio\nContent-Type: text/plain\n\n%s" % (resp_code, toreturn)
+        client.send(toreturn)
+        client.close()
