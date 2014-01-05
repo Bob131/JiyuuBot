@@ -9,7 +9,8 @@ def version(self, command):
     commit = gitlog[1]
     timeg = int(gitlog[4])
     if thread_types[threading.current_thread().ident] == "HTTP":
-        values = {"commithash": commit, "lastpull": time.gmtime(timeg)}
+        import calendar
+        values = {"commithash": commit, "lastpull": calendar.timegm(time.gmtime(timeg))}
         self.conman.gen_send(json.dumps(values, sort_keys=True, indent=4, separators=(',', ': ')))
     else:
         vers = "Commit hash: %s - Last pull: %s (%s ago)" % (commit, time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(timeg)), datetime.timedelta(seconds=math.floor(time.time()-timeg)))
