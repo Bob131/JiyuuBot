@@ -30,6 +30,11 @@ class httpd_api:
                     path = line.split(" ")[1]
                     break
             path = urllib.unquote_plus(path[1:])
+            json_callback = ""
+            if "?jsonp=" in path:
+                sp = path.split("?jsonp=")
+                path = sp[0]
+                json_callback = sp[1]
             command = path.split(" ")[0]
             resp_code = "200 OK"
             toreturn = ""
@@ -49,6 +54,8 @@ class httpd_api:
             else:
                 toreturn = "\"Invalid command\""
                 resp_code = "404 Not Found"
+            if not json_callback == "":
+                toreturn = "%s(%s);" % (json_callback, toreturn)
             toreturn = "HTTP/1.1 %s\nServer: Jiyuu Radio\nContent-Type: text/plain\n\n%s" % (resp_code, toreturn)
             client.send(toreturn)
             client.close()
