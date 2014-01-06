@@ -7,13 +7,25 @@ There needs to be a folder in your music path called "[nick]\_intros" containing
 
 ### CentOS 6 Setup Guide ###
 1. Ensure that [RPMForge](http://wiki.centos.org/AdditionalResources/Repositories/RPMForge) and [EPEL](https://fedoraproject.org/wiki/EPEL) repos are configured
-2. Install MPD and the MPD-Python bindings
+2. Install MPD  
+ At the time of writing (2014-01-07), CentOS 6.5 does not support the minimum required version of Glib by MPD 0.18 and the newest version available in the repos has some bugs which makes streaming difficult. For this reason, instructions on compiling v0.17.6 follow  
+ 1. Install prerequisites  
+  ```yum install wget libid3tag-devel libsamplerate-devel libcurl-devel ffmpeg-devel flac-devel libmad-devel libshout-devel libsndfile-devel wavpack-devel```
+ 2. Get the MPD source  
+  ```wget http://www.musicpd.org/download/mpd/0.17/mpd-0.17.6.tar.gz```  
+  ```tar -xvf mpd*```
+ 3. Configure and build  
+  ```cd mpd-0.17.6```  
+  ```./configure --enable-curl --enable-ffmpeg --enable-id3 --enable-lsr --enable-sndfile --enable-wavpack --enable-flac --enable-httpd-output --enable-lame-encoder --enable-mad --enable-pipe-output --enable-shout --enable-vorbis --enable-vorbis-encoder```  
+  ```make && make install```
+  
+3. Install the MPD-Python bindings
 
  ```sh
-  yum install mpd python-pip
+  yum install python-pip
   pip install python-mpd2
  ```
-3. Create MPD user and create associated directories
+4. Create MPD user and create associated directories
 
  ```sh
  useradd -d /var/lib/mpd -m -s /sbin/nologin mpd
@@ -21,7 +33,7 @@ There needs to be a folder in your music path called "[nick]\_intros" containing
  chown -R mpd /var/lib/mpd
  ```
 
-4. Write MPD config
+5. Write MPD config
 
  ```sh
   echo "music_directory         \"/var/lib/mpd/music\"
@@ -39,13 +51,13 @@ There needs to be a folder in your music path called "[nick]\_intros" containing
   buffer_before_play      \"100%\"" >> /etc/mpd.conf
  ```
 
-5. Start MPD
+6. Start MPD
 
  ```sh
   /usr/bin/mpd
  ```
  
-6. Clone the repo and configure
+7. Clone the repo and configure
 
  ```sh
   git clone https://github.com/SlashGeeSlashOS/JiyuuRadio.git
@@ -53,8 +65,11 @@ There needs to be a folder in your music path called "[nick]\_intros" containing
   vi configs/config.py
  ```
 
-7. Start the bot
+8. Start the bot
 
  ```sh
   python ./main.py &
  ```
+
+
+Optionally, configure your HTTP daemon to reverse proxy on behalf of the JSON server in JiyuuRadio
