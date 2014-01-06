@@ -2,9 +2,13 @@
 def queue(self, command):
     queue = self.conman.mpc.playlist()
     if thread_types[threading.current_thread().ident] == "HTTP":
+        import math
         newlist = []
         for song in queue:
-            newlist.append(self.conman.mpc.listallinfo(song[6:])[0])
+            toapp = self.conman.mpc.listallinfo(song[6:])[0]
+            if song == queue[0]:
+                toapp["elapsed"] = math.floor(float(self.conman.mpc.status()["elapsed"]))
+            newlist.append(toapp)
         self.conman.gen_send(json.dumps(newlist, sort_keys=True, indent=4, separators=(',', ': ')))
     else:
         self.require("format_song_details")
