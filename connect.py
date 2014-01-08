@@ -18,13 +18,14 @@ class ConnectionMan:
         http_responses = httpresp
 
 	#connect to mpd server
-        self.mpc = mpd.MPDClient()
-        self.mpc.connect(MPD_HOST, MPD_PORT)
+        if MPD:
+            self.mpc = mpd.MPDClient()
+            self.mpc.connect(MPD_HOST, MPD_PORT)
 
         # Could impose a limit, but not doing it yet
-        self.queue = Queue.Queue()
-
-        self.connect_irc()
+        if IRC:
+            self.queue = Queue.Queue()
+            self.connect_irc()
 
     # Trifecta of evil. Do with these as you please, but try not to break the functionality.
     def queue_raw(self, text):
@@ -112,4 +113,7 @@ class ConnectionMan:
     def privmsg(self, text):
         for msg in str(text).split("\n"):
             if not msg.split() == "":
-                self.queue_raw("PRIVMSG " + HOME_CHANNEL + " :" + str(msg))
+                if IRC:
+                    self.queue_raw("PRIVMSG " + HOME_CHANNEL + " :" + str(msg))
+                else:
+                    print str(msg)

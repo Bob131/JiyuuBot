@@ -11,11 +11,11 @@ class httpd_api:
         global http_responses
         http_responses = httpreps
         self.plugman = plugman_instance
-        serv = socket.socket()
-        serv.bind((HTTPD_IP, HTTPD_PORT))
-        serv.listen(5)
+        self.serv = socket.socket()
+        self.serv.bind((HTTPD_IP, HTTPD_PORT))
+        self.serv.listen(5)
         for x in range(0,4):
-            t = threading.Thread(target = self.http_parse, args = (serv,))
+            t = threading.Thread(target = self.http_parse, args = (self.serv,))
             t.daemon = True
             t.start()
 
