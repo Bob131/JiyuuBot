@@ -1,5 +1,4 @@
 import socket
-import mpd
 import ssl
 import os
 import Queue
@@ -8,6 +7,9 @@ import time
 
 #Load config file from config.py
 exec(open(os.path.join(os.path.dirname(__file__), "configs" + os.sep + "config.py"), "r").read())
+
+if MPD:
+    import mpd
 
 #Define connection class
 class ConnectionMan:
@@ -103,7 +105,7 @@ class ConnectionMan:
     #generic send function
     def gen_send(self, text):
         ret_type = thread_types[threading.current_thread().ident]
-        if ret_type == "PRIVMSG":
+        if ret_type == "PRIVMSG" or ret_type == "regex":
             self.privmsg(text)
         elif ret_type == "HTTP":
             http_responses[threading.current_thread().ident] = text

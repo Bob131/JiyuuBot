@@ -1,13 +1,18 @@
 import os
-import mpd
 import glob
 import threading
 import json
+import re
 
 from configman import *
 
 #Load config file from config.py
 exec(open(os.path.join(os.path.dirname(__file__), "configs" + os.sep + "config.py"), "r").read())
+
+if MPD:
+    import mpd
+else:
+    import dummympd as mpd
 
 #define Plugin Manager class
 class PluginMan:
@@ -15,14 +20,14 @@ class PluginMan:
         thread_types[threading.current_thread().ident] = source
         if source == "HTTP":
             commlist = self.httplist
+        elif source == "regex":
+            commlist = self.regex
         else:
             commlist = self.commandlist
         try:
             commlist[command](self, arg)
         except Exception as e:
-            if type(e) == TypeError:
-            	self.trywrapper(commlist[command], arg)
-            elif type(e) == KeyError:
+            if type(e) == KeyError:
                 pass
             elif type(e) == mpd.ConnectionError:
                 self.conman.reconnect_mpd()
@@ -30,6 +35,12 @@ class PluginMan:
             else:
                 self.conman.gen_send("Error executing %s: %s" % (command, e))
         del thread_types[threading.current_thread().ident]
+
+    def execute_regex(self, pattern, match):
+        t = threading.Thread(target = self.trywrapper, args = (pattern, match, "regex"))
+        t.daemon = 1
+        t.start()
+        return t.ident
 
     def execute_command(self, command, source="PRIVMSG"):
         try:
@@ -58,6 +69,8 @@ class PluginMan:
                 self.helplist[command] = self.helplist[function]
         elif maptype == "help":
             self.helplist[command] = function # here function is the help message
+        elif maptype == "regex": # for matching message lines not starting with .
+            self.regex[command] = function
         else:
             raise Exception("Invalid map type %s" % maptype)
 
@@ -86,6 +99,7 @@ class PluginMan:
         self.helplist = {"reload": ".reload - reloads modules"}
         self.httplist = {}
         self.funcs = {}
+        self.regex = {}
         pluginlist = glob.glob(self.modulespath + "*.py")
         plugincount = 0
         failcount = 0

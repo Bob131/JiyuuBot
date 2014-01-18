@@ -2,6 +2,7 @@
 import os
 import sys
 import time
+import re
 
 import connect
 import load
@@ -48,6 +49,11 @@ while 1:
                         plugman.execute_command(command[1:], "PRIVMSG")
                     elif not permitted:
                         conman.privmsg("You are not permitted to execute this command")
+                else:
+                    matches = list(pattern for pattern in plugman.regex.keys() if not re.match(pattern, command) == None)
+                    if len(matches) > 0:
+                        for match in matches:
+                            plugman.execute_regex(match, command)
             elif line == "":
                 conman.reconnect_irc()
         else:
