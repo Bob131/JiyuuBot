@@ -55,10 +55,16 @@ while 1:
                         else:
                             conman.privmsg("You are not permitted to message", chan)
                 else:
-                    matches = list(pattern for pattern in plugman.regex.keys() if not re.match(pattern, command) == None)
-                    if len(matches) > 0:
-                        for match in matches:
-                            plugman.execute_regex(match, command, chan)
+                    permitted = True
+                    if not chan.startswith("#"):
+                        permitted = permsman.get_msg_perms(nick)
+                    if permitted:
+                        matches = list(pattern for pattern in plugman.regex.keys() if not re.match(pattern, command) == None)
+                        if len(matches) > 0:
+                            for match in matches:
+                                plugman.execute_regex(match, command, chan)
+                    else:
+                        conman.privmsg("You are not permitted to message", chan)
             elif "INVITE" in line:
                 nick = line[1:line.index("!")]
                 chan = line[line.index(" :")+2:]
