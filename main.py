@@ -30,13 +30,15 @@ while 1:
         if IRC:
             line = conman.s.recv(2048)
             line = line.strip("\r\n")
+            if line.startswith(":"):
+                line = line[1:]
             print line
             if "PING" in line:
                 conman.queue_raw("PONG :" + line[6 : ])
             elif "PRIVMSG" in line and not "NOTICE" in line:
-                chan = line[line.rindex("PRIVMSG ") + 8 : line.rindex(" :")]
-                nick = line[1:line.index("!")]
-                command = line[line.rindex(chan + " :") + len(chan) + 2 : ]
+                chan = line[line.index(" PRIVMSG ") + 9 : line.index(" :")]
+                nick = line[:line.index("!")]
+                command = line[line.index(chan + " :") + len(chan) + 2 : ]
                 if chan == NICK:
                     chan = nick
                 cmd = command.split(" ")
@@ -68,12 +70,21 @@ while 1:
                     else:
                         conman.privmsg("You are not permitted to message", chan)
             elif "INVITE" in line:
-                nick = line[1:line.index("!")]
+                nick = line[:line.index("!")]
                 chan = line[line.index(" :")+2:]
                 if permsman.get_msg_perms(nick):
                     conman.join_irc(chan, nick)
                 else:
                     conman.privmsg("You are not permitted to invite", nick)
+            elif "KICK" in line:
+                chan = line[line.index("KICK ") + 5 : line.index(NICK)-1]
+                nick = line[:line.index("!")]
+                del conman.joined_chans[conman.joined_chans.index(chan)]
+                print "\n*** %s left! ***\n" % chan
+                if chan == HOME_CHANNEL:
+                    conman.join_irc(chan)
+                else:
+                    conman.privmsg("Kicked from %s by %s" % (chan, nick), HOME_CHANNEL)
             elif line == "":
                 conman.reconnect_irc()
         else:

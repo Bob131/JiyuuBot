@@ -60,7 +60,10 @@ class ConnectionMan:
 
 	if not nick == None:
 	    self.privmsg("Invited by %s" % nick, chan)
+	    self.privmsg("Home channel: %s" % HOME_CHANNEL, chan)
 	    self.privmsg("Joined %s, invited by %s" % (chan, nick), HOME_CHANNEL)
+
+	self.joined_chans.append(chan)
 
     def connect_irc(self):
 	#If SSL is enabled use ssl
@@ -70,8 +73,8 @@ class ConnectionMan:
             self.s = socket.socket( )
 
         self.s.connect((HOST, PORT))
-        
         self.lock = threading.Lock()
+        self.joined_chans = []
 
         thread = threading.Thread(target = self.queue_tick)
         thread.daemon = True
