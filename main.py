@@ -20,7 +20,7 @@ http_responses = {}
 conman = connect.ConnectionMan(thread_types, http_responses)
 permsman = permsman.PermsMan()
 plugman = load.PluginMan(conman, permsman, thread_types)
-servman = load.ServiceMan(conman, plugman)
+servman = load.ServiceMan(conman, plugman, thread_types)
 if HTTPD:
     httpd = http.httpd_api(plugman, http_responses)
 
@@ -33,27 +33,39 @@ while 1:
             print line
             if "PING" in line:
                 conman.queue_raw("PONG :" + line[6 : ])
-            elif "PRIVMSG" in line and not "NOTICE" in line and HOME_CHANNEL in line:
-                command = line[line.rindex(HOME_CHANNEL + " :") + len(HOME_CHANNEL) + 2 : ]
+            elif "PRIVMSG" in line and not "NOTICE" in line:
+                chan = line[line.rindex("PRIVMSG ") + 8 : line.rindex(" :")]
                 nick = line[1:line.index("!")]
+                command = line[line.rindex(chan + " :") + len(chan) + 2 : ]
+                if chan == NICK:
+                    chan = nick
                 cmd = command.split(" ")
                 permitted = True
                 if command.startswith("."):
-                    try:
+                    if chan.startswith("#"):
                         permitted = permsman.get_perms(nick, cmd[0][1:])
-                    except Exception as e:
-                        conman.privmsg(str(e))
-                        conman.privmsg("Assuming user is authorized")
-                        permitted = True
-                    if permitted:
-                        plugman.execute_command(command[1:], "PRIVMSG")
-                    elif not permitted:
-                        conman.privmsg("You are not permitted to execute this command")
+                        if permitted:
+                            plugman.execute_command(command[1:], "PRIVMSG:"+chan)
+                        else:
+                            conman.privmsg("You are not permitted to execute this command", chan)
+                    else:
+                        permitted = permsman.get_msg_perms(nick)
+                        if permitted:
+                            plugman.execute_command(command[1:], "PRIVMSG:"+chan)
+                        else:
+                            conman.privmsg("You are not permitted to message", chan)
                 else:
                     matches = list(pattern for pattern in plugman.regex.keys() if not re.match(pattern, command) == None)
                     if len(matches) > 0:
                         for match in matches:
-                            plugman.execute_regex(match, command)
+                            plugman.execute_regex(match, command, chan)
+            elif "INVITE" in line:
+                nick = line[1:line.index("!")]
+                chan = line[line.index(" :")+2:]
+                if permsman.get_msg_perms(nick):
+                    conman.join_irc(chan, nick)
+                else:
+                    conman.privmsg("You are not permitted to invite", nick)
             elif line == "":
                 conman.reconnect_irc()
         else:

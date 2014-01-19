@@ -16,11 +16,11 @@ else:
 
 #define Plugin Manager class
 class PluginMan:
-    def trywrapper(self, command, arg, source="PRIVMSG"):
+    def trywrapper(self, command, arg, source="PRIVMSG:"+HOME_CHANNEL):
         thread_types[threading.current_thread().ident] = source
         if source == "HTTP":
             commlist = self.httplist
-        elif source == "regex":
+        elif source.startswith("regex"):
             commlist = self.regex
         else:
             commlist = self.commandlist
@@ -36,13 +36,13 @@ class PluginMan:
                 self.conman.gen_send("Error executing %s: %s" % (command, e))
         del thread_types[threading.current_thread().ident]
 
-    def execute_regex(self, pattern, match):
-        t = threading.Thread(target = self.trywrapper, args = (pattern, match, "regex"))
+    def execute_regex(self, pattern, match, source):
+        t = threading.Thread(target = self.trywrapper, args = (pattern, match, "regex:"+source))
         t.daemon = 1
         t.start()
         return t.ident
 
-    def execute_command(self, command, source="PRIVMSG"):
+    def execute_command(self, command, source="PRIVMSG:"+HOME_CHANNEL):
         try:
             mapped = command[:command.index(" ")]
             arg = command[command.index(" ")+1:]
@@ -78,7 +78,7 @@ class PluginMan:
         try:
             return self.funcs[name](self, args)
         except Exception as e:
-            self.conman.privmsg("Error executing helper function %s: %s" % (name, e))
+            self.conman.gen_send("Error executing helper function %s: %s" % (name, e))
             return None
 
     def reg_func(self, name, func):
@@ -108,9 +108,9 @@ class PluginMan:
                 exec(open(plugin, "r").read())
                 plugincount += 1
             except Exception as e:
-                self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
+                self.conman.gen_send("Error loading module %s: %s" % (os.path.basename(plugin), e))
                 failcount += 1
-        self.conman.privmsg("Successfully loaded %s modules, %s failed to load" % (plugincount, failcount))
+        self.conman.gen_send("Successfully loaded %s modules, %s failed to load" % (plugincount, failcount))
 
 	#Define initialization function
     def __init__(self, conman_instance, permsman_instance, threaddict):
@@ -127,6 +127,7 @@ class PluginMan:
 
 class ServiceMan:
     def trywrapper(self, func, recur = 0):
+        thread_types[threading.current_thread().ident] = "PRIVMSG:"+HOME_CHANNEL
         try:
             func(self)
         except Exception as e:
@@ -135,10 +136,12 @@ class ServiceMan:
                 self.trywrapper(func)
             else:
                 if recur < 2:
-                    self.conman.privmsg("Service %s failed. Restarting..." % func.__name__)
+                    self.conman.gen_send("Service %s failed. Restarting..." % func.__name__)
                     self.trywrapper(func, recur+1)
                 else:
-                    self.conman.privmsg("Error in service module %s. Halting thread. Error: %s" % (func.__name__, e))
+                    self.conman.gen_send("Error in service module %s. Halting thread. Error: %s" % (func.__name__, e))
+        if not recur > 0:
+            del thread_types[threading.current_thread().ident]
 
     def start_services(self):
         for func in self.funclist:
@@ -158,12 +161,14 @@ class ServiceMan:
                 exec(open(service, "r").read())
                 servcount += 1
             except Exception as e:
-                self.conman.privmsg("Error loading service %s: %s" % (os.path.basename(service), e))
+                self.conman.gen_send("Error loading service %s: %s" % (os.path.basename(service), e))
                 failcount += 1
-        self.conman.privmsg("Successfully loaded %s services, %s failed to load" % (servcount, failcount))
+        self.conman.gen_send("Successfully loaded %s services, %s failed to load" % (servcount, failcount))
         self.start_services()
 
-    def __init__(self, conman_instance, plugman_instance):
+    def __init__(self, conman_instance, plugman_instance, threaddict):
+        global thread_types
+        thread_types = threaddict
         self.servicespath = os.path.join(os.path.dirname(__file__), "services") + os.sep
         self.conman = conman_instance
         self.plugman = plugman_instance

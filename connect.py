@@ -44,6 +44,24 @@ class ConnectionMan:
             self.send_raw(self.queue.get(True))
             time.sleep(OUTGOING_DELAY / 1000.0)
     
+    def join_irc(self, chan, nick=None):
+        self.queue_raw("JOIN " + chan)
+
+        while 1:
+            line = self.s.recv(2048)
+            line = line.strip("\r\n")
+            if("End of /NAMES list." in line):
+	        print "\n*** %s joined! ***\n" % chan
+	        break
+            else:
+	        print line
+
+	time.sleep(1) # allows chan join to complete before messages are sent
+
+	if not nick == None:
+	    self.privmsg("Invited by %s" % nick, chan)
+	    self.privmsg("Joined %s, invited by %s" % (chan, nick), HOME_CHANNEL)
+
     def connect_irc(self):
 	#If SSL is enabled use ssl
         if(SSL):
@@ -73,18 +91,7 @@ class ConnectionMan:
             else:
 	        print line
 
-        self.queue_raw("JOIN " + HOME_CHANNEL)
-
-        while 1:
-            line = self.s.recv(2048)
-            line = line.strip("\r\n")
-            if("End of /NAMES list." in line):
-	        print "\n*** Connected! ***\n"
-	        break
-            else:
-	        print line
-
-	time.sleep(1) # allows chan join to complete before messages are sent
+        self.join_irc(HOME_CHANNEL)
 
 	#Define reconnect function
     def reconnect_mpd(self):
@@ -104,18 +111,21 @@ class ConnectionMan:
 
     #generic send function
     def gen_send(self, text):
-        ret_type = thread_types[threading.current_thread().ident]
-        if ret_type == "PRIVMSG" or ret_type == "regex":
-            self.privmsg(text)
+        try:
+            ret_type = thread_types[threading.current_thread().ident]
+        except KeyError:
+            ret_type = "PRIVMSG:" + HOME_CHANNEL
+        if ret_type.startswith("PRIVMSG") or ret_type.startswith("regex"):
+            self.privmsg(text, ret_type.split(":")[1])
         elif ret_type == "HTTP":
             http_responses[threading.current_thread().ident] = text
 
     #Define private message function
     # Splitting is something that should be taken care of beforehand.
-    def privmsg(self, text):
+    def privmsg(self, text, channel):
         for msg in str(text).split("\n"):
             if not msg.split() == "":
                 if IRC:
-                    self.queue_raw("PRIVMSG " + HOME_CHANNEL + " :" + str(msg))
+                    self.queue_raw("PRIVMSG " + channel + " :" + str(msg))
                 else:
                     print str(msg)

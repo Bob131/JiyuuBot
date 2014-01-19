@@ -3,6 +3,6 @@ def topup_queue(self):
     while 1:
         time.sleep(30)
         if len(self.conman.mpc.playlist()) < 5:
-            self.plugman.execute_command("random", "PRIVMSG")
+            self.plugman.execute_command("random")
 
 self.map_service(topup_queue)
