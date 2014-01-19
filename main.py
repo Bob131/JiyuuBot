@@ -49,9 +49,11 @@ while 1:
                         else:
                             conman.privmsg("You are not permitted to execute this command", chan)
                     else:
-                        permitted = permsman.get_msg_perms(nick)
-                        if permitted:
-                            plugman.execute_command(command[1:], "PRIVMSG:"+chan)
+                        if permsman.get_msg_perms(nick):
+                            if permsman.get_perms(nick, cmd[0][1:]):
+                                plugman.execute_command(command[1:], "PRIVMSG:"+chan)
+                            else:
+                                conman.privmsg("You are not permitted to execute this command", chan)
                         else:
                             conman.privmsg("You are not permitted to message", chan)
                 else:
