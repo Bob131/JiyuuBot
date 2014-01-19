@@ -10,7 +10,7 @@ def git(self, message):
         elif len(match) == 2:
             req = requests.get("https://api.github.com/repos/%s/%s" % tuple(match)).json()
             tosend = "Github: %s - %s - by %s - Last push: %s" % (match[1], req["description"], match[0], req["pushed_at"])
-            if not req["homepage"] == None:
+            if not req["homepage"] == None and not req["homepage"] == "":
                 tosend += " - %s" % req["homepage"]
             self.conman.gen_send(tosend)
         elif match[2] == "issues" or match[2] == "pull":
