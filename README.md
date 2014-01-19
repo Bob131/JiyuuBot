@@ -62,6 +62,7 @@ There needs to be a folder in your music path called "[nick]\_intros" containing
  ```sh
   git clone https://github.com/SlashGeeSlashOS/JiyuuRadio.git
   cd JiyuuRadio
+  mv configs/config.py.example configs/config.py
   vi configs/config.py
  ```
 
