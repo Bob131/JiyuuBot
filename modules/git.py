@@ -9,7 +9,7 @@ def git(self, message):
             self.conman.gen_send("Github: %s" % match[0])
         elif len(match) == 2:
             req = requests.get("https://api.github.com/repos/%s/%s" % tuple(match)).json()
-            tosend = "Github: %s - %s - by %s - Last push: %s" % (match[1], req["description"], match[0], req["pushed_at"])
+            tosend = "Github: %s - %s - by %s - Last push: %s" % (match[1], req["description"], match[0], req["pushed_at"].split("T")[0])
             if not req["homepage"] == None and not req["homepage"] == "":
                 tosend += " - %s" % req["homepage"]
             self.conman.gen_send(tosend)
