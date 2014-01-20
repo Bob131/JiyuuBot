@@ -7,6 +7,7 @@ import re
 import connect
 import load
 import permsman
+import configman
 import http
 
 
@@ -17,7 +18,8 @@ thread_types = {}
 http_responses = {}
 
 #initialize plugin manager and load plugins
-conman = connect.ConnectionMan(thread_types, http_responses)
+confman = configman.ConfigMan("global")
+conman = connect.ConnectionMan(thread_types, http_responses, confman)
 permsman = permsman.PermsMan()
 plugman = load.PluginMan(conman, permsman, thread_types)
 servman = load.ServiceMan(conman, plugman, thread_types)
@@ -76,10 +78,13 @@ while 1:
                     conman.join_irc(chan, nick)
                 else:
                     conman.privmsg("You are not permitted to invite", nick)
-            elif "KICK" in line:
+            elif "KICK" in line and " %s " % NICK in line:
                 chan = line[line.index("KICK ") + 5 : line.index(NICK)-1]
                 nick = line[:line.index("!")]
                 del conman.joined_chans[conman.joined_chans.index(chan)]
+	        chanlist = confman.get_value("IRC", "CHANS", [])
+	        del chanlist[chanlist.index(chan)]
+	        confman.set_value("IRC", "CHANS", chanlist)
                 print "\n*** %s left! ***\n" % chan
                 if chan == HOME_CHANNEL:
                     conman.join_irc(chan)

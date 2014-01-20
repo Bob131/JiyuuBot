@@ -13,11 +13,13 @@ if MPD:
 
 #Define connection class
 class ConnectionMan:
-    def __init__(self, threaddict, httpresp):
+    def __init__(self, threaddict, httpresp, global_confman):
         global thread_types
         thread_types = threaddict
         global http_responses
         http_responses = httpresp
+
+        self.confman = global_confman
 
 	#connect to mpd server
         if MPD:
@@ -44,7 +46,7 @@ class ConnectionMan:
             self.send_raw(self.queue.get(True))
             time.sleep(OUTGOING_DELAY / 1000.0)
     
-    def join_irc(self, chan, nick=None):
+    def join_irc(self, chan, nick=None, record=True):
         self.queue_raw("JOIN " + chan)
 
         while 1:
@@ -62,6 +64,11 @@ class ConnectionMan:
 	    self.privmsg("Invited by %s" % nick, chan)
 	    self.privmsg("Home channel: %s" % HOME_CHANNEL, chan)
 	    self.privmsg("Joined %s, invited by %s" % (chan, nick), HOME_CHANNEL)
+	
+	if record:
+	    chanlist = self.confman.get_value("IRC", "CHANS", [])
+	    chanlist.append(chan)
+	    self.confman.set_value("IRC", "CHANS", chanlist)
 
 	self.joined_chans.append(chan)
 
@@ -94,7 +101,9 @@ class ConnectionMan:
             else:
 	        print line
 
-        self.join_irc(HOME_CHANNEL)
+        self.join_irc(chan = HOME_CHANNEL, record = False)
+        for channel in self.confman.get_value("IRC", "CHANS", []):
+            self.join_irc(chan = channel, record = False)
 
 	#Define reconnect function
     def reconnect_mpd(self):

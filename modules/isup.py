@@ -1,6 +1,7 @@
 def isup(self, domain):
     import requests
-    domain = domain.replace("http://", "").split("/")[0]
+    domain = re.sub(".*://", "", domain)
+    domain = domain.split("/")[0]
     info = requests.get("http://isitup.org/%s.json" % domain).json()
     if info["status_code"] == 1:
         self.conman.gen_send("%s (%s) is up - %sms" % (info["domain"], info["response_ip"], str(float(info["response_time"]) * 1000).split(".")[0]))
