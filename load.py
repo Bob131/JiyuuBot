@@ -74,9 +74,9 @@ class PluginMan:
         else:
             raise Exception("Invalid map type %s" % maptype)
 
-    def run_func(self, name, args):
+    def run_func(self, name, *args):
         try:
-            return self.funcs[name](self, args)
+            return self.funcs[name](self, *args)
         except Exception as e:
             self.conman.gen_send("Error executing helper function %s: %s" % (name, e))
             return None
