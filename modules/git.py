@@ -25,7 +25,7 @@ def git(self, message):
             match[2] = "issues"
             if len(match) == 4:
                 req = requests.get("https://api.github.com/repos/%s/%s/%s/%s" % tuple(match)).json()
-                self.conman.gen_send("Github: %s/%s#%s - %s - by %s" % (match[0], match[1], req["number"], req["title"], req["user"]["login"]))
+                self.conman.gen_send("Github: %s/%s#%s - %s - by %s - Created: %s - Updated: %s" % (match[0], match[1], req["number"], req["title"], req["user"]["login"], req["created_at"].split("T")[0], req["updated_at"].split("T")[0]))
             else:
                 req = requests.get("https://api.github.com/repos/%s/%s/%s" % tuple(match)).json() 
                 numofiss = len(req)
@@ -34,5 +34,8 @@ def git(self, message):
             branch = match[3]
             filepath = "/".join(match[4:])
             self.conman.gen_send("Github: %s on branch %s - %s - by %s" % (filepath, branch, match[1], match[0]))
+        elif match[2] == "commit":
+            req = requests.get("https://api.github.com/repos/%s/%s/%ss/%s" % tuple(match)).json()
+            self.conman.gen_send("Github: Commit %s on %s/%s - %s - by %s - %s" % (req["sha"], match[0], match[1], req["message"], req["author"]["name"], req["commiter"]["date"].split("T")[0]))
 
 self._map("regex", ".*https?://(www\.)?github.com/.*", git)
