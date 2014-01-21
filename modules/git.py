@@ -6,7 +6,15 @@ def git(self, message):
         if match[-1] == "":
             del match[-1]
         if len(match) == 1:
-            self.conman.gen_send("Github: %s" % match[0])
+            req = requests.get("http://osrc.dfm.io/%s.json" % match[0]).json()
+            if not "message" in req.keys():
+                self.conman.gen_send("Github: %s - %s repositories - %s contributions - Favourite language: %s (%s contributions)" % (req["name"], len(req["repositories"]), req["usage"]["total"], req["usage"]["languages"][0]["language"], req["usage"]["languages"][0]["count"]))
+            else:
+                req = requests.get("https://api.github.com/users/%s" % match[0]).json()
+                if not "message" in req.keys():
+                    self.conman.gen_send("Github: %s" % req["login"])
+                else:
+                    self.conman.gen_send("Github: User %s doesn't appear to exist" % match[0])
         elif len(match) == 2:
             req = requests.get("https://api.github.com/repos/%s/%s" % tuple(match)).json()
             tosend = "Github: %s - %s - by %s - Last push: %s" % (match[1], req["description"], match[0], req["pushed_at"].split("T")[0])
