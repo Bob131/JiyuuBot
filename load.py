@@ -3,6 +3,7 @@ import glob
 import threading
 import json
 import re
+import traceback
 
 from configman import *
 
@@ -16,16 +17,17 @@ else:
 
 #define Plugin Manager class
 class PluginMan:
-    def trywrapper(self, command, arg, source="PRIVMSG:"+HOME_CHANNEL):
-        thread_types[threading.current_thread().ident] = source
-        if source == "HTTP":
+    def trywrapper(self, command, arg, source):
+        if source["type"] == "HTTP":
             commlist = self.httplist
-        elif source.startswith("regex"):
+        elif source["type"] == "regex":
             commlist = self.regex
         else:
             commlist = self.commandlist
         try:
-            commlist[command](self, arg)
+            source["prefix"] = commlist[command]["prefix"]
+            thread_types[threading.current_thread().ident] = source
+            commlist[command]["function"](self, arg)
         except Exception as e:
             if type(e) == KeyError:
                 pass
@@ -33,52 +35,54 @@ class PluginMan:
                 self.conman.reconnect_mpd()
                 self.trywrapper(command, arg)
             else:
-                self.conman.gen_send("Error executing %s: %s" % (command, e))
+                traceback.print_exc()
+                self.conman.privmsg("Error executing %s: %s" % (command, e))
         del thread_types[threading.current_thread().ident]
 
-    def execute_regex(self, pattern, match, source):
-        t = threading.Thread(target = self.trywrapper, args = (pattern, match, "regex:"+source))
-        t.daemon = 1
-        t.start()
-        return t.ident
-
-    def execute_command(self, command, source="PRIVMSG:"+HOME_CHANNEL):
-        try:
-            mapped = command[:command.index(" ")]
-            arg = command[command.index(" ")+1:]
-        except ValueError:
-            mapped = command
-            arg = ""
+    def execute_command(self, command, source={"type": "PRIVMSG", "source": HOME_CHANNEL}):
+        if source["type"] == "PRIVMSG" or source["type"] == "HTTP":
+            try:
+                mapped = command[:command.index(" ")]
+                arg = command[command.index(" ")+1:]
+            except ValueError:
+                mapped = command
+                arg = ""
+        else:
+            mapped = source["pattern"]
+            arg = command
         t = threading.Thread(target = self.trywrapper, args = (mapped, arg, source))
         t.daemon = 1
         t.start()
         return t.ident
 
-    def _map(self, maptype, command, function):
+    def _map(self, maptype, command, function, prefix=""):
         if " " in command:
             raise Exception("Spaces not allowed in the command argument for command mapping")
         if maptype == "command":
-            self.commandlist[command] = function
+            self.commandlist[command] = {"function": function, "prefix": prefix}
         elif maptype == "http":
             self.httplist[command] = function
         elif maptype == "alias":
             if not type(command) == str:
                 raise Exception("Alias mapping must be to a string")
-            self.commandlist[command] = function
+            self.commandlist[command] = self.commandlist[function]
             if function in self.helplist.keys():
                 self.helplist[command] = self.helplist[function]
         elif maptype == "help":
             self.helplist[command] = function # here function is the help message
         elif maptype == "regex": # for matching message lines not starting with .
-            self.regex[command] = function
+            if prefix == "":
+                prefix = function.__name__
+            self.regex[command] = {"function": function, "prefix": prefix}
         else:
             raise Exception("Invalid map type %s" % maptype)
 
-    def run_func(self, name, *args):
+    def run_func(self, name, *args, **kwargs):
         try:
-            return self.funcs[name](self, *args)
+            return self.funcs[name](self, *args, **kwargs)
         except Exception as e:
-            self.conman.gen_send("Error executing helper function %s: %s" % (name, e))
+            traceback.print_exc()
+            self.conman.privmsg("Error executing helper function %s: %s" % (name, e))
             return None
 
     def reg_func(self, name, func):
@@ -95,7 +99,7 @@ class PluginMan:
         #Two unused vars are required so that .reload executes correctly
     def load(self, unused = None, alsoUnused = None):
         #not in __init__ so that .reload removes entries for old modules
-        self.commandlist = {"reload": self.load}
+        self.commandlist = {"reload": {"function": self.load, "prefix": ""}}
         self.helplist = {"reload": ".reload - reloads modules"}
         self.httplist = {}
         self.funcs = {}
@@ -108,9 +112,9 @@ class PluginMan:
                 exec(open(plugin, "r").read())
                 plugincount += 1
             except Exception as e:
-                self.conman.gen_send("Error loading module %s: %s" % (os.path.basename(plugin), e))
+                self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
                 failcount += 1
-        self.conman.gen_send("Successfully loaded %s modules, %s failed to load" % (plugincount, failcount))
+        self.conman.privmsg("Successfully loaded %s modules, %s failed to load" % (plugincount, failcount))
 
 	#Define initialization function
     def __init__(self, conman_instance, permsman_instance, threaddict):
@@ -136,10 +140,10 @@ class ServiceMan:
                 self.trywrapper(func)
             else:
                 if recur < 2:
-                    self.conman.gen_send("Service %s failed. Restarting..." % func.__name__)
+                    self.conman.privmsg("Service %s failed. Restarting..." % func.__name__)
                     self.trywrapper(func, recur+1)
                 else:
-                    self.conman.gen_send("Error in service module %s. Halting thread. Error: %s" % (func.__name__, e))
+                    self.conman.privmsg("Error in service module %s. Halting thread. Error: %s" % (func.__name__, e))
         if not recur > 0:
             del thread_types[threading.current_thread().ident]
 
@@ -161,9 +165,9 @@ class ServiceMan:
                 exec(open(service, "r").read())
                 servcount += 1
             except Exception as e:
-                self.conman.gen_send("Error loading service %s: %s" % (os.path.basename(service), e))
+                self.conman.privmsg("Error loading service %s: %s" % (os.path.basename(service), e))
                 failcount += 1
-        self.conman.gen_send("Successfully loaded %s services, %s failed to load" % (servcount, failcount))
+        self.conman.privmsg("Successfully loaded %s services, %s failed to load" % (servcount, failcount))
         self.start_services()
 
     def __init__(self, conman_instance, plugman_instance, threaddict):

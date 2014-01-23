@@ -43,7 +43,7 @@ class httpd_api:
             if path == "robots.txt":
                 toreturn = "User-agent: *\nDisallow: /"
             elif command in self.plugman.httplist.keys():
-                tid = self.plugman.execute_command(path, "HTTP")
+                tid = self.plugman.execute_command(path, {"type": "HTTP"})
                 for x in range(0,10):
                     if tid in http_responses.keys():
                         break

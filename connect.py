@@ -126,18 +126,23 @@ class ConnectionMan:
         try:
             ret_type = thread_types[threading.current_thread().ident]
         except KeyError:
-            ret_type = "PRIVMSG:" + HOME_CHANNEL
-        if ret_type.startswith("PRIVMSG") or ret_type.startswith("regex"):
-            self.privmsg(text, ret_type.split(":")[1])
+            ret_type = {"type": "PRIVMSG", "source": HOME_CHANNEL}
+        if ret_type["type"] == "PRIVMSG" or ret_type["type"] == "regex":
+            try:
+                if not ret_type["prefix"] == "":
+                    ret_type["prefix"] = "%s: " % ret_type["prefix"]
+                self.privmsg(text, ret_type["source"], ret_type["prefix"])
+            except KeyError:
+                self.privmsg(text, ret_type["source"])
         elif ret_type == "HTTP":
             http_responses[threading.current_thread().ident] = text
 
     #Define private message function
     # Splitting is something that should be taken care of beforehand.
-    def privmsg(self, text, channel):
+    def privmsg(self, text, channel=HOME_CHANNEL, prefix=""):
         for msg in str(text).split("\n"):
             if not msg.split() == "":
                 if IRC:
-                    self.queue_raw("PRIVMSG " + channel + " :" + str(msg))
+                    self.queue_raw("PRIVMSG " + channel + " :" + prefix + str(msg))
                 else:
-                    print str(msg)
+                    print prefix + str(msg)

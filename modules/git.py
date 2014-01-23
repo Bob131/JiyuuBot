@@ -38,18 +38,18 @@ def git(self, message):
         if len(match) == 1:
             req = requests.get("http://osrc.dfm.io/%s.json" % match[0]).json()
             if not "message" in req.keys():
-                self.conman.gen_send("Github: %s - %s repositories - %s contributions - Favourite language: %s (%s contributions)" % (self.run_func("git_get_name", req, True), len(req["repositories"]), req["usage"]["total"], req["usage"]["languages"][0]["language"], req["usage"]["languages"][0]["count"]))
+                self.conman.gen_send("%s - %s repositories - %s contributions - Favourite language: %s (%s contributions)" % (self.run_func("git_get_name", req, True), len(req["repositories"]), req["usage"]["total"], req["usage"]["languages"][0]["language"], req["usage"]["languages"][0]["count"]))
             else:
                 req = requests.get("https://api.github.com/users/%s" % match[0]).json()
                 if not "message" in req.keys():
-                    self.conman.gen_send("Github: %s" % self.run_func("git_get_name", req))
+                    self.conman.gen_send("%s" % self.run_func("git_get_name", req))
                 else:
-                    self.conman.gen_send("Github: User %s doesn't appear to exist" % match[0])
+                    self.conman.gen_send("User %s doesn't appear to exist" % match[0])
 
         # if github link to repo
         elif len(match) == 2:
             req = requests.get("https://api.github.com/repos/%s/%s" % tuple(match)).json()
-            tosend = "Github: %s - %s - by %s - Created: %s - Last push: %s" % (match[1], req["description"], self.run_func("git_get_name", req["owner"]), req["created_at"].split("T")[0], req["pushed_at"].split("T")[0])
+            tosend = "%s - %s - by %s - Created: %s - Last push: %s" % (match[1], req["description"], self.run_func("git_get_name", req["owner"]), req["created_at"].split("T")[0], req["pushed_at"].split("T")[0])
             if req["has_issues"]:
                 tosend += " - Open issues: %s" % req["open_issues_count"]
             if not req["homepage"] == None and not req["homepage"] == "":
@@ -64,18 +64,18 @@ def git(self, message):
             # if issue number provided
             if len(match) == 4:
                 req = requests.get("https://api.github.com/repos/%s/%s/%s/%s" % tuple(match)).json()
-                self.conman.gen_send("Github: %s/%s#%s - %s - by %s - Created: %s - Updated: %s" % (match[0], match[1], req["number"], req["title"], self.run_func("git_get_name", req["user"]), req["created_at"].split("T")[0], req["updated_at"].split("T")[0]))
+                self.conman.gen_send("%s/%s#%s - %s - by %s - Created: %s - Updated: %s" % (match[0], match[1], req["number"], req["title"], self.run_func("git_get_name", req["user"]), req["created_at"].split("T")[0], req["updated_at"].split("T")[0]))
 
         # if github link to file
         elif match[2] == "tree":
             branch = match[3]
             filepath = "/".join(match[4:])
-            self.conman.gen_send("Github: %s on branch %s - %s" % (filepath, branch, match[1]))
+            self.conman.gen_send("%s on branch %s - %s" % (filepath, branch, match[1]))
 
         # if github link to commit
         elif match[2] == "commit":
             req = requests.get("https://api.github.com/repos/%s/%s/git/%ss/%s" % tuple(match)).json()
-            self.conman.gen_send("Github: %s - by %s - %s" % (req["message"], req["author"]["name"], req["committer"]["date"].split("T")[0]))
+            self.conman.gen_send("%s - by %s - %s" % (req["message"], req["author"]["name"], req["committer"]["date"].split("T")[0]))
 
 self.reg_func("git_get_name", git_get_name)
-self._map("regex", ".*https?://(www\.)?github.com/.*", git)
+self._map("regex", ".*https?://(www\.)?github.com/.*", git, "Github")

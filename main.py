@@ -49,13 +49,13 @@ while 1:
                     if chan.startswith("#"):
                         permitted = permsman.get_perms(nick, cmd[0][1:])
                         if permitted:
-                            plugman.execute_command(command[1:], "PRIVMSG:"+chan)
+                            plugman.execute_command(command[1:], {"type": "PRIVMSG", "source": chan})
                         else:
                             conman.privmsg("You are not permitted to execute this command", chan)
                     else:
                         if permsman.get_msg_perms(nick):
                             if permsman.get_perms(nick, cmd[0][1:]):
-                                plugman.execute_command(command[1:], "PRIVMSG:"+chan)
+                                plugman.execute_command(command[1:], {"type": "PRIVMSG", "source": chan})
                             else:
                                 conman.privmsg("You are not permitted to execute this command", chan)
                         else:
@@ -68,7 +68,7 @@ while 1:
                         matches = list(pattern for pattern in plugman.regex.keys() if not re.match(pattern, command) == None)
                         if len(matches) > 0:
                             for match in matches:
-                                plugman.execute_regex(match, command, chan)
+                                plugman.execute_command(command, {"type": "regex", "source": chan, "pattern": match})
                     else:
                         conman.privmsg("You are not permitted to message", chan)
             elif "INVITE" in line:
