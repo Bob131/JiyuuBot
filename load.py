@@ -61,7 +61,7 @@ class PluginMan:
         if maptype == "command":
             self.commandlist[command] = {"function": function, "prefix": prefix}
         elif maptype == "http":
-            self.httplist[command] = function
+            self.httplist[command] = {"function": function, "prefix": ""}
         elif maptype == "alias":
             if not type(command) == str:
                 raise Exception("Alias mapping must be to a string")
