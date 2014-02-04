@@ -17,11 +17,11 @@ def ddate(self, command):
     dSeason, dDay = divmod(dayofYear, 73)
     dDayName = day%5
     dDay += 1
-    if 4 <= dDay <= 20 or 24 <= dDay <= 30:
-        dDayOrdinal = "th"
+    if 10 <= dDay % 100 < 20:
+        dDay = str(dDay) + 'th'
     else:
-        dDayOrdinal = ["st", "nd", "rd"][dDay % 10 - 1]
-    self.conman.gen_send("Today is %s, the %s day of %s in the Year of Our Lady of Discord %d" % (dDays[dDayName], str(dDay) + dDayOrdinal, dSeasons[dSeason], year + 1166))
+       	dDay = str(dDay) + {1 : 'st', 2 : 'nd', 3 : 'rd'}.get(dDay % 10, "th")
+    self.conman.gen_send("Today is %s, the %s day of %s in the Year of Our Lady of Discord %d" % (dDays[dDayName], dDay, dSeasons[dSeason], year + 1166))
 
 
 self._map("command", "ddate", ddate)
