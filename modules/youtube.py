@@ -7,8 +7,10 @@ def youtube(self, string):
                 match = re.findall("v=([\w-]+[^&\s])", match)[0]
             jdata = requests.get("https://gdata.youtube.com/feeds/api/videos/%s?alt=jsonc&v=2" % match).json()
             try:
+		import datetime
                 jdata = jdata["data"]
-                self.conman.gen_send("%s - Uploaded by %s - Uploaded %s - %s views" % (jdata["title"].encode('utf-8'), jdata["uploader"].encode('utf-8'), jdata["uploaded"].split("T")[0].encode('utf-8'), jdata["viewCount"]))
+		duration = str(datetime.timedelta(seconds=jdata["duration"]))
+                self.conman.gen_send("%s - Uploaded by %s - Uploaded %s - %s views - Duration %s" % (jdata["title"].encode('utf-8'), jdata["uploader"].encode('utf-8'), jdata["uploaded"].split("T")[0].encode('utf-8'), jdata["viewCount"], duration.encode('utf-8')))
             except KeyError:
                 self.conman.gen_send("%s" % jdata["error"]["message"])
 
