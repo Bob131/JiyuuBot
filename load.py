@@ -43,7 +43,7 @@ class PluginMan:
         if source["type"] == "PRIVMSG" or source["type"] == "HTTP":
             try:
                 mapped = command[:command.index(" ")]
-                arg = command[command.index(" ")+1:]
+                arg = command[command.index(" ")+1:].strip()
             except ValueError:
                 mapped = command
                 arg = ""
