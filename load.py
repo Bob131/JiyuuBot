@@ -112,9 +112,16 @@ class PluginMan:
                 exec(open(plugin, "r").read())
                 plugincount += 1
             except Exception as e:
-                self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
+                try:
+                    # if reloaded from a channel other than HOME_CHANNEL
+                    ret_type = thread_types[threading.current_thread().ident]
+                    if not ret_type["source"] == HOME_CHANNEL:
+                        self.conman.gen_send("Error loading module %s: %s" % (os.path.basename(plugin), e))
+                    self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
+                except:
+                    self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
                 failcount += 1
-        self.conman.privmsg("Successfully loaded %s modules, %s failed to load" % (plugincount, failcount))
+        self.conman.gen_send("Successfully loaded %s modules, %s failed to load" % (plugincount, failcount))
 
 	#Define initialization function
     def __init__(self, conman_instance, permsman_instance, threaddict):

@@ -21,6 +21,11 @@ class PermsMan:
             value = (value == 1 or value == "1" or value.lower() == "true")
         self.confman.set_value("msg", nick, value)
 
+    def suggest_cmd_perms(self, command, level):
+        # if auth level not set
+        if self.confman.get_value("command", command, None, False) == None:
+            self.set_cmd_perms(command, level)
+
     def get_perms(self, nick, command):
         userlvl = self.get_nick_perms(nick)
         cmdlvl = self.get_cmd_perms(command)
