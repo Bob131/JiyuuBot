@@ -13,7 +13,7 @@ def version(self, command):
         values = {"commithash": commit, "lastpull": calendar.timegm(time.gmtime(timeg))}
         self.conman.gen_send(json.dumps(values, sort_keys=True, indent=4, separators=(',', ': ')))
     else:
-        vers = "http://github.com/SlashGeeSlashOS/JiyuuRadio - Commit hash: %s - Last pull: %s (%s ago)" % (commit, time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(timeg)), datetime.timedelta(seconds=math.floor(time.time()-timeg)))
+        vers = "http://github.com/JiyuuProject/JiyuuBot - Commit hash: %s - Last pull: %s (%s ago)" % (commit, time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(timeg)), datetime.timedelta(seconds=math.floor(time.time()-timeg)))
         self.conman.gen_send(vers)
 
 self._map("command", "version", version)
