@@ -1,4 +1,4 @@
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import os
 import time
 import threading
@@ -26,12 +26,12 @@ class httpd_api:
             path = ""
             for line in req.split("\n"):
                 if line.startswith("GET"):
-                    print line
-                    print addr
-                    print time.strftime("%Y-%m-%d %H:%M:%S")
+                    print(line)
+                    print(addr)
+                    print(time.strftime("%Y-%m-%d %H:%M:%S"))
                     path = line.split(" ")[1]
                     break
-            path = urllib.unquote_plus(path[1:])
+            path = urllib.parse.unquote_plus(path[1:])
             json_callback = ""
             if "?jsonp=" in path:
                 sp = path.split("?jsonp=")

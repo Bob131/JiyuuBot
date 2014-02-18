@@ -1,14 +1,16 @@
+#!/usr/bin/env python3
 # coding: utf-8
 import os
 import sys
 import time
 import re
+import traceback
 
 import connect
 import load
 import permsman
 import configman
-import http
+import jr_webd
 
 
 #Load config file from config.py
@@ -24,17 +26,17 @@ permsman = permsman.PermsMan()
 plugman = load.PluginMan(conman, permsman, thread_types)
 servman = load.ServiceMan(conman, plugman, thread_types)
 if HTTPD:
-    httpd = http.httpd_api(plugman, http_responses)
+    httpd = jr_webd.httpd_api(plugman, http_responses)
 
 #Main active loop
 while 1:
     try:
         if IRC:
-            line = conman.s.recv(2048)
-            line = line.strip("\r\n")
+            line = conman.s.recv(2048).decode("UTF-8")
+            line = line.replace("\r\n", "")
             if line.startswith(":"):
                 line = line[1:]
-            print line
+            print(line)
             if "PING" in line:
                 conman.queue_raw("PONG :" + line[6 : ])
             elif "PRIVMSG" in line and not "NOTICE" in line:
@@ -82,10 +84,10 @@ while 1:
                 chan = line[line.index("KICK ") + 5 : line.index(NICK)-1]
                 nick = line[:line.index("!")]
                 del conman.joined_chans[conman.joined_chans.index(chan)]
-	        chanlist = confman.get_value("IRC", "CHANS", [])
-	        del chanlist[chanlist.index(chan)]
-	        confman.set_value("IRC", "CHANS", chanlist)
-                print "\n*** %s left! ***\n" % chan
+                chanlist = confman.get_value("IRC", "CHANS", [])
+                del chanlist[chanlist.index(chan)]
+                confman.set_value("IRC", "CHANS", chanlist)
+                print("\n*** %s left! ***\n" % chan)
                 if chan == HOME_CHANNEL:
                     conman.join_irc(chan)
                 else:
@@ -95,9 +97,10 @@ while 1:
         else:
             time.sleep(10)
     except Exception as e:
-        print "Error occured: %s" % str(e)
-        print "Cleaning up..."
+        print("Error occured: %s" % str(e))
+        traceback.print_exc()
+        print("Cleaning up...")
         if HTTPD:
             httpd.serv.close()
-        print "Bye"
+        print("Bye")
         sys.exit()

@@ -1,7 +1,7 @@
 import socket
 import ssl
 import os
-import Queue
+import queue
 import threading
 import time
 
@@ -28,7 +28,7 @@ class ConnectionMan:
 
         # Could impose a limit, but not doing it yet
         if IRC:
-            self.queue = Queue.Queue()
+            self.queue = queue.Queue()
             self.connect_irc()
 
     # Trifecta of evil. Do with these as you please, but try not to break the functionality.
@@ -38,7 +38,7 @@ class ConnectionMan:
     # You may bypass the queue, if needed.
     def send_raw(self, text):
         self.lock.acquire()
-        self.s.send(str(text))
+        self.s.send(bytes(text, "UTF-8"))
         self.lock.release()
 
     def queue_tick(self):
@@ -50,27 +50,27 @@ class ConnectionMan:
         self.queue_raw("JOIN " + chan)
 
         while 1:
-            line = self.s.recv(2048)
+            line = self.s.recv(2048).decode("UTF-8")
             line = line.strip("\r\n")
             if("End of /NAMES list." in line):
-	        print "\n*** %s joined! ***\n" % chan
-	        break
+                print("\n*** %s joined! ***\n" % chan)
+                break
             else:
-	        print line
+                print(line)
+                
+        time.sleep(1) # allows chan join to complete before messages are sent
 
-	time.sleep(1) # allows chan join to complete before messages are sent
-
-	if not nick == None:
-	    self.privmsg("Invited by %s" % nick, chan)
-	    self.privmsg("Home channel: %s" % HOME_CHANNEL, chan)
-	    self.privmsg("Joined %s, invited by %s" % (chan, nick), HOME_CHANNEL)
+        if not nick == None:
+            self.privmsg("Invited by %s" % nick, chan)
+            self.privmsg("Home channel: %s" % HOME_CHANNEL, chan)
+            self.privmsg("Joined %s, invited by %s" % (chan, nick), HOME_CHANNEL)
 	
-	if record:
-	    chanlist = self.confman.get_value("IRC", "CHANS", [])
-	    chanlist.append(chan)
-	    self.confman.set_value("IRC", "CHANS", chanlist)
+        if record:
+            chanlist = self.confman.get_value("IRC", "CHANS", [])
+            chanlist.append(chan)
+            self.confman.set_value("IRC", "CHANS", chanlist)
 
-	self.joined_chans.append(chan)
+        self.joined_chans.append(chan)
 
     def connect_irc(self):
 	#If SSL is enabled use ssl
@@ -91,15 +91,15 @@ class ConnectionMan:
         self.queue_raw("USER " + NICK + " 0 * :" + NICK)
         self.queue_raw("NICK " + NICK)
 
-        print "*** Connecting... ***"
+        print("*** Connecting... ***")
 
         while 1:
-            line = self.s.recv(2048)
+            line = self.s.recv(2048).decode("UTF-8")
             line = line.strip("\r\n")
             if("End of /MOTD command." in line):
-	        break
+                break
             else:
-	        print line
+            	print(line)
 
         self.join_irc(chan = HOME_CHANNEL, record = False)
         for channel in self.confman.get_value("IRC", "CHANS", []):
@@ -143,6 +143,6 @@ class ConnectionMan:
         for msg in str(text).split("\n"):
             if not msg.split() == "":
                 if IRC:
-                    self.queue_raw("PRIVMSG " + channel + " :" + prefix + str(msg))
+                    self.queue_raw("PRIVMSG " + channel + " :" + prefix + msg)
                 else:
-                    print prefix + str(msg)
+                    print(prefix + msg)

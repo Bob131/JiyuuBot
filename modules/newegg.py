@@ -32,13 +32,13 @@ def format_item(self, item, show_url=True):
         tags.append("\x02SHELL SHOCKER®\x02")
 
     # join all the tags together in a comma seperated string ("tag1, tag2, tag3")
-    tag_text = u", ".join(tags)
+    tag_text = ", ".join(tags)
 
     if show_url:
         # create the item URL and shorten it
-        return u"\x02%s\x02 (%s) - %s - %s - %s" % (title, price, rating, tag_text, url)
+        return "\x02%s\x02 (%s) - %s - %s - %s" % (title, price, rating, tag_text, url)
     else:
-        return u"\x02%s\x02 (%s) - %s - %s" % (title, price, rating, tag_text)
+        return "\x02%s\x02 (%s) - %s - %s" % (title, price, rating, tag_text)
 
 
 def newegg_url(self, msg):

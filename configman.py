@@ -8,7 +8,7 @@ class ConfigMan:
 
     def get_value(self, modname, valname, default="", writeDefault=True):
         self.load_values()
-        if self.values.has_key(modname) and self.values[modname].has_key(valname):
+        if modname in self.values and valname in self.values[modname]:
             return self.values[modname][valname]
         else:
             if writeDefault:
@@ -16,7 +16,7 @@ class ConfigMan:
             return default
 
     def set_value(self, modname, valname, value):
-        if not self.values.has_key(modname):
+        if modname not in self.values:
             self.values[modname] = {}
         self.values[modname][valname] = value
         self.save_values()

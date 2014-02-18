@@ -1,16 +1,16 @@
 def download(self, args):
-    import urllib2
-    import urllib
+    import urllib.request, urllib.error, urllib.parse
+    import urllib.request, urllib.parse, urllib.error
     import time
     self.conman.gen_send("Fetching track " + args)
-    dl = urllib2.urlopen(args)
+    dl = urllib.request.urlopen(args)
     fnameline=""
     for line in str(dl.info()).split("\r\n"):
         if "filename=" in line:
             fnameline = line
             break
     if dl.info().maintype == "audio":
-        fname = urllib.url2pathname(args[args.rindex("/") + 1 : ])
+        fname = urllib.request.url2pathname(args[args.rindex("/") + 1 : ])
         if not fnameline == "":
             fname = fnameline[fnameline.index("filename=") + 10 : fnameline.rindex("\"")].replace("/", " ")
         track = open(os.path.join(os.path.join(MUSIC_PATH, NICK + "_downloaded_music"), fname), "wb")
