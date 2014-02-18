@@ -8,6 +8,6 @@ def wikipedia(self, string):
         if "missing" in categories.keys():
             self.conman.gen_send("Page not found")
         else:
-            self.conman.gen_send("%s | Categories: %s" % (categories["title"], ", ".join(x["title"].replace("Category:", "") for x in categories["categories"])))
+            self.conman.gen_send("%s | Categories: %s" % (categories["title"].encode("utf-8"), ", ".join(re.sub("\w+:", "", x["title"].encode("utf-8")) for x in categories["categories"])))
 
 self._map("regex", ".*\w+.wikipedia.org/wiki/\w+.*", wikipedia, "Wikipedia")
