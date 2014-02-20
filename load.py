@@ -108,19 +108,20 @@ class PluginMan:
         plugincount = 0
         failcount = 0
         for plugin in pluginlist:
-            try:
-                exec(open(plugin, "r").read())
-                plugincount += 1
-            except Exception as e:
+            if not plugin.replace(self.modulespath, "").replace(".py", "") in MODULE_BLACKLIST:
                 try:
-                    # if reloaded from a channel other than HOME_CHANNEL
-                    ret_type = thread_types[threading.current_thread().ident]
-                    if not ret_type["source"] == HOME_CHANNEL:
-                        self.conman.gen_send("Error loading module %s: %s" % (os.path.basename(plugin), e))
-                    self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
-                except:
-                    self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
-                failcount += 1
+                    exec(open(plugin, "r").read())
+                    plugincount += 1
+                except Exception as e:
+                    try:
+                        # if reloaded from a channel other than HOME_CHANNEL
+                        ret_type = thread_types[threading.current_thread().ident]
+                        if not ret_type["source"] == HOME_CHANNEL:
+                            self.conman.gen_send("Error loading module %s: %s" % (os.path.basename(plugin), e))
+                        self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
+                    except:
+                        self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
+                    failcount += 1
         self.conman.gen_send("Successfully loaded %s modules, %s failed to load" % (plugincount, failcount))
 
 	#Define initialization function
@@ -168,12 +169,13 @@ class ServiceMan:
         servcount = 0
         failcount = 0
         for service in servlist:
-            try:
-                exec(open(service, "r").read())
-                servcount += 1
-            except Exception as e:
-                self.conman.privmsg("Error loading service %s: %s" % (os.path.basename(service), e))
-                failcount += 1
+            if not service.replace(self.servicespath, "").replace(".py", "") in SERVICE_BLACKLIST:
+                try:
+                    exec(open(service, "r").read())
+                    servcount += 1
+                except Exception as e:
+                    self.conman.privmsg("Error loading service %s: %s" % (os.path.basename(service), e))
+                    failcount += 1
         self.conman.privmsg("Successfully loaded %s services, %s failed to load" % (servcount, failcount))
         self.start_services()
 

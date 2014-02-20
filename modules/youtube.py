@@ -10,7 +10,7 @@ def youtube(self, string):
                 import datetime
                 jdata = jdata["data"]
                 duration = str(datetime.timedelta(seconds=jdata["duration"]))
-                self.conman.gen_send("%s - Uploaded by %s - Uploaded %s - %s views - Duration %s" % (jdata["title"], jdata["uploader"], jdata["uploaded"].split("T")[0], jdata["viewCount"], duration))
+                self.conman.gen_send("\x02%s\x02 - Uploaded by \x02%s\x02 - Uploaded %s - %s views - Duration %s" % (jdata["title"], jdata["uploader"], jdata["uploaded"].split("T")[0], jdata["viewCount"], duration))
             except KeyError:
                 self.conman.gen_send("%s" % jdata["error"]["message"])
 
