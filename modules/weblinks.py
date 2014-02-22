@@ -10,7 +10,7 @@ def weblink(self, message):
                 break
             info = req.info()
             if "html" in info["Content-Type"].split(";")[0]:
-                self.conman.gen_send("\x02%s\x02 - %sB" % (re.findall("<title>([^<]*)</title>", req.read().decode("UTF-8"))[0], info["Content-Length"]))
+                self.conman.gen_send("\x02%s\x02 - %sB" % (re.findall(b"<title>([^<]*)</title>", req.read())[0].decode("UTF-8"), info["Content-Length"]))
             else:
                 self.conman.gen_send("\x02%s\x02 - %sB" % (info["Content-Type"], info["Content-Length"]))
 
