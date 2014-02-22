@@ -104,14 +104,18 @@ class PluginMan:
         self.httplist = {}
         self.funcs = {}
         self.regex = {}
-        pluginlist = glob.glob(self.modulespath + "*.py")
+        self.pluginlist = {}
+        for plugpath in glob.glob(self.modulespath + "*.py"):
+            self.pluginlist[plugpath] = set()
         plugincount = 0
         failcount = 0
-        for plugin in pluginlist:
-            if not plugin.replace(self.modulespath, "").replace(".py", "") in MODULE_BLACKLIST:
+        blockcount = 0
+        for plugin in self.pluginlist.keys():
+            if not plugin.replace(self.modulespath, "").replace(".py", "") in self.glob_confman.get_value("modules", "BLOCKLIST", []):
                 try:
                     exec(open(plugin, "r").read())
                     plugincount += 1
+                    self.pluginlist[plugin].add("loaded")
                 except Exception as e:
                     try:
                         # if reloaded from a channel other than HOME_CHANNEL
@@ -122,15 +126,20 @@ class PluginMan:
                     except:
                         self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
                     failcount += 1
-        self.conman.gen_send("Successfully loaded %s modules, %s failed to load" % (plugincount, failcount))
+                    self.pluginlist[plugin].add("failed")
+            else:
+                blockcount += 1
+                self.pluginlist[plugin].add("blocked")
+        self.conman.gen_send("Successfully loaded %s modules%s%s" % (plugincount, (" | %s modules failed" % failcount if failcount > 0 else ""), (" | %s modules blocked" % blockcount if blockcount > 0 else "")))
 
 	#Define initialization function
-    def __init__(self, conman_instance, permsman_instance, threaddict):
+    def __init__(self, conman_instance, permsman_instance, globconfman_instance, threaddict):
         global thread_types
         thread_types = threaddict
         self.modulespath = os.path.join(os.path.dirname(__file__), "modules") + os.sep
         self.conman = conman_instance
         self.confman = ConfigMan("module")
+        self.glob_confman = globconfman_instance
         # this serves no function for the class itself, its just for exposing the information to modules that may request it
         self.permsman = permsman_instance
         self.load()

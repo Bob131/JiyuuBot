@@ -23,7 +23,7 @@ http_responses = {}
 confman = configman.ConfigMan("global")
 conman = connect.ConnectionMan(thread_types, http_responses, confman)
 permsman = permsman.PermsMan()
-plugman = load.PluginMan(conman, permsman, thread_types)
+plugman = load.PluginMan(conman, permsman, confman, thread_types)
 servman = load.ServiceMan(conman, plugman, thread_types)
 if HTTPD:
     httpd = jr_webd.httpd_api(plugman, http_responses)

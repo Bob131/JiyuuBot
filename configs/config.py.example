@@ -18,8 +18,5 @@ HTTPD_PORT = 7144 # Port for HTTP API
 # Outgoing message delay
 OUTGOING_DELAY = 300
 
-# module blacklist
-MODULE_BLACKLIST = ["bootyhour"]
-
 # service blacklist
 SERVICE_BLACKLIST = []
