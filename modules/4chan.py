@@ -17,4 +17,4 @@ def post(self, message):
         else:
             self.conman.gen_send("Post id not found")
 
-self._map("regex", ".*https+://boards.4chan.org/\w+/res/[\d\w]+.*", post, "4chan")
+self._map("regex", ".*https*://boards.4chan.org/\w+/res/[\d\w]+.*", post, "4chan")
