@@ -32,7 +32,10 @@ if HTTPD:
 while 1:
     try:
         if IRC:
-            line = conman.s.recv(2048).decode("UTF-8")
+            try:
+                line = conman.s.recv(2048).decode("UTF-8")
+            except UnicodeDecodeError:
+                break
             line = line.replace("\r\n", "")
             if line.startswith(":"):
                 line = line[1:]
@@ -97,10 +100,4 @@ while 1:
         else:
             time.sleep(10)
     except Exception as e:
-        print("Error occured: %s" % str(e))
         traceback.print_exc()
-        print("Cleaning up...")
-        if HTTPD:
-            httpd.serv.close()
-        print("Bye")
-        sys.exit()
