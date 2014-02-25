@@ -9,5 +9,4 @@ def leave(self, cmd):
     else:
         self.conman.gen_send("Not permitted to part")
 
-self.permsman.suggest_cmd_perms("leave", 999)
 self._map("command", "leave", leave)
