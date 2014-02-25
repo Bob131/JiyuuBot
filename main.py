@@ -58,13 +58,13 @@ while 1:
                     if chan.startswith("#"):
                         permitted = permsman.get_perms(nick, cmd[0][1:])
                         if permitted:
-                            plugman.execute_command(command[1:], {"type": "PRIVMSG", "source": chan})
+                            plugman.execute_command(command[1:], {"type": "PRIVMSG", "source": chan, "nick": nick})
                         else:
                             conman.privmsg("You are not permitted to execute this command", chan)
                     else:
                         if permsman.get_msg_perms(nick):
                             if permsman.get_perms(nick, cmd[0][1:]):
-                                plugman.execute_command(command[1:], {"type": "PRIVMSG", "source": chan})
+                                plugman.execute_command(command[1:], {"type": "PRIVMSG", "source": chan, "nick": nick})
                             else:
                                 conman.privmsg("You are not permitted to execute this command", chan)
                         else:
@@ -77,7 +77,7 @@ while 1:
                         matches = list(pattern for pattern in plugman.regex.keys() if not re.match(pattern, command) == None)
                         if len(matches) > 0:
                             for match in matches:
-                                plugman.execute_command(command, {"type": "regex", "source": chan, "pattern": match})
+                                plugman.execute_command(command, {"type": "regex", "source": chan, "pattern": match, "nick": nick})
                     else:
                         conman.privmsg("You are not permitted to message", chan)
             elif "INVITE" in line:
@@ -90,15 +90,7 @@ while 1:
             elif "KICK" in line and " %s " % NICK in line:
                 chan = line[line.index("KICK ") + 5 : line.index(NICK)-1]
                 nick = line[:line.index("!")]
-                del conman.joined_chans[conman.joined_chans.index(chan)]
-                chanlist = confman.get_value("IRC", "CHANS", [])
-                del chanlist[chanlist.index(chan)]
-                confman.set_value("IRC", "CHANS", chanlist)
-                print("\n*** %s left! ***\n" % chan)
-                if chan == HOME_CHANNEL:
-                    conman.join_irc(chan)
-                else:
-                    conman.privmsg("Kicked from %s by %s" % (chan, nick), HOME_CHANNEL)
+                conman.leave_irc(chan, nick, True)
             elif line == "":
                 conman.reconnect_irc()
         else:

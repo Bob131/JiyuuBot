@@ -66,12 +66,29 @@ class ConnectionMan:
             self.privmsg("Home channel: %s" % HOME_CHANNEL, chan)
             self.privmsg("Joined %s, invited by %s" % (chan, nick), HOME_CHANNEL)
 	
-        if record:
-            chanlist = self.confman.get_value("IRC", "CHANS", [])
-            chanlist.append(chan)
-            self.confman.set_value("IRC", "CHANS", chanlist)
-
         self.joined_chans.append(chan)
+
+        if record:
+            self.confman.set_value("IRC", "CHANS", list(chan for chan in self.joined_chans if not chan == HOME_CHANNEL))
+
+    def leave_irc(self, chan, nick, kicked=False):
+        if chan == HOME_CHANNEL and kicked:
+            del self.joined_chans[self.joined_chans.index(chan)]
+            self.join_irc(HOME_CHANNEL, None, False)
+        elif chan == HOME_CHANNEL:
+            self.privmsg("Can't be PART'd from home channel")
+        else:
+            if kicked:
+                self.privmsg("Kicked from %s by %s" % (chan, nick))
+            else:
+                partmsg = ("PART'd from %s by %s" % (chan, nick))
+                self.queue_raw("PART %s %s" % (chan, partmsg))
+                self.privmsg(partmsg)
+
+            del self.joined_chans[self.joined_chans.index(chan)]
+            self.confman.set_value("IRC", "CHANS", list(set(chan for chan in self.joined_chans if not chan == HOME_CHANNEL)))
+
+            print("\n*** %s left! ***\n" % chan)
 
     def connect_irc(self):
 	#If SSL is enabled use ssl
