@@ -11,10 +11,14 @@ import load
 import permsman
 import configman
 import jr_webd
+import logger
 
 
 #Load config file from config.py
 exec(open(os.path.join(os.path.dirname(__file__), "configs" + os.sep + "config.py"), "r").read())
+
+#init logger
+sys.stdout = logger.stdoutLog()
 
 thread_types = {}
 http_responses = {}
@@ -39,7 +43,7 @@ while 1:
             line = line.replace("\r\n", "")
             if line.startswith(":"):
                 line = line[1:]
-            print(line)
+            print("%s <<< %s" % (time.strftime("%Y-%m-%d %H:%M", time.localtime()), line))
             if "PING" in line:
                 conman.queue_raw("PONG :" + line[6 : ])
             elif "PRIVMSG" in line and not "NOTICE" in line:

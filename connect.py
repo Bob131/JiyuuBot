@@ -38,6 +38,7 @@ class ConnectionMan:
     # You may bypass the queue, if needed.
     def send_raw(self, text):
         self.lock.acquire()
+        print("%s >>> %s" % (time.strftime("%Y-%m-%d %H:%M", time.localtime()), text.strip()))
         self.s.send(bytes(text, "UTF-8"))
         self.lock.release()
 
