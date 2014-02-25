@@ -1,6 +1,6 @@
 def chans(self, cmd):
     tosend = ", ".join(self.conman.joined_chans)
-    tosend = "Channels currently served by %s: %s" % (NICK, tosend)
+    tosend = "%s channels currently served by %s: %s" % (len(self.conman.joined_chans), NICK, tosend)
     self.conman.gen_send(tosend)
 
 self._map("command", "chans", chans)
