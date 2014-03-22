@@ -39,7 +39,7 @@ while 1:
             try:
                 line = conman.s.recv(2048).decode("UTF-8")
             except UnicodeDecodeError:
-                break
+                continue
             line = line.replace("\r\n", "")
             if line.startswith(":"):
                 line = line[1:]

@@ -51,7 +51,10 @@ class ConnectionMan:
         self.queue_raw("JOIN " + chan)
 
         while 1:
-            line = self.s.recv(2048).decode("UTF-8")
+            try:
+                line = self.s.recv(2048).decode("UTF-8")
+            except UnicodeDecodeError:
+                continue
             line = line.strip("\r\n")
             if("End of /NAMES list." in line):
                 print("\n*** %s joined! ***\n" % chan)
@@ -112,7 +115,10 @@ class ConnectionMan:
         print("*** Connecting... ***")
 
         while 1:
-            line = self.s.recv(2048).decode("UTF-8")
+            try:
+                line = self.s.recv(2048).decode("UTF-8")
+            except UnicodeDecodeError:
+                continue
             line = line.strip("\r\n")
             if("End of /MOTD command." in line):
                 break
