@@ -44,8 +44,12 @@ while 1:
             if line.startswith(":"):
                 line = line[1:]
             print("%s <<< %s" % (time.strftime("%Y-%m-%d %H:%M", time.localtime()), line))
-            if "PING" in line:
+            if "PING" in line and not "PRIVMSG" in line:
                 conman.queue_raw("PONG :" + line[6 : ])
+            elif "PRIVMSG" in line and "PING" in line:           
+                msg = string.join(string.split(line)[3:])[1:]   
+                sender = string.split(string.split(line, ':')[1], '!')[0]
+                conman.queue_raw("NOTICE %s :%s" % (sender, msg))
             elif "PRIVMSG" in line and not "NOTICE" in line:
                 chan = line[line.index(" PRIVMSG ") + 9 : line.index(" :")]
                 nick = line[:line.index("!")]
