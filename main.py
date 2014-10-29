@@ -72,7 +72,9 @@ while 1:
 
                 # if this is an IM, set chan to the offending nick so the response can be properly directed
                 if msginfo["chan"] == NICK:
-                    msginfo["chan"] = msginfo["nick"]
+                    #TODO: Uncomment following line and implement PermsMan verification
+                    #msginfo["chan"] = msginfo["nick"]
+                    continue
 
                 # if msg is a command, execute
                 if msginfo["msg"].startswith("."):
