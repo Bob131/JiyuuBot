@@ -14,7 +14,7 @@ def add_random(self, command):
         while 1:
             filepath = filelist[random.randint(0, len(filelist)-1)]
             if not filepath.endswith(".m3u") and not filepath in selected_songs and not NICK + "_intros" + os.sep in filepath:
-                break
+                continue
         selected_songs.append(filepath)
         try:
             self.conman.mpc.add(filepath)

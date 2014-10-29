@@ -108,6 +108,7 @@ class ConnectionMan:
         thread.daemon = True
         thread.start()
 
+        global NICK
         # As of RFC 2812, USER message params are: <user> <mode> <unused> <realname>
         self.queue_raw("USER " + NICK + " 0 * :" + NICK)
         self.queue_raw("NICK " + NICK)
@@ -120,7 +121,10 @@ class ConnectionMan:
             except UnicodeDecodeError:
                 continue
             line = line.strip("\r\n")
-            if("End of /MOTD command." in line):
+            if("Nickname is already in use" in line):
+                NICK+="_"
+                self.queue_raw("NICK " + NICK)
+            elif("End of /MOTD command." in line):
                 break
             else:
             	print(line)
