@@ -24,9 +24,9 @@ def git_get_name(self, userdict, from_osrc=False):
         else:
             return userdict["login"]
 
-def git(self, message):
+def git(self, msginfo):
     import requests
-    matches = re.findall("github.com/([\w/-]+[^\s])", message)
+    matches = re.findall("github.com/([\w/-]+[^\s])", msginfo["msg"])
 
     for match in matches:
         match = match.split("/")
@@ -38,25 +38,25 @@ def git(self, message):
         if len(match) == 1:
             req = requests.get("http://osrc.dfm.io/%s.json" % match[0]).json()
             if not "message" in req.keys():
-                self.conman.gen_send("\x02%s\x02 - %s repositories - %s contributions - Favourite language: %s (%s contributions)" % (self.run_func("git_get_name", req, True), len(req["repositories"]), req["usage"]["total"], req["usage"]["languages"][0]["language"], req["usage"]["languages"][0]["count"]))
+                self.conman.gen_send("\x02%s\x02 - %s repositories - %s contributions - Favourite language: %s (%s contributions)" % (self.funcs["git_get_name"](self, req), len(req["repositories"]), req["usage"]["total"], req["usage"]["languages"][0]["language"], req["usage"]["languages"][0]["count"]), msginfo)
             else:
                 req = requests.get("https://api.github.com/users/%s" % match[0]).json()
                 if not "message" in req.keys():
-                    self.conman.gen_send("%s" % self.run_func("git_get_name", req))
+                    self.conman.gen_send(self.funcs["git_get_name"](self, req), msginfo)
                 else:
-                    self.conman.gen_send("User %s doesn't appear to exist" % match[0])
+                    self.conman.gen_send("User %s doesn't appear to exist" % match[0], msginfo)
 
         # if github link to repo
         elif len(match) == 2:
             req = requests.get("https://api.github.com/repos/%s/%s" % tuple(match)).json()
-            tosend = "\x02%s\x02 - \x02%s\x02 - by \x02%s\x02 - Created: %s - Last push: %s" % (match[1], req["description"], self.run_func("git_get_name", req["owner"]), req["created_at"].split("T")[0], req["pushed_at"].split("T")[0])
+            tosend = "\x02%s\x02 - \x02%s\x02 - by \x02%s\x02 - Created: %s - Last push: %s" % (match[1], req["description"], self.funcs["git_get_name"](self, req["owner"]), req["created_at"].split("T")[0], req["pushed_at"].split("T")[0])
             if req["has_issues"]:
                 tosend += " - Open issues: %s" % req["open_issues_count"]
             if not req["homepage"] == None and not req["homepage"] == "":
                 tosend += " - %s" % req["homepage"]
             if req["fork"]:
                 tosend += " - Forked from %s (%s)" % (req["parent"]["full_name"], req["parent"]["html_url"])
-            self.conman.gen_send(tosend)
+            self.conman.gen_send(tosend, msginfo)
 
         # if github link to issue
         elif match[2] == "issues" or match[2] == "pull":
@@ -64,18 +64,22 @@ def git(self, message):
             # if issue number provided
             if len(match) == 4:
                 req = requests.get("https://api.github.com/repos/%s/%s/%s/%s" % tuple(match)).json()
-                self.conman.gen_send("%s/%s#%s - \x02%s\x02 - by \x02%s\x02 - Created: %s - Updated: %s" % (match[0], match[1], req["number"], req["title"], self.run_func("git_get_name", req["user"]), req["created_at"].split("T")[0], req["updated_at"].split("T")[0]))
+                self.conman.gen_send("%s/%s#%s - \x02%s\x02 - by \x02%s\x02 - Created: %s - Updated: %s" % (match[0], match[1], req["number"], req["title"], self.funcs["git_get_name"](self, req["user"]), req["created_at"].split("T")[0], req["updated_at"].split("T")[0]), msginfo)
 
         # if github link to file
         elif match[2] == "tree":
             branch = match[3]
             filepath = "/".join(match[4:])
-            self.conman.gen_send("%s on branch %s - %s" % (filepath, branch, match[1]))
+            self.conman.gen_send("%s on branch %s - %s" % (filepath, branch, match[1]), msginfo)
 
         # if github link to commit
         elif match[2] == "commit":
             req = requests.get("https://api.github.com/repos/%s/%s/git/%ss/%s" % tuple(match)).json()
-            self.conman.gen_send("\x02%s\x02 - by \x02%s\x02 - %s" % (req["message"], req["author"]["name"], req["committer"]["date"].split("T")[0]))
+            self.conman.gen_send("\x02%s\x02 - by \x02%s\x02 - %s" % (req["message"], req["author"]["name"], req["committer"]["date"].split("T")[0]), msginfo)
 
-self.reg_func("git_get_name", git_get_name)
-self._map("regex", ".*https?://(www\.)?github.com/.*", git, "Github")
+self.funcs["git_get_name"] = git_get_name
+self.commandlist[".*https?://(www\.)?github.com/.*"] = {
+        "type": MAPTYPE_REGEX,
+        "function": git,
+        "prefix": "Github"
+        }

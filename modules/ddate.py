@@ -1,4 +1,4 @@
-def ddate(self, command):
+def ddate(self, msginfo):
     import datetime
     import calendar
     dSeasons = ["Chaos", "Discord", "Confusion", "Beureacracy", "The Aftermath"]
@@ -8,8 +8,8 @@ def ddate(self, command):
     day = int(datetime.datetime.now().strftime("%d"))
     today = datetime.date(year, month, day)
     boolLeapYear = calendar.isleap(year)
-    if boolLeapYear and month ==2 and day == 29:
-        self.conman.gen_send("Today is St. Tib's Day, %s YOLD" % year + 1166)
+    if boolLeapYear and month == 2 and day == 29:
+        self.conman.gen_send("Today is St. Tib's Day, %s YOLD" % year + 1166, msginfo)
         return 0
     dayofYear = today.timetuple().tm_yday - 1
     if boolLeapYear and dayofYear >=60:
@@ -21,8 +21,11 @@ def ddate(self, command):
         dDay = str(dDay) + 'th'
     else:
        	dDay = str(dDay) + {1 : 'st', 2 : 'nd', 3 : 'rd'}.get(dDay % 10, "th")
-    self.conman.gen_send("Today is %s, the %s day of %s in the Year of Our Lady of Discord %d" % (dDays[dDayName], dDay, dSeasons[dSeason], year + 1166))
+    self.conman.gen_send("Today is %s, the %s day of %s in the Year of Our Lady of Discord %d" % (dDays[dDayName], dDay, dSeasons[dSeason], year + 1166), msginfo)
 
 
-self._map("command", "ddate", ddate)
-self._map("help", "ddate", ".ddate - Prints the current Discordian date")
+self.commandlist["ddate"] = {
+        "type": MAPTYPE_COMMAND,
+        "function": ddate,
+        "help": "Prints the current Discordian date"
+        }

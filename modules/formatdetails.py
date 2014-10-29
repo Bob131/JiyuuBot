@@ -1,6 +1,6 @@
 def format_song_details(self, uri):
-    uri = uri[0]
     info = self.conman.mpc.listallinfo(uri)[0]
+    print(info)
     infodict = {"time": "N/A", "title": uri, "artist": "N/A", "album": "N/A"}
     for key in infodict.keys():
         try:
@@ -16,4 +16,4 @@ def format_song_details(self, uri):
     parse = "%s - %s - %s - %s" % (infodict["artist"], infodict["album"], infodict["title"], infodict["time"])
     return parse
 
-self.reg_func("format_song_details", format_song_details)
+self.funcs["format_song_details"] = format_song_details

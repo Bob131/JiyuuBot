@@ -7,103 +7,79 @@ import traceback
 
 from configman import *
 
+
 #Load config file from config.py
 exec(open(os.path.join(os.path.dirname(__file__), "configs" + os.sep + "config.py"), "r").read())
+
 
 if MPD:
     import mpd
 else:
     import dummympd as mpd
 
+#constants for _map
+MAPTYPE_COMMAND = 0
+MAPTYPE_ALIAS = 1
+MAPTYPE_REGEX = 2
+
+
 #define Plugin Manager class
 class PluginMan:
-    def trywrapper(self, command, arg, source):
-        if source["type"] == "HTTP":
-            commlist = self.httplist
-        elif source["type"] == "regex":
-            commlist = self.regex
-        else:
-            commlist = self.commandlist
+    def trywrapper(self, command, msginfo):
         try:
-            source["prefix"] = commlist[command]["prefix"]
-            thread_types[threading.current_thread().ident] = source
-            commlist[command]["function"](self, arg)
+            self.commandlist[command]["function"](self, msginfo)
         except Exception as e:
             if type(e) == KeyError:
                 pass
             elif type(e) == mpd.ConnectionError:
                 self.conman.reconnect_mpd()
-                self.trywrapper(command, arg)
+                self.trywrapper(command, msginfo)
             else:
                 traceback.print_exc()
                 self.conman.privmsg("Error executing %s: %s" % (command, e))
-        del thread_types[threading.current_thread().ident]
 
-    def execute_command(self, command, source={"type": "PRIVMSG", "source": HOME_CHANNEL}):
-        if source["type"] == "PRIVMSG" or source["type"] == "HTTP":
+
+    def execute_command(self, msginfo):
+        if msginfo["type"] == "PRIVMSG":
             try:
-                mapped = command[:command.index(" ")]
-                arg = command[command.index(" ")+1:].strip()
+                mapped = msginfo["msg"][1:msginfo["msg"].index(" ")]
             except ValueError:
-                mapped = command
-                arg = ""
+                mapped = msginfo["msg"][1:]
+        elif msginfo["type"] == "regex":
+            mapped = msginfo["pattern"]
         else:
-            mapped = source["pattern"]
-            arg = command
-        t = threading.Thread(target = self.trywrapper, args = (mapped, arg, source))
-        t.daemon = 1
-        t.start()
-        return t.ident
+            raise Exception("Invalid message type")
 
-    def _map(self, maptype, command, function, prefix=""):
-        if " " in command:
-            raise Exception("Spaces not allowed in the command argument for command mapping")
-        if maptype == "command":
-            self.commandlist[command] = {"function": function, "prefix": prefix}
-        elif maptype == "http":
-            self.httplist[command] = {"function": function, "prefix": ""}
-        elif maptype == "alias":
-            if not type(command) == str:
-                raise Exception("Alias mapping must be to a string")
-            self.commandlist[command] = self.commandlist[function]
-            if function in self.helplist.keys():
-                self.helplist[command] = self.helplist[function]
-        elif maptype == "help":
-            self.helplist[command] = function # here function is the help message
-        elif maptype == "regex": # for matching message lines not starting with .
-            if prefix == "":
-                prefix = function.__name__
-            self.regex[command] = {"function": function, "prefix": prefix}
-        else:
-            raise Exception("Invalid map type %s" % maptype)
-
-    def run_func(self, name, *args, **kwargs):
         try:
-            return self.funcs[name](self, *args, **kwargs)
-        except Exception as e:
-            traceback.print_exc()
-            self.conman.privmsg("Error executing helper function %s: %s" % (name, e))
-            return None
+            if self.commandlist[mapped]["type"] == MAPTYPE_ALIAS:
+                mapped = self.commandlist[mapped]["pointer"]
 
-    def reg_func(self, name, func):
-        if name in self.funcs.keys():
-            raise Exception("Function %s already registered" % name)
-        else:
-            self.funcs[name] = func
+            if self.commandlist[mapped].get("prefix", None):
+                msginfo["prefix"] = self.commandlist[mapped]["prefix"]
+
+            t = threading.Thread(target = self.trywrapper, args = (mapped, msginfo))
+            t.daemon = 1
+            t.start()
+
+        # silence traceback if not such command exists
+        except KeyError:
+            pass
+
 
     def require(self, func):
-        if not func in self.funcs.keys():
-            raise Exception("Module %s not loaded" % func)
+        if not self.funcs.get(func, None):
+            raise Exception("Required function %s not loaded" % func)
 
-	#Define function to load modules
-        #Two unused vars are required so that .reload executes correctly
-    def load(self, unused = None, alsoUnused = None):
+
+    #Define function to load modules
+    def load(self, unused, msginfo):
         #not in __init__ so that .reload removes entries for old modules
-        self.commandlist = {"reload": {"function": self.load, "prefix": ""}}
-        self.helplist = {"reload": ".reload - reloads modules"}
-        self.httplist = {}
+        self.commandlist = {"reload": {
+            "type": MAPTYPE_COMMAND,
+            "function": self.load,
+            "help": ".reload - reloads modules"
+            }}
         self.funcs = {}
-        self.regex = {}
         self.pluginlist = {}
         for plugpath in glob.glob(self.modulespath + "*.py"):
             self.pluginlist[plugpath] = set()
@@ -111,38 +87,34 @@ class PluginMan:
         failcount = 0
         blockcount = 0
         for plugin in self.pluginlist.keys():
-            if not plugin.replace(self.modulespath, "").replace(".py", "") in self.glob_confman.get_value("modules", "BLOCKLIST", []):
+            if not plugin.replace(self.modulespath, "").replace(".py", "") in self.glob_confman.get_value("modules", "MODULE_BLACKLIST", []):
                 try:
                     exec(open(plugin, "r").read())
                     plugincount += 1
                     self.pluginlist[plugin].add("loaded")
                 except Exception as e:
-                    try:
-                        # if reloaded from a channel other than HOME_CHANNEL
-                        ret_type = thread_types[threading.current_thread().ident]
-                        if not ret_type["source"] == HOME_CHANNEL:
-                            self.conman.gen_send("Error loading module %s: %s" % (os.path.basename(plugin), e))
-                        self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
-                    except:
-                        self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
+                    # if reloaded from a channel other than HOME_CHANNEL
+                    if not msginfo["chan"] == HOME_CHANNEL:
+                        self.conman.gen_send("Error loading module %s: %s" % (os.path.basename(plugin), e))
+                    self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
                     failcount += 1
                     self.pluginlist[plugin].add("failed")
             else:
                 blockcount += 1
                 self.pluginlist[plugin].add("blocked")
-        self.conman.gen_send("Successfully loaded %s modules%s%s" % (plugincount, (" | %s modules failed" % failcount if failcount > 0 else ""), (" | %s modules blocked" % blockcount if blockcount > 0 else "")))
+        self.conman.gen_send("Successfully loaded %s modules%s%s" % (plugincount, (" | %s modules failed" % failcount if failcount > 0 else ""), (" | %s modules blocked" % blockcount if blockcount > 0 else "")), msginfo)
 
-	#Define initialization function
-    def __init__(self, conman_instance, permsman_instance, globconfman_instance, threaddict):
-        global thread_types
-        thread_types = threaddict
+
+    # PluginMan constructor
+    def __init__(self, conman_instance, globconfman_instance):
         self.modulespath = os.path.join(os.path.dirname(__file__), "modules") + os.sep
         self.conman = conman_instance
         self.confman = ConfigMan("module")
         self.glob_confman = globconfman_instance
+        #TODO: Reimplement
         # this serves no function for the class itself, its just for exposing the information to modules that may request it
-        self.permsman = permsman_instance
-        self.load()
+        #self.permsman = permsman_instance
+        self.load(None, {"chan": HOME_CHANNEL})
 
 
 

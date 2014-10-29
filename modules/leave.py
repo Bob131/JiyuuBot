@@ -1,12 +1,17 @@
-def leave(self, cmd):
-    info = thread_types[threading.current_thread().ident] 
-    if self.permsman.get_msg_perms(info["nick"]):
-        cmd = list(x for x in cmd.strip().split(" ") if not x == "")
-        if len(cmd) == 0:
-            self.conman.leave_irc(info["source"], info["nick"])
-        else:
-            self.conman.leave_irc(cmd[0], info["nick"])
+def leave(self, msginfo):
+    #TODO: Reimplement
+    #if self.permsman.get_msg_perms(info["nick"]):
+    cmd = msginfo["msg"].split(" ")[1:]
+    if len(cmd) == 0:
+        self.conman.leave_irc(msginfo["chan"], msginfo["nick"])
     else:
-        self.conman.gen_send("Not permitted to part")
+        for chan in cmd:
+            if chan in self.conman.joined_chans:
+                self.conman.leave_irc(chan, msginfo["nick"])
+            else:
+                self.conman.gen_send("Can't PART from a channel that hasn't been joined", msginfo)
 
-self._map("command", "leave", leave)
+self.commandlist["leave"] = {
+        "type": MAPTYPE_COMMAND,
+        "function": leave
+        }
