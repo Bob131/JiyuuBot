@@ -1,29 +1,34 @@
+#NOTE: designed to work in tandem with https://github.com/Bob131/finna-be-octo-ninja/blob/master/downloadd.py
+
 def download(self, msginfo):
-    import urllib.request, urllib.error, urllib.parse
-    import urllib.request, urllib.parse, urllib.error
     import time
+    import socket
     args = msginfo["msg"].split(" ")[1:]
     for arg in args:
-        self.conman.gen_send("Fetching track " + arg, msginfo)
-        dl = urllib.request.urlopen(arg)
-        fnameline=""
-        for line in str(dl.info()).split("\r\n"):
-            if "filename=" in line:
-                fnameline = line
-                break
-        if dl.info().maintype == "audio":
-            fname = urllib.request.url2pathname(arg[arg.rindex("/") + 1 : ])
-            if not fnameline == "":
-                fname = fnameline[fnameline.index("filename=") + 10 : fnameline.rindex("\"")].replace("/", " ")
-            track = open(os.path.join(os.path.join(self.glob_confman.get("MPD", "MUSIC_PATH"), self.glob_confman.get("IRC", "NICK", allowTemp=False) + "_downloaded_music"), fname), "wb")
-            track.write(dl.read())
-            track.close()
-            self.conman.mpc.update()
-            time.sleep(5)
-            self.conman.mpc.addid(os.path.join(self.glob_confman.get("IRC", "NICK", allowTemp=False) + "_downloaded_music", fname), 2)
-            self.conman.gen_send(fname + " fetched and queued", msginfo)
+        s = socket.socket()
+        self.conman.gen_send("Contacting server...", msginfo)
+        tosend = {
+                "action": "download",
+                "uri": arg,
+                "allowed_mimetypes": "^audio/.*"
+                }
+        s.connect((self.glob_confman.get("MPD", "HOST"), 4411))
+        s.send(json.dumps(tosend).encode("UTF-8"))
+        recv = json.loads(s.recv(4096).decode("UTF-8"))
+        if recv["state"] == "error":
+            raise Exception(recv["error"])
         else:
-            self.conman.gen_send("Mime type " + dl.info().type + " not allowed.", msginfo)
+            self.conman.gen_send("REMOTE: Downloading '%s'" % recv["filename"], msginfo)
+            recv = json.loads(s.recv(4096).decode("UTF-8"))
+            if recv["state"] == "error":
+                raise Exception(recv["error"])
+            else:
+                self.conman.gen_send("REMOTE: Status OK. File '%s' downloaded" % recv["filename"], msginfo)
+                s.close()
+                self.conman.mpc.update()
+                time.sleep(5)
+                self.conman.mpc.add(self.conman.mpc.search("file", recv["filename"])[0])
+                self.conman.gen_send(recv["filename"] + " queued", msginfo)
 
 self.commandlist["download"] = {
         "type": MAPTYPE_COMMAND,
