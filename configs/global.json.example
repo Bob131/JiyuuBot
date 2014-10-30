@@ -2,7 +2,7 @@
     "IRC": {
         "HOST": "irc.rizon.net",
         "PORT": 9999,
-        "SSL": True,
+        "SSL": true,
         "NICK": "JiyuuBot",
         "HOME_CHANNEL": "#Jiyuu"
     },
