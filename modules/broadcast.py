@@ -4,8 +4,7 @@ def broadcast(self, msginfo):
         msginfo["chan"] = chan
         self.conman.gen_send(arg, msginfo)
 
-#TODO: Reimplement
-#self.permsman.suggest_cmd_perms("broadcast", 999)
+self.permsman.suggest_cmd_perms("broadcast", 999)
 self.commandlist["broadcast"] = {
         "type": MAPTYPE_COMMAND,
         "function": broadcast,

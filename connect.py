@@ -4,14 +4,7 @@ import os
 import queue
 import threading
 import time
-
-
-#Load config file from config.py
-exec(open(os.path.join(os.path.dirname(__file__), "configs" + os.sep + "config.py"), "r").read())
-
-
-if MPD:
-    import mpd
+import mpd
 
 
 #Define connection class
@@ -20,13 +13,11 @@ class ConnectionMan:
         self.confman = global_confman
 
 	#connect to mpd server
-        if MPD:
-            self.mpc = mpd.MPDClient()
-            self.mpc.connect(MPD_HOST, MPD_PORT)
+        self.mpc = mpd.MPDClient()
+        self.mpc.connect(self.confman.get("MPD", "HOST"), self.confman.get("MPD", "PORT"))
 
-        if IRC:
-            self.queue = queue.Queue()
-            self.connect_irc()
+        self.queue = queue.Queue()
+        self.connect_irc()
 
 
     # message management functions ###
@@ -43,6 +34,7 @@ class ConnectionMan:
 
 
     def queue_tick(self):
+        OUTGOING_DELAY = self.confman.get("IRC", "OUTGOING_DELAY", 300)
         while True:
             self.send_raw(self.queue.get(True))
             time.sleep(OUTGOING_DELAY / 1000.0)
@@ -75,14 +67,14 @@ class ConnectionMan:
         self.joined_chans.append(chan)
 
         if record:
-            self.confman.set_value("IRC", "CHANS", list(chan for chan in self.joined_chans if not chan == HOME_CHANNEL))
+            self.confman.setv("IRC", "CHANS", list(chan for chan in self.joined_chans if not chan == self.confman.get("IRC", "HOME_CHANNEL")))
 
 
     # parting channels
     def leave_irc(self, chan, nick, kicked=False):
-        if chan == HOME_CHANNEL and kicked:
+        if chan == self.confman.get("IRC", "HOME_CHANNEL") and kicked:
             del self.joined_chans[self.joined_chans.index(chan)]
-            self.join_irc(HOME_CHANNEL, None, False)
+            self.join_irc(self.confman.get("IRC", "HOME_CHANNEL"), None, False)
         elif chan == HOME_CHANNEL:
             self.privmsg("Can't be PART'd from home channel")
         else:
@@ -94,7 +86,7 @@ class ConnectionMan:
                 self.privmsg(partmsg)
 
             del self.joined_chans[self.joined_chans.index(chan)]
-            self.confman.set_value("IRC", "CHANS", list(set(chan for chan in self.joined_chans if not chan == HOME_CHANNEL)))
+            self.confman.setv("IRC", "CHANS", list(set(chan for chan in self.joined_chans if not chan == self.confman.get("IRC", "HOME_CHANNEL"))))
 
             print("\n*** %s left! ***\n" % chan)
 
@@ -102,12 +94,12 @@ class ConnectionMan:
     # connect to IRC server, join HOME_CHANNEL
     def connect_irc(self):
 	#If SSL is enabled use ssl
-        if SSL:
+        if self.confman.get("IRC", "SSL", False):
             self.s = ssl.wrap_socket(socket.socket())
         else:
             self.s = socket.socket()
 
-        self.s.connect((HOST, PORT))
+        self.s.connect((self.confman.get("IRC", "HOST"), self.confman.get("IRC", "PORT", 6669)))
         self.lock = threading.Lock()
         self.joined_chans = []
 
@@ -115,12 +107,11 @@ class ConnectionMan:
         thread.daemon = True
         thread.start()
 
-        global NICK
         # As of RFC 2812, USER message params are: <user> <mode> <unused> <realname>
-        self.queue_raw("USER " + NICK + " 0 * :" + NICK)
-        self.queue_raw("NICK " + NICK)
+        self.queue_raw("USER " + self.confman.get("IRC", "NICK") + " 0 * :" + self.confman.get("IRC", "NICK"))
+        self.queue_raw("NICK " + self.confman.get("IRC", "NICK"))
 
-        print("*** Connecting... ***")
+        print("*** Connecting... ***\n")
 
         while 1:
             try:
@@ -129,16 +120,16 @@ class ConnectionMan:
                 continue
             line = line.strip("\r\n")
             if "Nickname is already in use" in line:
-                NICK+="_"
-                self.queue_raw("NICK " + NICK)
+                self.confman.setv("IRC", "NICK", self.confman.get("IRC", "NICK")+"_", True)
+                self.queue_raw("NICK " + self.confman.get("IRC", "NICK"))
             elif "PING" in line:
                 self.queue_raw("PONG :%s" % line[6:])
             elif "End of /MOTD command." in line:
                 break
             print(line)
 
-        self.join_irc(chan = HOME_CHANNEL, record = False)
-        for channel in self.confman.get_value("IRC", "CHANS", []):
+        self.join_irc(chan = self.confman.get("IRC", "HOME_CHANNEL"), record = False)
+        for channel in self.confman.get("IRC", "CHANS", []):
             self.join_irc(chan = channel, record = False)
 
 
@@ -148,7 +139,7 @@ class ConnectionMan:
             self.mpc.disconnect()
         except mpd.ConnectionError:
             pass
-        self.mpc.connect(MPD_HOST, MPD_PORT)
+        self.mpc.connect(self.confman.get("MPD", "HOST"), self.confman.get("MPD", "PORT"))
 
 
     # reconnect to IRC
@@ -171,11 +162,10 @@ class ConnectionMan:
 
     #Define private message function
     # Splitting is something that should be taken care of beforehand.
-    def privmsg(self, text, channel=HOME_CHANNEL):
+    def privmsg(self, text, channel=None):
+        if channel == None:
+            channel = self.confman.get("IRC", "HOME_CHANNEL")
         if "\n" in text:
             raise Exception("connect.py:privmsg() no longer accepts multi-line messages")
         else:
-            if IRC:
-                self.queue_raw("PRIVMSG " + channel + " :" + text)
-            else:
-                print(prefix + text)
+            self.queue_raw("PRIVMSG " + channel + " :" + text)

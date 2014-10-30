@@ -15,12 +15,12 @@ def download(self, msginfo):
             fname = urllib.request.url2pathname(arg[arg.rindex("/") + 1 : ])
             if not fnameline == "":
                 fname = fnameline[fnameline.index("filename=") + 10 : fnameline.rindex("\"")].replace("/", " ")
-            track = open(os.path.join(os.path.join(MUSIC_PATH, NICK + "_downloaded_music"), fname), "wb")
+            track = open(os.path.join(os.path.join(self.glob_confman.get("MPD", "MUSIC_PATH"), self.glob_confman.get("IRC", "NICK", allowTemp=False) + "_downloaded_music"), fname), "wb")
             track.write(dl.read())
             track.close()
             self.conman.mpc.update()
             time.sleep(5)
-            self.conman.mpc.addid(os.path.join(NICK + "_downloaded_music", fname), 2)
+            self.conman.mpc.addid(os.path.join(self.glob_confman.get("IRC", "NICK", allowTemp=False) + "_downloaded_music", fname), 2)
             self.conman.gen_send(fname + " fetched and queued", msginfo)
         else:
             self.conman.gen_send("Mime type " + dl.info().type + " not allowed.", msginfo)

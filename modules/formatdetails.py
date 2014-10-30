@@ -1,6 +1,5 @@
 def format_song_details(self, uri):
     info = self.conman.mpc.listallinfo(uri)[0]
-    print(info)
     infodict = {"time": "N/A", "title": uri, "artist": "N/A", "album": "N/A"}
     for key in infodict.keys():
         try:
