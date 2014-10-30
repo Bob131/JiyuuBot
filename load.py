@@ -20,9 +20,7 @@ class PluginMan:
         try:
             self.commandlist[command]["function"](self, msginfo)
         except Exception as e:
-            if type(e) == KeyError:
-                pass
-            elif type(e) == mpd.ConnectionError:
+            if type(e) == mpd.ConnectionError:
                 self.conman.reconnect_mpd()
                 self.trywrapper(command, msginfo)
             else:
