@@ -20,7 +20,7 @@ def git_get_name(self, userdict, from_osrc=False):
         if "url" in userdict.keys():
             import requests
             req = requests.get(userdict["url"]).json()
-            return self.run_func("git_get_name", req)
+            return self.funcs["git_get_name"](self, req)
         else:
             return userdict["login"]
 
