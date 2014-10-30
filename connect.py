@@ -14,7 +14,13 @@ class ConnectionMan:
 
 	#connect to mpd server
         self.mpc = mpd.MPDClient()
-        self.mpc.connect(self.confman.get("MPD", "HOST"), self.confman.get("MPD", "PORT"))
+        try:
+            self.mpc.connect(self.confman.get("MPD", "HOST"), self.confman.get("MPD", "PORT"))
+        except (KeyError, ConnectionRefusedError) as e:
+            if self.confman.get("MPD", "ENABLED"):
+                raise e
+            else:
+                pass
 
         self.queue = queue.Queue()
         self.connect_irc()

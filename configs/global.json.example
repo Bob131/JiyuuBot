@@ -1,0 +1,15 @@
+{
+    "IRC": {
+        "HOST": "irc.rizon.net",
+        "PORT": 9999,
+        "SSL": True,
+        "NICK": "JiyuuBot",
+        "HOME_CHANNEL": "#Jiyuu"
+    },
+    "MPD": {
+        "ENABLED": true,
+        "HOST": "127.0.0.1",
+        "PORT": 6600,
+        "MUSIC_PATH": "/media/music/Music"
+    }
+}

@@ -13,9 +13,11 @@ class ConfigMan:
                 _ = self.values["IRC"]["HOME_CHANNEL"]
                 _ = self.values["IRC"]["NICK"]
 
-                _ = self.values["MPD"]["HOST"]
-                _ = self.values["MPD"]["PORT"]
-                _ = self.values["MPD"]["MUSIC_PATH"]
+                _ = self.values["MPD"]["ENABLED"]
+                if _ == True:
+                    _ = self.values["MPD"]["HOST"]
+                    _ = self.values["MPD"]["PORT"]
+                    _ = self.values["MPD"]["MUSIC_PATH"]
             except KeyError:
                 raise Exception("configs/global.json missing values. See configs/global.json.example for help")
         self.load(True)
