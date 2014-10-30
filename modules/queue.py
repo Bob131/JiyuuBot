@@ -13,7 +13,10 @@ def queue(self, msginfo):
                 raise Exception
             queue = queue[int(command):]
     except:
-        raise Exception("Invalid song id")
+        if len(queue) == 1:
+            pass
+        else:
+            raise Exception("Invalid song id")
     num = 4
     if len(queue) < 4:
         num = len(queue)

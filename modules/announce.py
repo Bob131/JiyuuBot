@@ -1,9 +1,7 @@
 def announce(self, command):
     import random
-    filelist = os.listdir(os.path.join(self.glob_confman.get("MPD", "MUSIC_PATH"), self.glob_confman.get("IRC", "NICK", allowTemp=False) + "_intros"))
-    filepath = ""
+    filelist = self.conman.mpc.listall("/%s_intros" % self.glob_confman.get("IRC", "NICK"))
     filepath = filelist[random.randint(0, len(filelist)-1)]
-    filepath = os.path.join(self.glob_confman.get("IRC", "NICK", allowTemp=False) + "_intros", filepath)
     self.conman.mpc.addid(filepath, 1)
 
 self.commandlist["announce"] = {

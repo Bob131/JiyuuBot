@@ -9,7 +9,6 @@
     "MPD": {
         "ENABLED": true,
         "HOST": "127.0.0.1",
-        "PORT": 6600,
-        "MUSIC_PATH": "/media/music/Music"
+        "PORT": 6600
     }
 }

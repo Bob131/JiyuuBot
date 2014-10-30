@@ -1,10 +1,6 @@
 def add_random(self, _):
     import random
-    filelist = []
-    for root, dirs, files in os.walk(self.glob_confman.get("MPD", "MUSIC_PATH")):
-        for name in files:
-            root = root.replace(self.glob_confman.get("MPD", "MUSIC_PATH") + os.sep, "")
-            filelist.append(os.path.join(root, name))
+    filelist = self.conman.mpc.listall("/")
     numsongs = int(self.confman.get("add_random", "NUMBER_OF_SONGS", 10))
     while numsongs:
         filepath = filelist[random.randint(0, len(filelist)-1)]
