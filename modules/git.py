@@ -11,7 +11,6 @@ def git_get_name(self, userdict, from_osrc=False):
 
     # if dict from api.github.com
     if "name" in userdict.keys():
-        print(userdict["name"])
         if userdict["name"] == None or userdict["name"].strip() == "" or userdict["name"] == userdict["login"]:
             return userdict["login"]
         else:

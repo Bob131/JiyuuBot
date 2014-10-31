@@ -12,15 +12,19 @@ class ConnectionMan:
     def __init__(self, global_confman):
         self.confman = global_confman
 
-	#connect to mpd server
+	#connect to mpd server and fetch song list
         self.mpc = mpd.MPDClient()
         try:
             self.mpc.connect(self.confman.get("MPD", "HOST"), self.confman.get("MPD", "PORT"))
+            print("Connected to MPD! Fetching song list...")
+            # Module writers: DO NOT CHANGE THIS LIST
+            self.mpc.songlist = list(song["file"] for song in self.mpc.listall("/") if "file" in song.keys())
+            print("Song list fetched. Connecting to IRC...")
         except (KeyError, ConnectionRefusedError) as e:
-            if self.confman.get("MPD", "ENABLED"):
-                raise e
-            else:
+            if not self.confman.get("MPD", "ENABLED"):
                 pass
+            else:
+                raise e
 
         self.queue = queue.Queue()
         self.connect_irc()

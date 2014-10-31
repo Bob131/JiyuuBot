@@ -1,15 +1,14 @@
 def add_random(self, _):
     import random
-    filelist = self.conman.mpc.listall("/")
     numsongs = int(self.confman.get("add_random", "NUMBER_OF_SONGS", 10))
+    mpdsongs = int(self.conman.mpc.stats()["songs"])
     while numsongs:
-        filepath = filelist[random.randint(0, len(filelist)-1)]
-        if not filepath.endswith(".m3u") and not NICK + "_intros" + os.sep in filepath:
-            try:
-                self.conman.mpc.add(filepath)
-                numsongs-=1
-            except mpd.MPDError:
-                pass
+        sid = random.randint(0, mpdsongs-1)
+        try:
+            self.conman.mpc.addid(self.conman.mpc.songlist[sid])
+            numsongs-=1
+        except mpd.MPDError:
+            pass
 
 self.commandlist["random"] = {
         "type": MAPTYPE_COMMAND,
