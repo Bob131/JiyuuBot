@@ -15,7 +15,7 @@ def ddate(self, msginfo):
     if boolLeapYear and dayofYear >=60:
         dayofYear -= 1
     dSeason, dDay = divmod(dayofYear, 73)
-    dDayName = (day-1)%5
+    dDayName = (dayofYear)%5
     dDay += 1
     if 10 <= dDay % 100 < 20:
         dDay = str(dDay) + 'th'
