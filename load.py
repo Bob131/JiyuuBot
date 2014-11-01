@@ -84,7 +84,7 @@ class PluginMan:
                 except Exception as e:
                     # if reloaded from a channel other than HOME_CHANNEL
                     if not msginfo["chan"] == self.glob_confman.get("IRC", "HOME_CHANNEL"):
-                        self.conman.gen_send("Error loading module %s: %s" % (os.path.basename(plugin), e))
+                        self.conman.gen_send("Error loading module %s: %s" % (os.path.basename(plugin), e), msginfo)
                     self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
                     failcount += 1
                     self.pluginlist[plugin].add("failed")
