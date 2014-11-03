@@ -25,7 +25,12 @@ class PluginMan:
                 self.trywrapper(command, msginfo)
             else:
                 traceback.print_exc()
-                self.conman.privmsg("Error executing %s: %s" % (command, e))
+                self.ltb = {
+                        "exception": traceback.format_exc(),
+                        "msginfo": msginfo
+                        }
+                self.conman.gen_send("Error executing %s: %s" % (command, e), msginfo)
+                self.conman.privmsg("Exception occured. Check traceback")
 
 
     def execute_command(self, msginfo):
@@ -101,4 +106,5 @@ class PluginMan:
         self.confman = ConfigMan("module")
         self.glob_confman = globconfman_instance
         self.permsman = permsman_instance
+        self.ltb = None
         self.load(None, {"chan": self.glob_confman.get("IRC", "HOME_CHANNEL")})
