@@ -4,14 +4,14 @@ def queue(self, msginfo):
     self.require("format_song_details")
     command = msginfo["msg"].split(" ")[1:]
     if command == []:
-        command = "1"
+        command = int(self.conman.mpc.currentsong()["pos"]) + 2
     else:
         command = command[0]
     try:
         if not command == "":
             if int(command) <= 0 or int(command) == len(queue):
                 raise Exception
-            queue = queue[int(command):]
+            queue = queue[int(command)-1:]
     except:
         if len(queue) == 1:
             pass
