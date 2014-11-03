@@ -9,7 +9,7 @@ def tb(self, msginfo):
             self.conman.gen_send(line, msginfo)
         self.ltb = None
 
-self.permsman.suggest_cmd_perms("tb", 999)
+self.permsman.suggest_cmd_perms("dump", 999)
 self.commandlist["dump"] = {
         "type": MAPTYPE_COMMAND,
         "function": tb,
