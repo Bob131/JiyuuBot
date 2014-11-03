@@ -4,6 +4,7 @@ def tb(self, msginfo):
     else:
         for line in self.ltb["exception"].split("\n"):
             self.conman.gen_send(line, msginfo)
+        self.conman.gen_send("---------------------", msginfo)
         dump = json.dumps(self.ltb["msginfo"], indent=4, separators=(",", ": "))
         for line in dump.split("\n"):
             self.conman.gen_send(line, msginfo)
