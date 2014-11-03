@@ -30,7 +30,8 @@ class PluginMan:
                         "msginfo": msginfo
                         }
                 self.conman.gen_send("Error executing %s: %s" % (command, e), msginfo)
-                self.conman.privmsg("Exception occured. Check traceback")
+                if not msginfo["chan"] == self.glob_confman.get("IRC", "HOME_CHANNEL"):
+                    self.conman.privmsg("Exception occured. Check traceback")
 
 
     def execute_command(self, msginfo):
