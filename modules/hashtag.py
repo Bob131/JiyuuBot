@@ -11,7 +11,7 @@ def add_hash(self, msginfo):
     command = msginfo["msg"].split(" ")[1:]
     command[0] = command[0].lower().replace("#", "")
     if not command[0] in reg_tags.keys():
-        reg_tags[command[0]] = command[1]
+        reg_tags[command[0]] = command[1:]
         self.confman.setv("hash", "REG_TAGS", reg_tags)
         self.conman.gen_send("#%s now mapped" % command[0], msginfo)
     else:
@@ -25,7 +25,7 @@ def del_hash(self, msginfo):
         self.confman.setv("hash", "REG_TAGS", reg_tags)
         self.conman.gen_send("#%s deleted" % command, msginfo)
     except KeyError:
-        self.conman.gen_send("#%s does not exist" % command. msginfo)
+        self.conman.gen_send("#%s does not exist" % command, msginfo)
 
 self.commandlist[".*\#\w+.*"] = {
         "type": MAPTYPE_REGEX,
@@ -35,4 +35,9 @@ self.commandlist["addhash"] = {
         "type": MAPTYPE_COMMAND,
         "function": add_hash,
         "help": "Adds hastag"
+        }
+self.permsman.suggest_cmd_perms("delhash", 300)
+self.commandlist["delhash"] = {
+        "type": MAPTYPE_COMMAND,
+        "function": del_hash
         }
