@@ -3,6 +3,7 @@ def hashtag(self, msginfo):
     for tag in message:
         reg_tags = self.confman.get("hash", "REG_TAGS", {})
         tag = tag.lower()
+        print(tag)
         if tag in reg_tags.keys():
             self.conman.gen_send(reg_tags[tag], msginfo)
 
@@ -11,7 +12,7 @@ def add_hash(self, msginfo):
     command = msginfo["msg"].split(" ")[1:]
     command[0] = command[0].lower().replace("#", "")
     if not command[0] in reg_tags.keys():
-        reg_tags[command[0]] = command[1:]
+        reg_tags[command[0]] = " ".join(command[1:]).strip()
         self.confman.setv("hash", "REG_TAGS", reg_tags)
         self.conman.gen_send("#%s now mapped" % command[0], msginfo)
     else:
@@ -19,7 +20,7 @@ def add_hash(self, msginfo):
 
 def del_hash(self, msginfo):
     reg_tags = self.confman.get("hash", "REG_TAGS", {})
-    command = msginfo["msg"].strip().lower().replace("#", "")
+    command = msginfo["msg"].split(" ")[1].lower().replace("#", "")
     try:
         del reg_tags[command]
         self.confman.setv("hash", "REG_TAGS", reg_tags)
