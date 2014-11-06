@@ -13,11 +13,13 @@ import configman
 import logger
 
 
+#load config
+confman = configman.ConfigMan("global")
+
 #init logger
-sys.stdout = logger.stdoutLog()
+sys.stdout = logger.stdoutLog(confman.get("MISC", "LOG", True))
 
 #initialize plugin manager and load plugins
-confman = configman.ConfigMan("global")
 conman = connect.ConnectionMan(confman)
 permsman = permsman.PermsMan()
 plugman = load.PluginMan(conman, confman, permsman)
