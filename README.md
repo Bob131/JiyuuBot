@@ -26,4 +26,4 @@ Care should be taken to ensure that _all_ required dependencies are installed, a
 
 Note that JiyuuBot at this point in time logs *everything*, and these logs can rapidly grow in size. If you're short on disk space, consider disabling logging in your configuration file.
 
-JiyuuBot core code and all modules are licensed under the GPLv3.
+JiyuuBot core code and all modules are licensed under the AGPLv3.
