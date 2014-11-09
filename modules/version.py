@@ -8,7 +8,7 @@ def version(self, msginfo):
     gitlog = gitlog.split("\n")[-2].split(" ")
     commit = gitlog[1][:7]
     timeg = int(gitlog[4])
-    vers = "http://github.com/JiyuuProject/JiyuuBot - Commit hash: %s - Last pull: %s (%s ago)" % (commit, time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(timeg)), datetime.timedelta(seconds=math.floor(time.time()-timeg)))
+    vers = "http://github.com/JiyuuProject/JiyuuBot - Commit hash: \x02%s\x02 - Last pull: %s (%s ago)" % (commit, time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(timeg)), datetime.timedelta(seconds=math.floor(time.time()-timeg)))
     self.conman.gen_send(vers, msginfo)
 
 self.commandlist["version"] = {
