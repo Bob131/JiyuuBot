@@ -26,7 +26,7 @@ def git_get_name(self, userdict, from_osrc=False):
 
 def git(self, msginfo):
     import requests
-    matches = re.findall("github.com/([\w/-]+[^\s])", msginfo["msg"])
+    matches = re.findall("github.com/([\w/-\\\\.]+[^\s])", msginfo["msg"])
 
     for match in matches:
         match = match.split("/")
@@ -64,10 +64,10 @@ def git(self, msginfo):
             # if issue number provided
             if len(match) == 4:
                 req = requests.get("https://api.github.com/repos/%s/%s/%s/%s" % tuple(match)).json()
-                self.conman.gen_send("%s/%s#%s - \x02%s\x02 - by \x02%s\x02 - Created: %s - Updated: %s - State: %s - Tags: %s" % (match[0], match[1], req["number"], req["title"], self.funcs["git_get_name"](self, req["user"]), req["created_at"].split("T")[0], req["updated_at"].split("T")[0], req["state"].capitalize(), ", ".join("\x02%s\x02" % label["name"] for label in req["labels"])), msginfo)
+                self.conman.gen_send("%s/%s#%s - \x02%s\x02 - by \x02%s\x02 - Created: %s - Updated: %s - State: %s%s" % (match[0], match[1], req["number"], req["title"], self.funcs["git_get_name"](self, req["user"]), req["created_at"].split("T")[0], req["updated_at"].split("T")[0], req["state"].capitalize(), (" - Tags: " + ", ".join("\x02%s\x02" % label["name"] for label in req["labels"]) if not len(req["labels"]) == 0 else "")), msginfo)
 
         # if github link to file
-        elif match[2] == "tree":
+        elif match[2] == "tree" or match[2] == "blob":
             branch = match[3]
             filepath = "/".join(match[4:])
             self.conman.gen_send("%s on branch %s - %s" % (filepath, branch, match[1]), msginfo)
