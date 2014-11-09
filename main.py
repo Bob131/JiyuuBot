@@ -99,7 +99,7 @@ while 1:
             conman.join_irc(chan, nick)
 
         # if we've been kicked from a channel
-        elif "KICK" in line and " %s " % NICK in line:
+        elif "KICK" in line and " %s " % confman.get("IRC", "NICK") in line:
             chan = line[line.index("KICK ") + 5 : line.index(confman.get("IRC", "NICK"))-1]
             nick = line[:line.index("!")]
             conman.leave_irc(chan, nick, True)
