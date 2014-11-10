@@ -26,7 +26,7 @@ def git_get_name(self, userdict, from_osrc=False):
 
 def git(self, msginfo):
     import requests
-    matches = re.findall("github.com/([\w/-\\\\.]+[^\s])", msginfo["msg"])
+    matches = re.findall("github.com/(.+[^\s#?])", msginfo["msg"])
 
     for match in matches:
         match = match.split("/")
@@ -49,13 +49,27 @@ def git(self, msginfo):
         # if github link to repo
         elif len(match) == 2:
             req = requests.get("https://api.github.com/repos/%s/%s" % tuple(match)).json()
-            tosend = "\x02%s\x02 - \x02%s\x02 - by \x02%s\x02 - Created: %s - Last push: %s" % (match[1], req["description"], self.funcs["git_get_name"](self, req["owner"]), req["created_at"].split("T")[0], req["pushed_at"].split("T")[0])
-            if req["has_issues"]:
-                tosend += " - Open issues: %s" % req["open_issues_count"]
-            if not req["homepage"] == None and not req["homepage"] == "":
-                tosend += " - %s" % req["homepage"]
-            if req["fork"]:
-                tosend += " - Forked from %s (%s)" % (req["parent"]["full_name"], req["parent"]["html_url"])
+            tosend = ""
+            try:
+                _ = req['message']
+            except:
+                req['message'] = None
+            if not req['message'] == "Not Found":
+                try:
+                    tosend = "\x02%s\x02 - \x02%s\x02 - by \x02%s\x02 - Created: %s - Last push: %s" % (match[1], req["description"], self.funcs["git_get_name"](self, req["owner"]), req["created_at"].split("T")[0], req["pushed_at"].split("T")[0])
+                except KeyError as e:
+                    if e.args[0] == "description":
+                        tosend = "\x02%s\x02 - by \x02%s\x02 - Created: %s - Last push: %s" % (match[1], self.funcs["git_get_name"](self, req["owner"]), req["created_at"].split("T")[0], req["pushed_at"].split("T")[0])
+                    else:
+                        raise e
+                if req["has_issues"]:
+                    tosend += " - Open issues: %s" % req["open_issues_count"]
+                if not req["homepage"] == None and not req["homepage"] == "":
+                    tosend += " - %s" % req["homepage"]
+                if req["fork"]:
+                    tosend += " - Forked from %s (%s)" % (req["parent"]["full_name"], req["parent"]["html_url"])
+            else:
+                tosend = "Repo \x02%s/%s\x02 does not exist" % (match[-2], match[-1])
             self.conman.gen_send(tosend, msginfo)
 
         # if github link to issue
