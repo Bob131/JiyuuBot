@@ -61,9 +61,9 @@ class PluginMan:
             pass
 
 
-    def require(self, func):
-        if not self.funcs.get(func, None):
-            raise Exception("Required function %s not loaded" % func)
+    def require(self, plugin):
+        if not self.pluginlist.get(plugin, None):
+            raise Exception("Required plugin %s not loaded" % plugin)
 
 
     #Define function to load modules

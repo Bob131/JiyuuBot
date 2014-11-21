@@ -1,7 +1,7 @@
 #Module to display queue of songs from MPD
 def queue(self, msginfo):
     queue = self.conman.mpc.playlist()
-    self.require("format_song_details")
+    self.require("formatdetails")
     command = msginfo["msg"].split(" ")[1:]
     if command == []:
         command = int(self.conman.mpc.currentsong()["pos"]) + 2

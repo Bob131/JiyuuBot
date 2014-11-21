@@ -1,6 +1,6 @@
 def current(self, msginfo):
     import datetime
-    self.require("format_song_details")
+    self.require("formatdetails")
     currentTrack = self.conman.mpc.currentsong()
     if type(currentTrack) == list:
         currentTrack = currentTrack[0]
