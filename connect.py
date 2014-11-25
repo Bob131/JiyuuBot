@@ -71,8 +71,8 @@ class ConnectionMan:
 
         if not nick == None:
             self.privmsg("Invited by %s" % nick, chan)
-            self.privmsg("Home channel: %s" % HOME_CHANNEL, chan)
-            self.privmsg("Joined %s, invited by %s" % (chan, nick), HOME_CHANNEL)
+            self.privmsg("Home channel: %s" % self.confman.get("IRC", "HOME_CHANNEL"), chan)
+            self.privmsg("Joined %s, invited by %s" % (chan, nick), self.confman.get("IRC", "HOME_CHANNEL"))
 	
         self.joined_chans.append(chan)
 
