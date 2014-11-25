@@ -29,6 +29,7 @@ def git(self, msginfo):
     matches = re.findall("github.com/(.+[^\s#?])", msginfo["msg"])
 
     for match in matches:
+        match = match.split(" ")[0]
         match = match.split("/")
         # remove last list element in case of trailing slash
         if match[-1] == "":

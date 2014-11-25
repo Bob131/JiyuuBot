@@ -85,7 +85,7 @@ class ConnectionMan:
         if chan == self.confman.get("IRC", "HOME_CHANNEL") and kicked:
             del self.joined_chans[self.joined_chans.index(chan)]
             self.join_irc(self.confman.get("IRC", "HOME_CHANNEL"), None, False)
-        elif chan == HOME_CHANNEL:
+        elif chan == self.confman.get("IRC", "HOME_CHANNEL"):
             self.privmsg("Can't be PART'd from home channel")
         else:
             if kicked:

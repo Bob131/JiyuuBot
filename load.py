@@ -62,7 +62,8 @@ class PluginMan:
 
 
     def require(self, plugin):
-        if not self.pluginlist.get(plugin, None):
+        plugin = "{}/{}.py".format(self.modulespath, plugin)
+        if not list(self.pluginlist.get(plugin, ["failed"]))[0] == "failed":
             raise Exception("Required plugin %s not loaded" % plugin)
 
 
