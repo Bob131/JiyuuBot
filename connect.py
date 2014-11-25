@@ -4,7 +4,12 @@ import os
 import queue
 import threading
 import time
-import mpd
+import sys
+#Check for mpd installation
+try:
+    import mpd
+except ImportError:
+    print("Unable to load mpd")
 
 
 #Define connection class
@@ -13,14 +18,15 @@ class ConnectionMan:
         self.confman = global_confman
 
 	#connect to mpd server and fetch song list
-        self.mpc = mpd.MPDClient()
+        if "mpd" in sys.modules.keys():
+            self.mpc = mpd.MPDClient()
         try:
             self.mpc.connect(self.confman.get("MPD", "HOST"), self.confman.get("MPD", "PORT"))
             print("Connected to MPD! Fetching song list...")
             # Module writers: DO NOT CHANGE THIS LIST
             self.mpc.songlist = list(song["file"] for song in self.mpc.listall("/") if "file" in song.keys())
             print("Song list fetched. Connecting to IRC...")
-        except (KeyError, ConnectionRefusedError) as e:
+        except (KeyError, ConnectionRefusedError, AttributeError) as e:
             if not self.confman.get("MPD", "ENABLED"):
                 pass
             else:

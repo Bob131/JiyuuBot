@@ -4,7 +4,12 @@ import threading
 import json
 import re
 import traceback
-import mpd
+try:
+    import mpd
+    boolMPD = True
+except ImportError:
+    boolMPD = False
+    print("Unable to load mpd")
 
 from configman import *
 
@@ -20,9 +25,10 @@ class PluginMan:
         try:
             self.commandlist[command]["function"](self, msginfo)
         except Exception as e:
-            if type(e) == mpd.ConnectionError:
-                self.conman.reconnect_mpd()
-                self.trywrapper(command, msginfo)
+            if boolMPD:
+                if type(e) == mpd.ConnectionError:
+                    self.conman.reconnect_mpd()
+                    self.trywrapper(command, msginfo)
             else:
                 traceback.print_exc()
                 self.ltb = {
