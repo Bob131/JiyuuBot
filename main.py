@@ -81,7 +81,7 @@ while 1:
                     msginfo["type"] = "PRIVMSG"
                     plugman.execute_command(msginfo)
                 else:
-                    conman.gen_send("You do not have high enough permissions to execute that command")
+                    conman.gen_send("You do not have high enough permissions to execute that command", msginfo)
             else:
                 # check whether message matches any mapped regex strings
                 patterns = (pattern for pattern in plugman.commandlist.keys() if plugman.commandlist[pattern]["type"] == load.MAPTYPE_REGEX)
