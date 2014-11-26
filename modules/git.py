@@ -10,7 +10,7 @@ def git_get_name(self, userdict, from_osrc=False):
             return userdict["name"]
 
     # if dict from api.github.com
-    if "name" in userdict.keys():
+    if "public_repos" in userdict.keys():
         if userdict["name"] == None or userdict["name"].strip() == "" or userdict["name"] == userdict["login"]:
             return userdict["login"]
         else:
