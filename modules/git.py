@@ -24,6 +24,16 @@ def git_get_name(self, userdict, from_osrc=False):
         else:
             return userdict["login"]
 
+def git_allowed(self, req):
+    try:
+        _ = req['message']
+    except:
+        req['message'] = None
+    if req['message'].startswith("API rate limit exceeded"):
+        return False
+    else:
+        return True
+
 def git(self, msginfo):
     import requests
     matches = re.findall("github.com/(.+[^\s#?])", msginfo["msg"])
@@ -56,7 +66,7 @@ def git(self, msginfo):
                 _ = req['message']
             except:
                 req['message'] = None
-            if not req['message'] == "Not Found":
+            if not req['message'] == "Not Found" and self.funcs["git_allowed"](self, req):
                 try:
                     tosend = "\x02%s\x02 - \x02%s\x02 - by \x02%s\x02 - Created: %s - Last push: %s" % (match[1], req["description"], self.funcs["git_get_name"](self, req["owner"]), req["created_at"].split("T")[0], req["pushed_at"].split("T")[0])
                 except KeyError as e:
@@ -70,6 +80,8 @@ def git(self, msginfo):
                     tosend += " - %s" % req["homepage"]
                 if req["fork"]:
                     tosend += " - Forked from %s (%s)" % (req["parent"]["full_name"], req["parent"]["html_url"])
+            elif not self.funcs["git_allowed"](self, req):
+                tosend = "\x02%s\x02 - by \x02%s\x02" % tuple(match)
             else:
                 tosend = "Repo \x02%s/%s\x02 does not exist" % (match[-2], match[-1])
             self.conman.gen_send(tosend, msginfo)
@@ -80,7 +92,10 @@ def git(self, msginfo):
             # if issue number provided
             if len(match) == 4:
                 req = requests.get("https://api.github.com/repos/%s/%s/%s/%s" % tuple(match)).json()
-                self.conman.gen_send("%s/%s#%s - \x02%s\x02 - by \x02%s\x02 - Created: %s - Updated: %s - State: %s%s" % (match[0], match[1], req["number"], req["title"], self.funcs["git_get_name"](self, req["user"]), req["created_at"].split("T")[0], req["updated_at"].split("T")[0], req["state"].capitalize(), (" - Tags: " + ", ".join("\x02%s\x02" % label["name"] for label in req["labels"]) if not len(req["labels"]) == 0 else "")), msginfo)
+                if self.funcs["git_allowed"](self, req):
+                    self.conman.gen_send("%s/%s#%s - \x02%s\x02 - by \x02%s\x02 - Created: %s - Updated: %s - State: %s%s" % (match[0], match[1], req["number"], req["title"], self.funcs["git_get_name"](self, req["user"]), req["created_at"].split("T")[0], req["updated_at"].split("T")[0], req["state"].capitalize(), (" - Tags: " + ", ".join("\x02%s\x02" % label["name"] for label in req["labels"]) if not len(req["labels"]) == 0 else "")), msginfo)
+                else:
+                    self.conman.gen_send("%s/%s#%s" % (match[0], match[1], match[3]), msginfo)
 
         # if github link to file
         elif match[2] == "tree" or match[2] == "blob":
@@ -91,9 +106,11 @@ def git(self, msginfo):
         # if github link to commit
         elif match[2] == "commit":
             req = requests.get("https://api.github.com/repos/%s/%s/git/%ss/%s" % tuple(match)).json()
-            self.conman.gen_send("\x02%s\x02 - by \x02%s\x02 - %s" % (req["message"], req["author"]["name"], req["committer"]["date"].split("T")[0]), msginfo)
+            if self.funcs["git_allowed"](self, req):
+                self.conman.gen_send("\x02%s\x02 - by \x02%s\x02 - %s" % (req["message"], req["author"]["name"], req["committer"]["date"].split("T")[0]), msginfo)
 
 self.funcs["git_get_name"] = git_get_name
+self.funcs["git_allowed"] = git_allowed
 self.commandlist[".*https?://(www\.)?github.com/.*"] = {
         "type": MAPTYPE_REGEX,
         "function": git,
