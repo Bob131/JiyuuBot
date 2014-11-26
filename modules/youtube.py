@@ -6,8 +6,8 @@ def youtube(self, msginfo):
         for match in stuff:
             if "v=" in match:
                 match = re.findall("v=([\w-]+[^&\s])", match)[0]
-            jdata = requests.get("https://gdata.youtube.com/feeds/api/videos/%s?alt=json&v=2" % match).json()
             try:
+                jdata = requests.get("https://gdata.youtube.com/feeds/api/videos/%s?alt=json&v=2" % match).json()
                 import datetime
                 import locale
                 jdata = jdata["entry"]
@@ -19,6 +19,8 @@ def youtube(self, msginfo):
                     self.conman.gen_send("\x02%s\x02 - Uploaded by \x02%s\x02 - Uploaded %s - Duration %s" % (jdata["title"]["$t"], jdata["author"][0]["name"]["$t"], jdata["published"]["$t"].split("T")[0], duration), msginfo)
                 else:
                     self.conman.gen_send("%s" % jdata["error"]["message"], msginfo)
+            except ValueError:
+            	print("Video not found")
 
 self.commandlist[".*(youtube\.com|youtu\.be)/(watch\?)?([^\#\?]+).*"] = {
         "type": MAPTYPE_REGEX,
