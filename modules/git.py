@@ -49,6 +49,7 @@ def git(self, msginfo):
 
         # if github link to repo
         elif len(match) == 2:
+            match[1] = match[1].replace(".git", "")
             req = requests.get("https://api.github.com/repos/%s/%s" % tuple(match)).json()
             tosend = ""
             try:
