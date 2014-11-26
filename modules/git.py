@@ -51,7 +51,8 @@ def git(self, msginfo):
             if not "message" in req.keys():
                 self.conman.gen_send("\x02%s\x02 - %s repositories - %s contributions - Favourite language: %s (%s contributions)" % (self.funcs["git_get_name"](self, req, True), len(req["repositories"]), req["usage"]["total"], req["usage"]["languages"][0]["language"], req["usage"]["languages"][0]["count"]), msginfo)
             else:
-                req = requests.get("https://api.github.com/users/%s" % match[0]).json()
+                headers = {'User-Agent': 'JiyuuBot', 'Authorization':'%s' % self.configman.get("oAuth", "GITHUB","")}
+                req = requests.get("https://api.github.com/users/%s" % match[0], headers).json()
                 if not "message" in req.keys():
                     self.conman.gen_send(self.funcs["git_get_name"](self, req), msginfo)
                 else:
