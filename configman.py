@@ -23,6 +23,7 @@ class ConfigMan:
 
 
     def get(self, modname, valname, default="", writeDefault=True, allowTemp=True):
+        self.load()
         if allowTemp and modname in self.tvalues and valname in self.tvalues[modname]:
             return self.tvalues[modname][valname]
         elif modname in self.values and valname in self.values[modname]:
