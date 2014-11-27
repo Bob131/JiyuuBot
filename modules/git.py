@@ -49,8 +49,8 @@ def git(self, msginfo):
         if match[-1] == "":
             del match[-1]
         headers = {'User-Agent': 'JiyuuBot'}
-        if not self.confman.get("oAuth", "GITHUB", "") == "":
-            auth = (self.confman.get("oAuth", "GITHUB", ""), "x-oauth-basic")
+        if not self.confman.get("git", "OAUTH") == "":
+            auth = (self.confman.get("git", "OAUTH", ""), "x-oauth-basic")
         else:
             auth = None
         # if github link to user profile
