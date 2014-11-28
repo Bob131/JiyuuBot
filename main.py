@@ -65,8 +65,9 @@ while 1:
                     "user": line[line.index("!")+1:line.index("@")].replace("~", ""),
                     "hostname": line[line.index("@")+1:line.index(" ")],
                     "timestamp": time.time()}
+            # strip out non-printable chars. See http://www.unicode.org/reports/tr44/tr44-6.html#Code_Point_Labels
             for char in line[line.index(msginfo["chan"] + " :")+len(msginfo["chan"])+2:]:
-                if not unicodedata.category(char) == "Cc":
+                if not unicodedata.category(char).startswith("C"):
                     msginfo["msg"] += char
             msginfo["msg"] = msginfo["msg"].strip()
 
