@@ -65,6 +65,7 @@ while 1:
                     "hostname": line[line.index("@")+1:line.index(" ")],
                     "timestamp": time.time()}
             msginfo["msg"] = line[line.index(msginfo["chan"] + " :")+len(msginfo["chan"])+2:]
+            msginfo["msg"] = msginfo["msg"].strip()
 
             # if this is an IM, set chan to the offending nick so the response can be properly directed
             if msginfo["chan"] == confman.get("IRC", "NICK"):
