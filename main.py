@@ -5,6 +5,7 @@ import sys
 import time
 import re
 import traceback
+import unicodedata
 
 import connect
 import load
@@ -64,7 +65,9 @@ while 1:
                     "user": line[line.index("!")+1:line.index("@")].replace("~", ""),
                     "hostname": line[line.index("@")+1:line.index(" ")],
                     "timestamp": time.time()}
-            msginfo["msg"] = line[line.index(msginfo["chan"] + " :")+len(msginfo["chan"])+2:]
+            for char in line[line.index(msginfo["chan"] + " :")+len(msginfo["chan"])+2:]:
+                if not unicodedata.category(char) == "Cc":
+                    msginfo["msg"] += char
             msginfo["msg"] = msginfo["msg"].strip()
 
             # if this is an IM, set chan to the offending nick so the response can be properly directed
