@@ -25,10 +25,9 @@ class PluginMan:
         try:
             self.commandlist[command]["function"](self, msginfo)
         except Exception as e:
-            if boolMPD:
-                if type(e) == mpd.ConnectionError:
-                    self.conman.reconnect_mpd()
-                    self.trywrapper(command, msginfo)
+            if type(e) == mpd.ConnectionError and boolMPD:
+                self.conman.reconnect_mpd()
+                self.trywrapper(command, msginfo)
             else:
                 traceback.print_exc()
                 self.ltb = {
