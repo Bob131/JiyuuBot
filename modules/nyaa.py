@@ -12,7 +12,7 @@ def nyaa(self, msginfo):
             # seeders/leachers
             up = soup.find(class_="viewsn").contents[0]
             down = soup.find(class_="viewln").contents[0]
-            tosend = "\x02{}\x02 - Size: {} - Peers: {} - Download: {}".format(name, size, "\x033↑{}\x03/\x034↓{}\x03".format(up, down), "http://{}nyaa.se/?page=download&tid={}".format(lewd, url))
+            tosend = "\x02{}\x02 - Size: {} - Peers: {}".format(name, size, "\x033↑{}\x03/\x034↓{}\x03".format(up, down))
             self.conman.gen_send(tosend, msginfo)
         elif request.status_code == 200:
             self.conman.gen_send("Error: Torrent ID \x02{}\x02 not found".format(url), msginfo)
