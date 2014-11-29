@@ -12,7 +12,7 @@ def youtube(self, msginfo):
                 import locale
                 jdata = jdata["entry"]
                 duration = str(datetime.timedelta(seconds=int(jdata["media$group"]["yt$duration"]["seconds"])))
-                self.conman.gen_send("\x02%s\x02 - Uploaded by \x02%s\x02 - Uploaded %s - %s views - Duration %s - Rating \x033👍%s\x03/\x034👎%s\x03" % (jdata["title"]["$t"], jdata["author"][0]["name"]["$t"], jdata["published"]["$t"].split("T")[0], locale.format("%d", int(jdata["yt$statistics"]["viewCount"]), grouping=True), duration, jdata["yt$rating"]["numLikes"], jdata["yt$rating"]["numDislikes"]), msginfo)
+                self.conman.gen_send("\x02%s\x02 - Uploaded by \x02%s\x02 - %s views - Duration %s - Rating \x033✔%s\x03/\x034✗%s\x03" % (jdata["title"]["$t"], jdata["author"][0]["name"]["$t"], locale.format("%d", int(jdata["yt$statistics"]["viewCount"]), grouping=True), duration, jdata["yt$rating"]["numLikes"], jdata["yt$rating"]["numDislikes"]), msginfo)
             except KeyError as e:
                 # if stats unavailable
                 if getattr(e, 'args')[0] == "yt$statistics":
