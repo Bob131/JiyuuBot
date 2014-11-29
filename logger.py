@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import sys
+import platform
 
 class stdoutLog(object):
     def __init__(self, logToFile):
@@ -16,6 +17,9 @@ class stdoutLog(object):
         self.stdout = sys.stdout
 
     def write(self, out):
+        if platform.system() == 'Windows':
+            out = out.encode('cp437', errors='backslashreplace')
+            out = out.decode()
         self.stdout.write(out)
         if self.log:
             self.log.write(out)
