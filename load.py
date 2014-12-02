@@ -105,6 +105,7 @@ class PluginMan:
             else:
                 blockcount += 1
                 self.pluginlist[plugin].add("blocked")
+        self.regex_cache = list(pattern for pattern in self.commandlist.keys() if self.commandlist[pattern]["type"] == MAPTYPE_REGEX)
         self.conman.gen_send("Successfully loaded %s modules%s%s" % (plugincount, (" | %s modules failed" % failcount if failcount > 0 else ""), (" | %s modules blocked" % blockcount if blockcount > 0 else "")), msginfo)
 
 
