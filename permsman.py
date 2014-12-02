@@ -1,8 +1,9 @@
 from configman import *
 
 class PermsMan:
-    def __init__(self):
+    def __init__(self, glob_confman):
         self.confman = ConfigMan("perms")
+        self.glob_confman = glob_confman
 
     def set_cmd_perms(self, cmd, value):
         value = int(value)
@@ -38,7 +39,7 @@ class PermsMan:
         return self.confman.get("msg", host, False, False)
 
     def get_cmd_perms(self, command):
-        return self.confman.get("command", command, 100, False)
+        return self.confman.get("command", command, self.glob_confman.get("PERMS", "CMD_DEFAULT", 100), False)
 
     def get_host_perms(self, host):
-        return self.confman.get("host", host, 100, False)
+        return self.confman.get("host", host, self.glob_confman.get("PERMS", "HOST_DEFAULT", 100), False)

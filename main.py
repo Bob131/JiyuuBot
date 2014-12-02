@@ -22,7 +22,7 @@ sys.stdout = logger.stdoutLog(confman.get("MISC", "LOG", True))
 
 #initialize plugin manager and load plugins
 conman = connect.ConnectionMan(confman)
-permsman = permsman.PermsMan()
+permsman = permsman.PermsMan(confman)
 plugman = load.PluginMan(conman, confman, permsman)
 #TODO: Reimplement
 #servman = load.ServiceMan(conman, plugman, thread_types)
