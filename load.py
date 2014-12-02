@@ -17,6 +17,7 @@ from configman import *
 MAPTYPE_COMMAND = 0
 MAPTYPE_ALIAS = 1
 MAPTYPE_REGEX = 2
+MAPTYPE_OTHER = MAPTYPE_REGEX
 
 
 #define Plugin Manager class
