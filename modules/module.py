@@ -11,7 +11,7 @@ def mod_parse(self, msginfo):
         self.glob_confman.setv("modules", "BLACKLIST", list(block))
         self.conman.gen_send("Blocked %s modules" % len(arg[1].split(",")), msginfo)
     elif arg[0] == "unblock":
-        block = set(self.glob_confman.get("modules", "BLOCKLIST", []))
+        block = set(self.glob_confman.get("modules", "BLACKLIST", []))
         for mod in arg[1].split(","):
             block.remove(mod.strip())
         self.glob_confman.setv("modules", "BLACKLIST", list(block))

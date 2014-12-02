@@ -89,7 +89,7 @@ class PluginMan:
         failcount = 0
         blockcount = 0
         for plugin in self.pluginlist.keys():
-            if not plugin.replace(self.modulespath, "").replace(".py", "") in self.glob_confman.get("modules", "MODULE_BLACKLIST", []):
+            if not plugin.replace(self.modulespath, "").replace(".py", "") in self.glob_confman.get("modules", "BLACKLIST", []):
                 try:
                     exec(open(plugin, "r").read())
                     plugincount += 1
