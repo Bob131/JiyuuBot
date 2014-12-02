@@ -71,6 +71,10 @@ while 1:
                     msginfo["msg"] += char
             msginfo["msg"] = msginfo["msg"].strip()
 
+            if msginfo["msg"].lower().startswith(confman.get("IRC", "NICK").lower()):
+                msginfo["msg"] = msginfo["msg"][len(confman.get("IRC", "NICK")):]
+                msginfo["msg"] = re.sub("[,:\s]*", "", msginfo["msg"])
+
             # if this is an IM, set chan to the offending nick so the response can be properly directed
             if msginfo["chan"] == confman.get("IRC", "NICK"):
                 msginfo["chan"] = msginfo["nick"]
