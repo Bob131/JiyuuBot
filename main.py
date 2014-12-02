@@ -96,18 +96,6 @@ while 1:
                     msginfo["pattern"] = match
                     plugman.execute_command(msginfo)
 
-        # if we've been invited to a channel
-        elif "INVITE" in line:
-            nick = line[:line.index("!")]
-            chan = line[line.index(" :")+2:]
-            conman.join_irc(chan, nick)
-
-        # if we've been kicked from a channel
-        elif "KICK" in line and " %s " % confman.get("IRC", "NICK") in line:
-            chan = line[line.index("KICK ") + 5 : line.index(confman.get("IRC", "NICK"))-1]
-            nick = line[:line.index("!")]
-            conman.leave_irc(chan, nick, True)
-
         # irc connection lost; time to reconnect
         elif line == "":
             conman.reconnect_irc()

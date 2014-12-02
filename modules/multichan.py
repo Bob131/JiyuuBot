@@ -27,6 +27,21 @@ def join(self, msginfo):
                 self.conman.gen_send("Already serving {}".format(chan), msginfo)
 
 
+def invite(self, msginfo):
+    hostname = msginfo["strg"][msginfo["strg"].index("@")+1:msginfo["strg"].index(" ")]
+    if self.permsman.get_msg_perms(hostname):
+        nick = msginfo["strg"][:msginfo["strg"].index("!")]
+        chan = msginfo["strg"][msginfo["strg"].index(" :")+2:]
+        self.conman.join_irc(chan, nick)
+
+
+def kick(self, msginfo):
+    NICK = self.confman.get("IRC", "NICK")
+    chan = re.findall("(#[^\s,]+)", msginfo["strg"])[0]
+    nick = msginfo["strg"][:msginfo["strg"].index("!")]
+    self.conman.leave_irc(chan, nick, True)
+
+
 
 self.commandlist["chans"] = {
         "type": MAPTYPE_COMMAND,
@@ -40,4 +55,12 @@ self.commandlist["leave"] = {
 self.commandlist["join"] = {
         "type": MAPTYPE_COMMAND,
         "function": join
+        }
+self.commandlist["!INVITE"] = {
+        "type": MAPTYPE_OTHER,
+        "function": invite
+        }
+self.commandlist["!KICK"] = {
+        "type": MAPTYPE_OTHER,
+        "function": kick
         }
