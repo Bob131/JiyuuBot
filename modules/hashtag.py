@@ -3,7 +3,6 @@ def hashtag(self, msginfo):
     for tag in message:
         reg_tags = self.confman.get("hash", "REG_TAGS", {})
         tag = tag.lower()
-        print(tag)
         if tag in reg_tags.keys():
             self.conman.gen_send(reg_tags[tag], msginfo)
 
