@@ -119,7 +119,7 @@ while 1:
             if "!" + command in plugman.commandlist.keys():
                 # offload all parsing to module
                 msginfo = {"strg": line, "type": "regex", "pattern": "!" + command} # reg as regex for simplicity
-                msginfo["chan"] = re.findall("(#\w+)", line)[0] # so error handlers know where to spit msgs
+                msginfo["chan"] = re.findall("(#[^\s,]+)", line)[0] # so error handlers know where to spit msgs
                 plugman.execute_command(msginfo)
     except Exception as e:
         traceback.print_exc()
