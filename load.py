@@ -82,6 +82,7 @@ class PluginMan:
             }}
         self.funcs = {}
         self.pluginlist = {}
+        self.regex_cache = None
         for plugpath in glob.glob(self.modulespath + "*.py"):
             self.pluginlist[plugpath] = set()
         plugincount = 0

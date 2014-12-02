@@ -87,15 +87,15 @@ while 1:
                     plugman.execute_command(msginfo)
                 else:
                     conman.gen_send("You do not have high enough permissions to execute that command", msginfo)
-            else:
-                # check whether message matches any mapped regex strings
-                patterns = (pattern for pattern in plugman.commandlist.keys() if plugman.commandlist[pattern]["type"] == load.MAPTYPE_REGEX)
-                matches = list(pattern for pattern in patterns if not re.match(pattern, msginfo["msg"]) == None)
-                if len(matches) > 0:
-                    msginfo["type"] = "regex"
-                    for match in matches:
-                        msginfo["pattern"] = match
-                        plugman.execute_command(msginfo)
+            # check whether message matches any mapped regex strings
+            if plugman.regex_cache == None:
+                plugman.regex_cache = (pattern for pattern in plugman.commandlist.keys() if plugman.commandlist[pattern]["type"] == load.MAPTYPE_REGEX)
+            matches = list(pattern for pattern in plugman.regex_cache if not re.match(pattern, msginfo["msg"]) == None)
+            if len(matches) > 0:
+                msginfo["type"] = "regex"
+                for match in matches:
+                    msginfo["pattern"] = match
+                    plugman.execute_command(msginfo)
 
         # if we've been invited to a channel
         elif "INVITE" in line:
