@@ -87,6 +87,7 @@ while 1:
                     plugman.execute_command(msginfo)
                 else:
                     conman.gen_send("You do not have high enough permissions to execute that command", msginfo)
+
             # check whether message matches any mapped regex strings
             if plugman.regex_cache == None:
                 plugman.regex_cache = (pattern for pattern in plugman.commandlist.keys() if plugman.commandlist[pattern]["type"] == load.MAPTYPE_REGEX)
