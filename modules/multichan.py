@@ -36,10 +36,12 @@ def invite(self, msginfo):
 
 
 def kick(self, msginfo):
-    NICK = self.confman.get("IRC", "NICK")
-    chan = re.findall("(#[^\s,]+)", msginfo["strg"])[0]
-    nick = msginfo["strg"][:msginfo["strg"].index("!")]
-    self.conman.leave_irc(chan, nick, True)
+    beingkicked = msginfo["strg"][msginfo["strg"].rindex(":")+1:]
+    NICK = self.glob_confman.get("IRC", "NICK")
+    if beingkicked == NICK:
+        chan = re.findall("(#[^\s,]+)", msginfo["strg"])[0]
+        nick = msginfo["strg"][:msginfo["strg"].index("!")]
+        self.conman.leave_irc(chan, nick, True)
 
 
 
