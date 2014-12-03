@@ -34,7 +34,7 @@ self.commandlist[".*\#\w+.*"] = {
 self.commandlist["addhash"] = {
         "type": MAPTYPE_COMMAND,
         "function": add_hash,
-        "help": "Adds hastag"
+        "help": "Adds hastag. Syntax: .addhash #<hashtag> <string>"
         }
 self.permsman.suggest_cmd_perms("delhash", 300)
 self.commandlist["delhash"] = {

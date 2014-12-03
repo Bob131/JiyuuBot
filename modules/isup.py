@@ -15,5 +15,5 @@ def isup(self, msginfo):
 self.commandlist["isup"] = {
         "type": MAPTYPE_COMMAND,
         "function": isup,
-        "help": "Check whether website is up"
+        "help": "Check whether domain is up. Syntax: .isup <domain>"
         }

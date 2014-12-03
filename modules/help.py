@@ -25,5 +25,5 @@ def display_help(self, msginfo):
 self.commandlist["help"] = {
         "type": MAPTYPE_COMMAND,
         "function": display_help,
-        "help": "displays help"
+        "help": "displays help. Syntax: .help [command]"
         }

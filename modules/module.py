@@ -21,5 +21,5 @@ self.permsman.suggest_cmd_perms("module", 999)
 self.commandlist["module"] = {
         "type": MAPTYPE_COMMAND,
         "function": mod_parse,
-        "help": "Controls what modules should be loaded. Arguments are list, block and unblock. (un)block accepts comma-delimited arguments"
+        "help": "Controls what modules should be loaded. Arguments are list, block and unblock. (un)block accepts comma-delimited arguments. Syntax: .module (block|unblock) <module> OR .module list)"
         }
