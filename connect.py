@@ -33,6 +33,7 @@ class ConnectionMan:
                 raise e
 
         self.queue = queue.Queue()
+        self.lock = threading.Lock()
         self.connect_irc()
 
 
@@ -116,7 +117,6 @@ class ConnectionMan:
             self.s = socket.socket()
 
         self.s.connect((self.confman.get("IRC", "HOST"), self.confman.get("IRC", "PORT", 6669)))
-        self.lock = threading.Lock()
         self.joined_chans = []
 
         thread = threading.Thread(target = self.queue_tick)
