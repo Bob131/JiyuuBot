@@ -23,23 +23,22 @@ MAPTYPE_OTHER = MAPTYPE_REGEX
 #define Plugin Manager class
 class PluginMan:
     def trywrapper(self, command, msginfo):
-        try:
-            self.lock.acquire()
-            self.commandlist[command]["function"](self, msginfo)
-            self.lock.release()
-        except Exception as e:
-            if type(e) == mpd.ConnectionError and boolMPD:
-                self.conman.reconnect_mpd()
-                self.trywrapper(command, msginfo)
-            else:
-                traceback.print_exc()
-                self.ltb = {
-                        "exception": traceback.format_exc(),
-                        "msginfo": msginfo
-                        }
-                self.conman.gen_send("Error executing %s: %s" % (command, e), msginfo)
-                if not msginfo["chan"] == self.glob_confman.get("IRC", "HOME_CHANNEL"):
-                    self.conman.privmsg("Exception occured. Check traceback")
+        with self.lock:
+            try:
+                self.commandlist[command]["function"](self, msginfo)
+            except Exception as e:
+                if type(e) == mpd.ConnectionError and boolMPD:
+                    self.conman.reconnect_mpd()
+                    self.trywrapper(command, msginfo)
+                else:
+                    traceback.print_exc()
+                    self.ltb = {
+                            "exception": traceback.format_exc(),
+                            "msginfo": msginfo
+                            }
+                    self.conman.gen_send("Error executing %s: %s" % (command, e), msginfo)
+                    if not msginfo["chan"] == self.glob_confman.get("IRC", "HOME_CHANNEL"):
+                        self.conman.privmsg("Exception occured. Check traceback")
 
 
     def execute_command(self, msginfo):
@@ -77,7 +76,6 @@ class PluginMan:
 
     #Define function to load modules
     def load(self, _, msginfo):
-        self.lock.acquire()
         #not in __init__ so that .reload removes entries for old modules
         self.commandlist = {"reload": {
             "type": MAPTYPE_COMMAND,
@@ -109,7 +107,6 @@ class PluginMan:
                 self.pluginlist[plugin].add("blocked")
         self.regex_cache = list(pattern for pattern in self.commandlist.keys() if self.commandlist[pattern]["type"] == MAPTYPE_REGEX)
         self.conman.gen_send("Successfully loaded %s modules%s%s" % (plugincount, (" | %s modules failed" % failcount if failcount > 0 else ""), (" | %s modules blocked" % blockcount if blockcount > 0 else "")), msginfo)
-        self.lock.release()
 
 
     # PluginMan constructor
@@ -121,4 +118,5 @@ class PluginMan:
         self.permsman = permsman_instance
         self.ltb = None
         self.lock = threading.Lock()
-        self.load(None, {"chan": self.glob_confman.get("IRC", "HOME_CHANNEL")})
+        with self.lock:
+            self.load(None, {"chan": self.glob_confman.get("IRC", "HOME_CHANNEL")})
