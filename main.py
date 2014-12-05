@@ -6,6 +6,7 @@ import time
 import re
 import traceback
 import unicodedata
+import signal
 
 import connect
 import load
@@ -26,6 +27,14 @@ permsman = permsman.PermsMan(confman)
 plugman = load.PluginMan(conman, confman, permsman)
 #TODO: Reimplement
 #servman = load.ServiceMan(conman, plugman, thread_types)
+
+
+def SIGHUPhandle(_, __):
+    conman.privmsg("Received SIGHUP! Reloading modules")
+    plugman.execute_command({"msg": ".reload", "type": "PRIVMSG", "chan": confman.get("IRC", "HOME_CHANNEL")})
+
+signal.signal(signal.SIGHUP, SIGHUPhandle)
+
 
 #Main active loop
 while 1:
@@ -115,4 +124,5 @@ while 1:
                 msginfo["chan"] = confman.get("IRC", "HOME_CHANNEL") # so error handlers know where to spit msgs
                 plugman.execute_command(msginfo)
     except Exception as e:
-        traceback.print_exc()
+        if not type(e) == InterruptedError:
+            traceback.print_exc()
