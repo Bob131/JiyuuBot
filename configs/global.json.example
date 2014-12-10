@@ -4,7 +4,8 @@
         "PORT": 9999,
         "SSL": true,
         "NICK": "JiyuuBot",
-        "HOME_CHANNEL": "#Jiyuu"
+        "HOME_CHANNEL": "#Jiyuu",
+        "BUFFER_SIZE": 4096
     },
     "MPD": {
         "ENABLED": true,

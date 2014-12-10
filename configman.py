@@ -14,6 +14,7 @@ class ConfigMan:
                 _ = self.values["IRC"]["HOST"]
                 _ = self.values["IRC"]["HOME_CHANNEL"]
                 _ = self.values["IRC"]["NICK"]
+                _ = self.values["IRC"]["BUFFER_SIZE"]
 
                 _ = self.values["MPD"]["ENABLED"]
                 if _ == True:

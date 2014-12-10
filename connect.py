@@ -5,11 +5,46 @@ import queue
 import threading
 import time
 import sys
+import select
 #Check for mpd installation
 try:
     import mpd
 except ImportError:
     print("Unable to load mpd")
+
+
+class irc_sock(socket.socket):
+    def __init__(self, confman):
+        self.confman = confman
+        self._split_queue = []
+        super().__init__()
+
+    def recv(self, timeout=250):
+        if len(self._split_queue) == 0:
+            ready, _, _ = select.select([self], [], [], float(timeout))
+            if ready:
+                data = super().recv(self.confman.get("IRC", "BUFFER_SIZE"))
+                try:
+                    data = data.decode("UTF-8").strip("\r\n")
+                except UnicodeDecodeError:
+                    self._split_queue.append("")
+                if data.startswith("ERROR"):
+                    if "throttled" in line:
+                        print("*** Throttled. Waiting 60 seconds and trying again ***")
+                        time.sleep(60)
+                        os.execv(__file__.replace("connect.py", "main.py"), sys.argv)
+                    elif "Excess Flood" in line:
+                        print("*** Server flood. Adjusting message tick and trying again ***")
+                        self.confman.setv("IRC", "OUTGOING_DELAY", self.confman.get("IRC", "OUTGOING_DELAY")+100)
+                        os.execv(__file__.replace("connect.py", "main.py"), sys.argv)
+                else:
+                    self._split_queue.extend(data.split("\r\n"))
+        try:
+            toreturn = self._split_queue.pop(0)
+            print("%s <<< %s" % (time.strftime("%Y-%m-%d %H:%M", time.localtime()), toreturn))
+        except IndexError:
+            toreturn = None
+        return toreturn
 
 
 #Define connection class
@@ -57,16 +92,10 @@ class ConnectionMan:
         self.queue_raw("JOIN " + chan)
 
         while 1:
-            try:
-                line = self.s.recv(2048).decode("UTF-8")
-            except UnicodeDecodeError:
-                continue
-            line = line.strip("\r\n")
+            line = self.s.recv(10)
             if "End of /NAMES list." in line:
                 print("\n*** %s joined! ***\n" % chan)
                 break
-            else:
-                print(line)
                 
         time.sleep(1) # allows chan join to complete before messages are sent
 
@@ -106,9 +135,9 @@ class ConnectionMan:
     def connect_irc(self):
 	#If SSL is enabled use ssl
         if self.confman.get("IRC", "SSL", False):
-            self.s = ssl.wrap_socket(socket.socket())
+            self.s = ssl.wrap_socket(irc_sock(self.confman))
         else:
-            self.s = socket.socket()
+            self.s = irc_sock(self.confman)
 
         self.s.connect((self.confman.get("IRC", "HOST"), self.confman.get("IRC", "PORT", 6669)))
         self.joined_chans = []
@@ -121,22 +150,19 @@ class ConnectionMan:
         self.queue_raw("USER " + self.confman.get("IRC", "NICK") + " 0 * :" + self.confman.get("IRC", "NICK"))
         self.queue_raw("NICK " + self.confman.get("IRC", "NICK"))
 
-        print("*** Connecting... ***\n")
+        print("*** Connecting... ***")
 
+        # empty message buffer
         while 1:
-            try:
-                line = self.s.recv(2048).decode("UTF-8")
-            except UnicodeDecodeError:
-                continue
-            line = line.strip("\r\n")
-            if "Nickname is already in use" in line:
-                self.confman.setv("IRC", "NICK", self.confman.get("IRC", "NICK")+"_", True)
-                self.queue_raw("NICK " + self.confman.get("IRC", "NICK"))
-            elif "PING" in line:
-                self.queue_raw("PONG :%s" % line[6:])
-            elif "End of /MOTD command." in line:
+            line = self.s.recv(10)
+            if line == None:
                 break
-            print(line)
+            else:
+                if "Nickname is already in use" in line:
+                    self.confman.setv("IRC", "NICK", self.confman.get("IRC", "NICK")+"_", True)
+                    self.queue_raw("NICK " + self.confman.get("IRC", "NICK"))
+                elif "PING" in line:
+                    self.queue_raw("PONG :%s" % line[6:])
 
         self.join_irc(chan = self.confman.get("IRC", "HOME_CHANNEL"), record = False)
         for channel in self.confman.get("IRC", "CHANS", []):

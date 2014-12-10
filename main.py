@@ -40,16 +40,10 @@ signal.signal(signal.SIGHUP, SIGHUPhandle)
 while 1:
     try:
         # receive and format line for parsing
-        try:
-            line = conman.s.recv(2048).decode("UTF-8")
-        except UnicodeDecodeError:
-            continue
-        line = line.replace("\r\n", "")
+        line = conman.s.recv()
+
         if line.startswith(":"):
             line = line[1:]
-
-        # log
-        print("%s <<< %s" % (time.strftime("%Y-%m-%d %H:%M", time.localtime()), line))
 
         # respond to pings
         if "PING" in line and not "PRIVMSG" in line:
@@ -113,6 +107,11 @@ while 1:
 
         # irc connection lost; time to reconnect
         elif line == "":
+            conman.reconnect_irc()
+
+        elif line == None:
+            print("*** Ping timeout. Waiting 60 seconds and trying again ***")
+            time.sleep(60)
             conman.reconnect_irc()
 
         # allow modules to hook for other commands
