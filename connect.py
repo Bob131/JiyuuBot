@@ -66,6 +66,11 @@ class ConnectionMan:
             print("Song list fetched. Connecting to IRC...")
 
         self.queue = queue.Queue()
+
+        thread = threading.Thread(target = self.queue_tick)
+        thread.daemon = True
+        thread.start()
+
         self.lock = threading.Lock()
         self.connect_irc()
 
@@ -78,8 +83,11 @@ class ConnectionMan:
     # You may bypass the queue, if needed.
     def send_raw(self, text):
         self.lock.acquire()
-        print("%s >>> %s" % (time.strftime("%Y-%m-%d %H:%M", time.localtime()), text.strip()))
-        self.s.send(bytes(text, "UTF-8"))
+        try:
+            self.s.send(bytes(text, "UTF-8"))
+            print("%s >>> %s" % (time.strftime("%Y-%m-%d %H:%M", time.localtime()), text.strip()))
+        except:
+            pass
         self.lock.release()
 
 
@@ -146,15 +154,11 @@ class ConnectionMan:
         self.s.connect((self.confman.get("IRC", "HOST"), self.confman.get("IRC", "PORT", 6669)))
         self.joined_chans = []
 
-        thread = threading.Thread(target = self.queue_tick)
-        thread.daemon = True
-        thread.start()
+        print("*** Connecting... ***")
 
         # As of RFC 2812, USER message params are: <user> <mode> <unused> <realname>
         self.queue_raw("USER " + self.confman.get("IRC", "NICK") + " 0 * :" + self.confman.get("IRC", "NICK"))
         self.queue_raw("NICK " + self.confman.get("IRC", "NICK"))
-
-        print("*** Connecting... ***")
 
         # empty message buffer
         while 1:
