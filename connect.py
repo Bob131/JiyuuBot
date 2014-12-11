@@ -30,11 +30,11 @@ class irc_sock(socket.socket):
                     self._split_queue.append("")
                 else:
                     if data.startswith("ERROR"):
-                        if "throttled" in line:
+                        if "throttled" in data:
                             print("*** Throttled. Waiting 60 seconds and trying again ***")
                             time.sleep(60)
                             os.execv(__file__.replace("connect.py", "main.py"), sys.argv)
-                        elif "Excess Flood" in line:
+                        elif "Excess Flood" in data:
                             print("*** Server flood. Adjusting message tick and trying again ***")
                             self.confman.setv("IRC", "OUTGOING_DELAY", self.confman.get("IRC", "OUTGOING_DELAY")+100)
                             os.execv(__file__.replace("connect.py", "main.py"), sys.argv)
@@ -43,7 +43,9 @@ class irc_sock(socket.socket):
 
         try:
             toreturn = self._split_queue.pop(0)
-            print("%s <<< %s" % (time.strftime("%Y-%m-%d %H:%M", time.localtime()), toreturn))
+            if type(toreturn) == bytes:
+                toreturn = toreturn.decode("UTF-8") # make sure its the right type
+            print("{} <<< {}".format(time.strftime("%Y-%m-%d %H:%M"), toreturn))
         except IndexError:
             toreturn = None
         return toreturn
@@ -161,7 +163,7 @@ class ConnectionMan:
                 break
             else:
                 if "Nickname is already in use" in line:
-                    self.confman.setv("IRC", "NICK", self.confman.get("IRC", "NICK")+"_", True)
+                    self.confman.setv("IRC", "NICK", self.confman.get("IRC", "NICK")+"_", temp=True)
                     self.queue_raw("NICK " + self.confman.get("IRC", "NICK"))
                 elif "PING" in line:
                     self.queue_raw("PONG :%s" % line[6:])
