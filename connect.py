@@ -28,17 +28,19 @@ class irc_sock(socket.socket):
                     data = data.decode("UTF-8").strip("\r\n")
                 except UnicodeDecodeError:
                     self._split_queue.append("")
-                if data.startswith("ERROR"):
-                    if "throttled" in line:
-                        print("*** Throttled. Waiting 60 seconds and trying again ***")
-                        time.sleep(60)
-                        os.execv(__file__.replace("connect.py", "main.py"), sys.argv)
-                    elif "Excess Flood" in line:
-                        print("*** Server flood. Adjusting message tick and trying again ***")
-                        self.confman.setv("IRC", "OUTGOING_DELAY", self.confman.get("IRC", "OUTGOING_DELAY")+100)
-                        os.execv(__file__.replace("connect.py", "main.py"), sys.argv)
                 else:
-                    self._split_queue.extend(data.split("\r\n"))
+                    if data.startswith("ERROR"):
+                        if "throttled" in line:
+                            print("*** Throttled. Waiting 60 seconds and trying again ***")
+                            time.sleep(60)
+                            os.execv(__file__.replace("connect.py", "main.py"), sys.argv)
+                        elif "Excess Flood" in line:
+                            print("*** Server flood. Adjusting message tick and trying again ***")
+                            self.confman.setv("IRC", "OUTGOING_DELAY", self.confman.get("IRC", "OUTGOING_DELAY")+100)
+                            os.execv(__file__.replace("connect.py", "main.py"), sys.argv)
+                    else:
+                        self._split_queue.extend(data.split("\r\n"))
+
         try:
             toreturn = self._split_queue.pop(0)
             print("%s <<< %s" % (time.strftime("%Y-%m-%d %H:%M", time.localtime()), toreturn))
