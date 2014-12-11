@@ -23,7 +23,7 @@ class irc_sock(socket.socket):
         if len(self._split_queue) == 0:
             ready, _, _ = select.select([self], [], [], float(timeout))
             if ready:
-                data = super().recv(self.confman.get("IRC", "BUFFER_SIZE"))
+                data = super(type(self), self).recv(self.confman.get("IRC", "BUFFER_SIZE"))
                 try:
                     data = data.decode("UTF-8").strip("\r\n")
                 except UnicodeDecodeError:
@@ -49,6 +49,14 @@ class irc_sock(socket.socket):
         except IndexError:
             toreturn = None
         return toreturn
+
+
+class irc_sock_ssl(ssl.SSLSocket):
+    def __init__(self, confman):
+        self.confman = confman
+        self._split_queue = []
+        super().__init__(socket.socket())
+        self.recv = irc_sock.recv.__get__(self)
 
 
 #Define connection class
@@ -147,7 +155,7 @@ class ConnectionMan:
     def connect_irc(self):
 	#If SSL is enabled use ssl
         if self.confman.get("IRC", "SSL", False):
-            self.s = ssl.wrap_socket(irc_sock(self.confman))
+            self.s = irc_sock_ssl(self.confman)
         else:
             self.s = irc_sock(self.confman)
 
