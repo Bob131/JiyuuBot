@@ -223,3 +223,9 @@ class ConnectionMan:
             raise Exception("connect.py:privmsg() no longer accepts multi-line messages")
         else:
             self.queue_raw("PRIVMSG " + channel + " :" + text)
+
+
+    def broadcast(self, text, prefix="NOTICE: "):
+        for chan in self.joined_chans:
+            self.privmsg("{}{}".format(prefix, text), chan)
+            time.sleep(self.confman.get("IRC", "BROADCAST_WAIT", 0))

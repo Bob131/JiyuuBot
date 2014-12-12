@@ -35,7 +35,7 @@ plugman = load.PluginMan(conman, confman, permsman)
 
 def bye(txt):
     conman.privmsg(txt)
-    plugman.execute_command({"msg": ".broadcast Going down for core libs update", "type": "PRIVMSG"})
+    conman.broadcast("Going down for core libs update")
 
 
 class inot_handler(watchdog.events.FileSystemEventHandler):
