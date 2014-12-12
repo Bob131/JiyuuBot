@@ -48,6 +48,8 @@ class inot_handler(watchdog.events.FileSystemEventHandler):
 
     def on_any_event(self, event):
         path = event.src_path
+        if "/modules" in path:
+            path = "/modules" # don't reload for every single module
         if not event.is_directory:
             if event.event_type == "modified" or event.event_type == "deleted" or event.event_type == "moved":
                 if not "/configs" in path and not "/." in path and not "~" in path and not "4913" in path and not "/logs" in path and not path in self.invoke:
@@ -55,6 +57,7 @@ class inot_handler(watchdog.events.FileSystemEventHandler):
                     self.invoke.append(path)
                     t.start()
                     if "/modules" in path:
+                        time.sleep(10) # hopefully module updates are done by now
                         conman.privmsg("Update to modules detected")
                         plugman.execute_command({"msg": ".reload", "type": "PRIVMSG", "chan": confman.get("IRC", "HOME_CHANNEL")})
                     else:
