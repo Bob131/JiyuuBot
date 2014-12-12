@@ -30,14 +30,16 @@ class irc_sock(socket.socket):
                     self._split_queue.append("")
                 else:
                     if data.startswith("ERROR"):
+                        print("*** Server error ***")
                         if "throttled" in data:
                             print("*** Throttled. Waiting 60 seconds and trying again ***")
                             time.sleep(60)
-                            os.execv(__file__.replace("connect.py", "main.py"), sys.argv)
                         elif "Excess Flood" in data:
                             print("*** Server flood. Adjusting message tick and trying again ***")
                             self.confman.setv("IRC", "OUTGOING_DELAY", self.confman.get("IRC", "OUTGOING_DELAY")+100)
-                            os.execv(__file__.replace("connect.py", "main.py"), sys.argv)
+                        elif "Ping timeout" in data:
+                            print("*** Ping timeout ***")
+                        os.execv(__file__.replace("connect.py", "main.py"), sys.argv)
                     else:
                         self._split_queue.extend(data.split("\r\n"))
 

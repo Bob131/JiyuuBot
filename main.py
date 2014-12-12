@@ -7,6 +7,11 @@ import re
 import traceback
 import unicodedata
 import signal
+import atexit
+import threading
+
+import watchdog.events
+import watchdog.observers
 
 import connect
 import load
@@ -28,12 +33,59 @@ plugman = load.PluginMan(conman, confman, permsman)
 #TODO: Reimplement
 #servman = load.ServiceMan(conman, plugman, thread_types)
 
+def bye(txt):
+    conman.privmsg(txt)
+    plugman.execute_command({"msg": ".broadcast Going down for core libs update", "type": "PRIVMSG"})
+
+
+class inot_handler(watchdog.events.FileSystemEventHandler):
+    def __init__(self):
+        self.invoke = []
+
+    def clear_invoke(self, path):
+        time.sleep(10)
+        self.invoke.remove(path)
+
+    def on_any_event(self, event):
+        path = event.src_path
+        if not event.is_directory:
+            if event.event_type == "modified" or event.event_type == "deleted" or event.event_type == "moved":
+                if not "/configs" in path and not "/." in path and not "~" in path and not "4913" in path and not "/logs" in path and not path in self.invoke:
+                    t = threading.Thread(target=self.clear_invoke, args=(path,))
+                    self.invoke.append(path)
+                    t.start()
+                    if "/modules" in path:
+                        conman.privmsg("Update to modules detected")
+                        plugman.execute_command({"msg": ".reload", "type": "PRIVMSG", "chan": confman.get("IRC", "HOME_CHANNEL")})
+                    else:
+                        print("Core update detected")
+                        bye("Update to core libs detected")
+                        time.sleep(10) # wait for remaining messages to be sent
+                        conman.s.close()
+                        os.execv(__file__, sys.argv)
+
+observer = watchdog.observers.Observer()
+observer.schedule(inot_handler(), "./", recursive=True)
+observer.start()
+
+def close_inot():
+    observer.stop()
+    observer.join()
+
+atexit.register(close_inot)
+
 
 def SIGHUPhandle(_, __):
     conman.privmsg("Received SIGHUP! Reloading modules")
     plugman.execute_command({"msg": ".reload", "type": "PRIVMSG", "chan": confman.get("IRC", "HOME_CHANNEL")})
 
+def SIGTERMhandle(_, __):
+    bye("Received SIGTERM! Going down")
+    time.sleep(10) # wait for remaining messages to be sent
+    sys.exit(0)
+
 signal.signal(signal.SIGHUP, SIGHUPhandle)
+signal.signal(signal.SIGTERM, SIGTERMhandle)
 
 
 #Main active loop
