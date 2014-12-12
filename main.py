@@ -26,6 +26,8 @@ confman = configman.ConfigMan("global")
 #init logger
 sys.stdout = logger.stdoutLog(confman.get("MISC", "LOG", True))
 
+lock = threading.Lock()
+
 #initialize plugin manager and load plugins
 conman = connect.ConnectionMan(confman)
 permsman = permsman.PermsMan(confman)
@@ -43,29 +45,33 @@ class inot_handler(watchdog.events.FileSystemEventHandler):
         self.invoke = []
 
     def clear_invoke(self, path):
-        time.sleep(10)
+        time.sleep(60)
         self.invoke.remove(path)
 
     def on_any_event(self, event):
+        lock.acquire()
         path = event.src_path
         if not event.is_directory:
             if event.event_type == "modified" or event.event_type == "deleted" or event.event_type == "moved":
                 if not "/configs" in path and not "/." in path and not "~" in path and not "4913" in path and not "/logs" in path and not path in self.invoke:
                     if "/modules" in path:
                         path = "/modules" # don't reload for every single module
+                        rel = not "/modules" in self.invoke
                     t = threading.Thread(target=self.clear_invoke, args=(path,))
                     self.invoke.append(path)
                     t.start()
-                    if "/modules" in path:
-                        time.sleep(10) # hopefully module updates are done by now
-                        conman.privmsg("Update to modules detected")
-                        plugman.execute_command({"msg": ".reload", "type": "PRIVMSG", "chan": confman.get("IRC", "HOME_CHANNEL")})
+                    if path == "/modules":
+                        if rel:
+                            time.sleep(10) # hopefully module updates are done by now
+                            conman.privmsg("Update to modules detected")
+                            plugman.execute_command({"msg": ".reload", "type": "PRIVMSG", "chan": confman.get("IRC", "HOME_CHANNEL")})
                     else:
                         print("Core update detected")
                         bye("Update to core libs detected")
                         time.sleep(10) # wait for remaining messages to be sent
                         conman.s.close()
                         os.execv(__file__, sys.argv)
+        lock.release()
 
 observer = watchdog.observers.Observer()
 observer.schedule(inot_handler(), "./", recursive=True)
