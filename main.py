@@ -48,11 +48,11 @@ class inot_handler(watchdog.events.FileSystemEventHandler):
 
     def on_any_event(self, event):
         path = event.src_path
-        if "/modules" in path:
-            path = "/modules" # don't reload for every single module
         if not event.is_directory:
             if event.event_type == "modified" or event.event_type == "deleted" or event.event_type == "moved":
                 if not "/configs" in path and not "/." in path and not "~" in path and not "4913" in path and not "/logs" in path and not path in self.invoke:
+                    if "/modules" in path:
+                        path = "/modules" # don't reload for every single module
                     t = threading.Thread(target=self.clear_invoke, args=(path,))
                     self.invoke.append(path)
                     t.start()

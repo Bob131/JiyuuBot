@@ -66,15 +66,6 @@ class ConnectionMan:
     def __init__(self, global_confman):
         self.confman = global_confman
 
-	#connect to mpd server and fetch song list
-        if "mpd" in sys.modules.keys() and self.confman.get("MPD", "ENABLED"):
-            self.mpc = mpd.MPDClient()
-            self.mpc.connect(self.confman.get("MPD", "HOST"), self.confman.get("MPD", "PORT"))
-            print("Connected to MPD! Fetching song list...")
-            # Module writers: DO NOT CHANGE THIS LIST
-            self.mpc.songlist = list(song["file"] for song in self.mpc.listall("/") if "file" in song.keys())
-            print("Song list fetched. Connecting to IRC...")
-
         self.queue = queue.Queue()
 
         thread = threading.Thread(target = self.queue_tick)
@@ -185,15 +176,6 @@ class ConnectionMan:
         self.join_irc(chan = self.confman.get("IRC", "HOME_CHANNEL"), record = False)
         for channel in self.confman.get("IRC", "CHANS", []):
             self.join_irc(chan = channel, record = False)
-
-
-    # reconnect to MPD
-    def reconnect_mpd(self):
-        try:
-            self.mpc.disconnect()
-        except mpd.ConnectionError:
-            pass
-        self.mpc.connect(self.confman.get("MPD", "HOST"), self.confman.get("MPD", "PORT"))
 
 
     # reconnect to IRC

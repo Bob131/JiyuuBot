@@ -1,15 +1,10 @@
 import os
+import sys
 import glob
 import threading
 import json
 import re
 import traceback
-try:
-    import mpd
-    boolMPD = True
-except ImportError:
-    boolMPD = False
-    print("Unable to load mpd")
 
 from configman import *
 
@@ -27,18 +22,14 @@ class PluginMan:
             try:
                 self.commandlist[command]["function"](self, msginfo)
             except Exception as e:
-                if type(e) == mpd.ConnectionError and boolMPD:
-                    self.conman.reconnect_mpd()
-                    self.trywrapper(command, msginfo)
-                else:
-                    traceback.print_exc()
-                    self.ltb = {
-                            "exception": traceback.format_exc(),
-                            "msginfo": msginfo
-                            }
-                    self.conman.gen_send("Error executing %s: %s" % (command, e), msginfo)
-                    if not msginfo["chan"] == self.glob_confman.get("IRC", "HOME_CHANNEL"):
-                        self.conman.privmsg("Exception occured. Check traceback")
+                traceback.print_exc()
+                self.ltb = {
+            	        "exception": traceback.format_exc(),
+                        "msginfo": msginfo
+                        }
+                self.conman.gen_send("Error executing %s: %s" % (command, e), msginfo)
+                if not msginfo["chan"] == self.glob_confman.get("IRC", "HOME_CHANNEL"):
+                    self.conman.privmsg("Exception occured. Check traceback")
 
 
     def execute_command(self, msginfo):
@@ -102,6 +93,7 @@ class PluginMan:
                     self.conman.privmsg("Error loading module %s: %s" % (os.path.basename(plugin), e))
                     failcount += 1
                     self.pluginlist[plugin].add("failed")
+                    traceback.print_exc()
             else:
                 blockcount += 1
                 self.pluginlist[plugin].add("blocked")
