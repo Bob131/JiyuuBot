@@ -3,5 +3,6 @@ def update(self, command):
 
 self.commandlist["update"] = {
         "type": MAPTYPE_COMMAND,
-        "function": update
+        "function": update,
+        "help": "Update MPD database"
         }

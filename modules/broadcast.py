@@ -5,5 +5,6 @@ def broadcast(self, msginfo):
 self.permsman.suggest_cmd_perms("broadcast", 999)
 self.commandlist["broadcast"] = {
         "type": MAPTYPE_COMMAND,
-        "function": broadcast
+        "function": broadcast,
+        "help": "broadcast message on every channel this bot serves"
         }

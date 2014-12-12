@@ -28,10 +28,12 @@ def set_perm_argparser(self, msginfo):
 
 self.commandlist["getperm"] = {
         "type": MAPTYPE_COMMAND,
-        "function": get_perm_argparser
+        "function": get_perm_argparser,
+        "help": "Get permission info. Called on its own, it returns the permission level for your hostname. Syntax: .getperm [(msg <hostname>)|(cmd <command>)|(host <hostname>)]"
         }
 self.commandlist["setperm"] = {
         "type": MAPTYPE_COMMAND,
-        "function": set_perm_argparser
+        "function": set_perm_argparser,
+        "help": "Set permission info. Syntax: .setperm (msg <hostname> <true or false>)|(cmd <command> <perm level>)|(host <hostname> <perm level>)"
         }
 self.permsman.suggest_cmd_perms("setperm", 999)

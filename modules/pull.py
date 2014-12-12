@@ -8,5 +8,6 @@ def pull(self, msginfo):
 
 self.commandlist["pull"] = {
         "type": MAPTYPE_COMMAND,
-        "function": pull
+        "function": pull,
+        "help": "Pull new commits from configured origin"
         }

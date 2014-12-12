@@ -33,9 +33,11 @@ self.commandlist["\.\w+.*"] = {
 self.commandlist["addrem"] = {
         "type": MAPTYPE_COMMAND,
         "function": add_reminder,
+        "help": "Add reminder for command. Syntax: .addrem <.command> <reminder>"
         }
 self.permsman.suggest_cmd_perms("delrem", 300)
 self.commandlist["delrem"] = {
         "type": MAPTYPE_COMMAND,
-        "function": del_reminder
+        "function": del_reminder,
+        "help": "Remove reminder for command. Syntax: .delrem <.command>"
         }

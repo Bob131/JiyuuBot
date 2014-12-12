@@ -52,11 +52,13 @@ self.commandlist["chans"] = {
         }
 self.commandlist["leave"] = {
         "type": MAPTYPE_COMMAND,
-        "function": leave
+        "function": leave,
+        "help": "Leaves specified chan. If no chan is specified, leaves the current chan. Syntax: .leave [#chan]"
         }
 self.commandlist["join"] = {
         "type": MAPTYPE_COMMAND,
-        "function": join
+        "function": join,
+        "help": "Joins a specified chan"
         }
 self.commandlist["!INVITE"] = {
         "type": MAPTYPE_OTHER,
