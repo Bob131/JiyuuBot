@@ -172,10 +172,6 @@ while 1:
                         msginfo["pattern"] = match
                         plugman.execute_command(msginfo)
 
-            # irc connection lost; time to reconnect
-            elif line == "":
-                conman.reconnect_irc()
-
             # allow modules to hook for other commands
             else:
                 command = line.split(" ")[1]
