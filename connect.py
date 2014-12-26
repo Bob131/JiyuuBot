@@ -106,7 +106,7 @@ class ConnectionMan:
 
         while 1:
             line = self.s.recv(10)
-            if "End of /NAMES list." in line:
+            if (line or '') == '' or "End of /NAMES list." in line:
                 print("\n*** %s joined! ***\n" % chan)
                 break
                 
