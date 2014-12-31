@@ -66,7 +66,6 @@ class inot_handler(watchdog.events.FileSystemEventHandler):
                             conman.privmsg("Update to modules detected")
                             plugman.execute_command({"msg": ".reload", "type": "PRIVMSG", "chan": confman.get("IRC", "HOME_CHANNEL")})
                     else:
-                        print("Core update detected")
                         bye("Update to core libs detected")
                         time.sleep(10) # wait for remaining messages to be sent
                         conman.s.close()
@@ -95,6 +94,10 @@ def SIGTERMhandle(_, __):
 
 signal.signal(signal.SIGHUP, SIGHUPhandle)
 signal.signal(signal.SIGTERM, SIGTERMhandle)
+
+
+# get and set our hostname for this session
+conman.queue_raw("WHOIS {}".format(confman.get("IRC", "NICK")))
 
 
 #Main active loop
