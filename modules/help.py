@@ -7,7 +7,7 @@ def display_help(self, msginfo):
             if self.commandlist[keys].get("help", None) and self.permsman.get_perms(msginfo["hostname"], keys):
                 cmdlist.append("."+keys)
         self.conman.gen_send("%s commands available:" % len(cmdlist), msginfo)
-        self.conman.gen_send(" ".join(cmdlist), msginfo)
+        self.conman.gen_send(" ".join(sorted(cmdlist)), msginfo)
     else:
         for arg in args:
             if arg.startswith("."):
