@@ -34,10 +34,7 @@ class PluginMan:
 
     def execute_command(self, msginfo):
         if msginfo["type"] == "PRIVMSG":
-            try:
-                mapped = msginfo["msg"][1:msginfo["msg"].index(" ")]
-            except ValueError:
-                mapped = msginfo["msg"][1:]
+            mapped = msginfo["msg"].split(" ")[0].replace(".", "")
         elif msginfo["type"] == "regex":
             mapped = msginfo["pattern"]
         else:
@@ -49,6 +46,11 @@ class PluginMan:
 
             if self.commandlist[mapped].get("prefix", None):
                 msginfo["prefix"] = self.commandlist[mapped]["prefix"]
+
+            if self.commandlist[mapped]["type"] == MAPTYPE_COMMAND:
+                if not self.permsman.get_perms(msginfo["hostname"], mapped):
+                    self.conman.gen_send("You do not have high enough permissions to execute that command", msginfo)
+                    return None
 
             t = threading.Thread(target = self.trywrapper, args = (mapped, msginfo))
             t.daemon = 1

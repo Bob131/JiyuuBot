@@ -151,21 +151,15 @@ while 1:
                 # if this is an IM, set chan to the offending nick so the response can be properly directed
                 if msginfo["chan"] == confman.get("IRC", "NICK"):
                     msginfo["chan"] = msginfo["nick"]
-                    # if not authorized, notify the user
+                    # if not authorized, notify the user and break out of loop
                     if not permsman.get_msg_perms(msginfo["hostname"]):
                         conman.gen_send("You do not have adequate permissions for IM", msginfo)
                         continue
 
                 # if msg is a command, execute
                 if msginfo["msg"].startswith("."):
-                    # check whether its an actual command
-                    if msginfo["msg"].split(" ")[0].replace(".", "") in plugman.commandlist.keys():
-                        # ensure adequate permssions (move this to load.py to enabled perms checking on regex functions?)
-                        if permsman.get_perms(msginfo["hostname"], msginfo["msg"].split(" ")[0][1:]):
-                            msginfo["type"] = "PRIVMSG"
-                            plugman.execute_command(msginfo)
-                        else:
-                            conman.gen_send("You do not have high enough permissions to execute that command", msginfo)
+                    msginfo["type"] = "PRIVMSG"
+                    plugman.execute_command(msginfo)
 
                 # check whether message matches any mapped regex strings
                 matches = list(pattern for pattern in plugman.regex_cache if not re.match(pattern, msginfo["msg"]) == None)
