@@ -1,3 +1,4 @@
+@self.command(help="Dumps traceback and msginfo struct of last occuring exception", perm=999)
 def tb(self, msginfo):
     if self.ltb == None:
         self.conman.gen_send("Nothing to dump!", msginfo)
@@ -9,10 +10,3 @@ def tb(self, msginfo):
         for line in dump.split("\n"):
             self.conman.gen_send(line, msginfo)
         self.ltb = None
-
-self.permsman.suggest_cmd_perms("dump", 999)
-self.commandlist["dump"] = {
-        "type": MAPTYPE_COMMAND,
-        "function": tb,
-        "help": "Dumps traceback and msginfo struct of last occuring exception"
-        }

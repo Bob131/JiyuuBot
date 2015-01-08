@@ -1,3 +1,4 @@
+@self.regex(".*nyaa.se/\?page=view\&tid=.*")
 def nyaa(self, msginfo):
     import requests
     from bs4 import BeautifulSoup
@@ -18,10 +19,3 @@ def nyaa(self, msginfo):
             self.conman.gen_send("Error: Torrent ID \x02{}\x02 not found".format(url), msginfo)
         else:
             self.conman.gen_send("Error fetching {}: {}".format(url, request.status_code.title), msginfo)
-
-
-self.commandlist[".*nyaa.se/\?page=view\&tid=.*"] = {
-        "type": MAPTYPE_REGEX,
-        "function": nyaa,
-        "prefix": "Nyaa"
-        }

@@ -5,6 +5,7 @@ import threading
 import json
 import re
 import traceback
+import types
 
 from configman import *
 
@@ -12,7 +13,9 @@ from configman import *
 MAPTYPE_COMMAND = 0
 MAPTYPE_ALIAS = 1
 MAPTYPE_REGEX = 2
-MAPTYPE_OTHER = MAPTYPE_REGEX
+MAPTYPE_IRC = MAPTYPE_REGEX
+
+ORIGINAL_MEMBERS = ()
 
 
 #define Plugin Manager class
@@ -34,7 +37,7 @@ class PluginMan:
 
     def execute_command(self, msginfo):
         if msginfo["type"] == "PRIVMSG":
-            mapped = msginfo["msg"].split(" ")[0].replace(".", "")
+            mapped = msginfo["msg"].split(" ")[0].replace(".", "").lower()
         elif msginfo["type"] == "regex":
             mapped = msginfo["pattern"]
         else:
@@ -61,6 +64,55 @@ class PluginMan:
             pass
 
 
+    # map decorators
+    def command(self, *args, **kargs):
+        def decorator(f):
+            try:
+                name = args[0]
+            except IndexError:
+                name = f.__name__
+            self.commandlist[name] = {
+                    "type": MAPTYPE_COMMAND,
+                    "function": f
+                    }
+            if 'help' in kargs.keys():
+                self.commandlist[name]["help"] = kargs['help']
+            if 'perm' in kargs.keys():
+                self.permsman.suggest_cmd_perms(name, kargs['perm'])
+            return f
+        return decorator
+
+    def alias(self, from_, to):
+        self.commandlist[from_] = {
+                "type": MAPTYPE_ALIAS,
+                "pointer": to
+                }
+
+    def regex(self, pattern, **kargs):
+        def decorator(f):
+            prefix = kargs.get('prefix', None) or f.__name__.title()
+            self.commandlist[pattern] = {
+                    "type": MAPTYPE_REGEX,
+                    "function": f,
+                    "prefix": prefix
+                    }
+            return f
+        return decorator
+
+    def irc(self, command):
+        def decorator(f):
+            self.commandlist["!{}".format(str(command))] = {
+                    "type": MAPTYPE_IRC,
+                    "function": f
+                    }
+            return f
+        return decorator
+
+    def function(self, f):
+        self.__dict__[f.__name__] = types.MethodType(f, self)
+        return f
+
+
     def require(self, plugin):
         plugin = "{}/{}.py".format(self.modulespath, plugin)
         if not list(self.pluginlist.get(plugin, ["failed"]))[0] == "failed":
@@ -69,13 +121,18 @@ class PluginMan:
 
     #Define function to load modules
     def load(self, _, msginfo):
+        #remove functions
+        current_members = tuple(self.__dict__.keys()) # copy into new value
+        for name in current_members:
+            if not name in ORIGINAL_MEMBERS:
+                print("Destroying old object {}".format(name))
+                del self.__dict__[name]
         #not in __init__ so that .reload removes entries for old modules
         self.commandlist = {"reload": {
             "type": MAPTYPE_COMMAND,
             "function": self.load,
             "help": ".reload - reloads modules"
             }}
-        self.funcs = {}
         self.pluginlist = {}
         for plugpath in glob.glob(self.modulespath + "*.py"):
             self.pluginlist[plugpath] = set()
@@ -112,5 +169,7 @@ class PluginMan:
         self.permsman = permsman_instance
         self.ltb = None
         self.lock = threading.Lock()
+        global ORIGINAL_MEMBERS
+        ORIGINAL_MEMBERS = tuple(self.__dict__.keys())
         with self.lock:
             self.load(None, {"chan": self.glob_confman.get("IRC", "HOME_CHANNEL")})

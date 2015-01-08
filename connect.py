@@ -191,7 +191,10 @@ class ConnectionMan:
     # generic send function
     def gen_send(self, text, msginfo):
         try:
-            self.privmsg("%s: %s" % (msginfo["prefix"], text), msginfo["chan"])
+            if msginfo["type"] == "regex":
+                self.privmsg("%s: %s" % (msginfo["prefix"], text), msginfo["chan"])
+            else:
+                raise KeyError
         except KeyError:
             self.privmsg(text, msginfo["chan"])
 

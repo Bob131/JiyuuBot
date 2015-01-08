@@ -1,3 +1,4 @@
+@self.command(help="Prints the current Discordian date")
 def ddate(self, msginfo):
     import datetime
     import calendar
@@ -22,10 +23,3 @@ def ddate(self, msginfo):
     else:
        	dDay = str(dDay) + {1 : 'st', 2 : 'nd', 3 : 'rd'}.get(dDay % 10, "th")
     self.conman.gen_send("Today is %s, the %s day of %s in the Year of Our Lady of Discord %d" % (dDays[dDayName], dDay, dSeasons[dSeason], year + 1166), msginfo)
-
-
-self.commandlist["ddate"] = {
-        "type": MAPTYPE_COMMAND,
-        "function": ddate,
-        "help": "Prints the current Discordian date"
-        }

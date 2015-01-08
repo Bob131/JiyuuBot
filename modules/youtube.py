@@ -1,3 +1,4 @@
+@self.regex(".*(youtube\.com|youtu\.be)/(watch\?)?([^\#\?]+).*", prefix="YouTube")
 def youtube(self, msginfo):
     string = msginfo["msg"]
     stuff = re.findall("youtu.be/([^\#\?\s]+)", string) + re.findall("youtube.com/watch\?([^\#\?\s]+)", string)
@@ -21,9 +22,3 @@ def youtube(self, msginfo):
                     self.conman.gen_send("%s" % jdata["error"]["message"], msginfo)
             except ValueError:
             	print("Video not found")
-
-self.commandlist[".*(youtube\.com|youtu\.be)/(watch\?)?([^\#\?]+).*"] = {
-        "type": MAPTYPE_REGEX,
-        "function": youtube,
-        "prefix": "YouTube"
-        }

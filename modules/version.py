@@ -1,3 +1,4 @@
+@self.command(help="Prints commit hash and the time of the last git pull")
 def version(self, msginfo):
     import datetime
     import time
@@ -10,9 +11,3 @@ def version(self, msginfo):
     timeg = int(gitlog[4])
     vers = "http://github.com/JiyuuProject/JiyuuBot - Commit hash: \x02%s\x02 - Last pull: %s (%s ago)" % (commit, time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(timeg)), datetime.timedelta(seconds=math.floor(time.time()-timeg)))
     self.conman.gen_send(vers, msginfo)
-
-self.commandlist["version"] = {
-        "type": MAPTYPE_COMMAND,
-        "function": version,
-        "help": "Prints commit hash and last git pull"
-        }

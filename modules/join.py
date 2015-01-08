@@ -1,3 +1,4 @@
+@self.irc("JOIN")
 def who(self, msginfo):
     nick = msginfo["strg"][:msginfo["strg"].index("!")]
     chan = re.findall("(#[^\s,]+)", msginfo["strg"])[0]
@@ -6,6 +7,8 @@ def who(self, msginfo):
         self.conman.queue_raw("NOTICE {} :{}".format(nick, self.confman.get("join", "greeter", "Hello {nick}, welcome to {chan}!").format(nick=nick, chan=chan)))
 
 
+@self.command("quiet", help="Suppresses join messages for channel. Defaults to current channel. Syntax: .quiet [channel]")
+@self.command("dequiet", help="Enables join messages for channel. Defaults to current channel. Syntax: .dequiet [channel]")
 def quiet(self, msginfo):
     try:
         chan = msginfo["msg"].split(" ")[1]
@@ -27,6 +30,8 @@ def quiet(self, msginfo):
         self.conman.gen_send("You don't have permission to do that", msginfo)
 
 
+@self.command("shuush", help="Suppresses join messages for your hostname")
+@self.command("deshuush", help="Enables join messages for your hostname")
 def shuush(self, msginfo):
     hostlist = set(self.confman.get("join", "quiet_hosts", []))
     if msginfo["msg"].startswith(".shuush"):
@@ -39,30 +44,3 @@ def shuush(self, msginfo):
         except KeyError:
             pass
     self.confman.setv("join", "quiet_hosts", list(hostlist))
-
-
-
-self.commandlist["!JOIN"] = {
-        "type": MAPTYPE_OTHER,
-        "function": who
-        }
-self.commandlist["quiet"] = {
-        "type": MAPTYPE_COMMAND,
-        "function": quiet,
-        "help": "Suppresses join messages for channel. Defaults to current channel. Syntax: .quiet [channel]"
-        }
-self.commandlist["dequiet"] = {
-        "type": MAPTYPE_COMMAND,
-        "function": quiet,
-        "help": "Enables join messages for channel. Defaults to current channel. Syntax: .dequiet [channel]"
-        }
-self.commandlist["shuush"] = {
-        "type": MAPTYPE_COMMAND,
-        "function": shuush,
-        "help": "Suppresses join messages for your hostname"
-        }
-self.commandlist["deshuush"] = {
-        "type": MAPTYPE_COMMAND,
-        "function": shuush,
-        "help": "Enables join messages for your hostname"
-        }

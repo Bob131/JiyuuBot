@@ -1,4 +1,5 @@
-def post(self, msginfo):
+@self.regex(".*https*://boards.4chan.org/\w+/(res|thread)/[\d\w]+.*", prefix="4chan")
+def chan(self, msginfo):
     import requests
     matches = re.findall("boards.4chan.org/(\w+)/(?:res|thread)/([\d\#p]+)", msginfo["msg"])
     for match in matches:
@@ -17,9 +18,3 @@ def post(self, msginfo):
             self.conman.gen_send("\x02>>%s\x02 - by \x02%s\x02 - posted at %s%s" % (thread["no"], thread["name"], thread["now"].replace("\\", ""), ("" if thread["resto"] == 0 else " - reply to %s" % thread["resto"])), msginfo)
         else:
             self.conman.gen_send("Post id not found", msginfo)
-
-self.commandlist[".*https*://boards.4chan.org/\w+/(res|thread)/[\d\w]+.*"] = {
-        "function": post,
-        "type": MAPTYPE_REGEX,
-        "prefix": "4chan"
-        }

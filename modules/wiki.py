@@ -1,3 +1,4 @@
+@self.regex(".*\w+.wikipedia.org/wiki/[^\#\s\?]+.*")
 def wikipedia(self, msginfo):
     import requests
     from urllib import parse
@@ -11,9 +12,3 @@ def wikipedia(self, msginfo):
             self.conman.gen_send("Page not found", msginfo)
         else:
             self.conman.gen_send("%s | Categories: %s" % (categories["title"], ", ".join(re.sub("\w+:", "", x["title"]) for x in categories["categories"])), msginfo)
-
-self.commandlist[".*\w+.wikipedia.org/wiki/[^\#\s\?]+.*"] = {
-        "type": MAPTYPE_REGEX,
-        "function": wikipedia,
-        "prefix": "Wikipedia"
-        }

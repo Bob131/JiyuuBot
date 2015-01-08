@@ -1,3 +1,4 @@
+@self.command(help="Check whether a website is up. Syntax: .isup <domain>")
 def isup(self, msginfo):
     domains = msginfo["msg"].split(" ")[1:]
     if len(domains) == 0:
@@ -16,9 +17,3 @@ def isup(self, msginfo):
                 self.conman.gen_send("%s (%s) is down" % (info["domain"], info["response_ip"]), msginfo)
             elif info["status_code"] == 3:
                 self.conman.gen_send("%s doesn't appear to exist" % info["domain"], msginfo)
-
-self.commandlist["isup"] = {
-        "type": MAPTYPE_COMMAND,
-        "function": isup,
-        "help": "Check whether a website is up. Syntax: .isup <domain>"
-        }

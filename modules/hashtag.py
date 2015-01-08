@@ -1,3 +1,4 @@
+@self.regex("[^\.]*\#\w+.*", prefix="")
 def hashtag(self, msginfo):
     message = re.findall(".*\#(\w+).*", msginfo["msg"])
     for tag in message:
@@ -6,7 +7,8 @@ def hashtag(self, msginfo):
         if tag in reg_tags.keys():
             self.conman.gen_send(reg_tags[tag], msginfo)
 
-def add_hash(self, msginfo):
+@self.command(help="Adds hastag. Syntax: .addhash #<hashtag> <string> | See also: .delhash")
+def addhash(self, msginfo):
     reg_tags = self.confman.get("hash", "REG_TAGS", {})
     command = msginfo["msg"].split(" ")[1:]
     command[0] = command[0].lower().replace("#", "")
@@ -17,7 +19,8 @@ def add_hash(self, msginfo):
     else:
         self.conman.gen_send("#%s already mapped" % command[0], msginfo)
 
-def del_hash(self, msginfo):
+@self.command(help="Deletes previously added hashtag. Syntax: .delhash #<hashtag> | See also: .addhash", perm=300)
+def delhash(self, msginfo):
     reg_tags = self.confman.get("hash", "REG_TAGS", {})
     command = msginfo["msg"].split(" ")[1].lower().replace("#", "")
     try:
@@ -26,19 +29,3 @@ def del_hash(self, msginfo):
         self.conman.gen_send("#%s deleted" % command, msginfo)
     except KeyError:
         self.conman.gen_send("#%s does not exist" % command, msginfo)
-
-self.commandlist[".*\#\w+.*"] = {
-        "type": MAPTYPE_REGEX,
-        "function": hashtag
-        }
-self.commandlist["addhash"] = {
-        "type": MAPTYPE_COMMAND,
-        "function": add_hash,
-        "help": "Adds hastag. Syntax: .addhash #<hashtag> <string> | See also: .delhash"
-        }
-self.permsman.suggest_cmd_perms("delhash", 300)
-self.commandlist["delhash"] = {
-        "type": MAPTYPE_COMMAND,
-        "function": del_hash,
-        "help": "Deletes previously added hashtag. Syntax: .delhash #<hashtag> | See also: .addhash"
-        }

@@ -1,4 +1,5 @@
-def mod_parse(self, msginfo):
+@self.command(help="Controls what modules should be loaded. Arguments are list, block and unblock. (un)block accepts comma-delimited arguments. Syntax: .module (block|unblock) <module> OR .module list [blocked])", perm=999)
+def module(self, msginfo):
     arg = msginfo["msg"].split(" ")[1:]
     if len(arg) == 0:
         return None
@@ -23,10 +24,3 @@ def mod_parse(self, msginfo):
             block.remove(mod.strip())
         self.glob_confman.setv("modules", "BLACKLIST", list(block))
         self.conman.gen_send("Unblocked %s modules" % len(arg[1].split(",")), msginfo)
-
-self.permsman.suggest_cmd_perms("module", 999)
-self.commandlist["module"] = {
-        "type": MAPTYPE_COMMAND,
-        "function": mod_parse,
-        "help": "Controls what modules should be loaded. Arguments are list, block and unblock. (un)block accepts comma-delimited arguments. Syntax: .module (block|unblock) <module> OR .module list [blocked])"
-        }

@@ -1,3 +1,4 @@
+@self.function
 def git_get_name(self, userdict, from_osrc=False):
     # string format to use if both a login and a name are available
     strfrmt = "%s (%s)"
@@ -20,10 +21,11 @@ def git_get_name(self, userdict, from_osrc=False):
         if "url" in userdict.keys():
             import requests
             req = requests.get(userdict["url"]).json()
-            return self.funcs["git_get_name"](self, req)
+            return self.git_get_name(req)
         else:
             return userdict["login"]
 
+@self.function
 def git_allowed(self, req):
     try:
         _ = req['message']
@@ -38,7 +40,8 @@ def git_allowed(self, req):
     except:
         return True
 
-def git(self, msginfo):
+@self.regex(".*https?://(www\.)?github.com/.*")
+def github(self, msginfo):
     import requests
     matches = re.findall("github.com/(.+[^\s#?])", msginfo["msg"])
 
@@ -57,11 +60,11 @@ def git(self, msginfo):
         if len(match) == 1:
             req = requests.get("http://osrc.dfm.io/%s.json" % match[0]).json()
             if not "message" in req.keys():
-                self.conman.gen_send("\x02%s\x02 - %s repositories - %s contributions - Favourite language: %s (%s contributions)" % (self.funcs["git_get_name"](self, req, True), len(req["repositories"]), req["usage"]["total"], req["usage"]["languages"][0]["language"], req["usage"]["languages"][0]["count"]), msginfo)
+                self.conman.gen_send("\x02%s\x02 - %s repositories - %s contributions - Favourite language: %s (%s contributions)" % (self.git_get_name(req, True), len(req["repositories"]), req["usage"]["total"], req["usage"]["languages"][0]["language"], req["usage"]["languages"][0]["count"]), msginfo)
             else:
                 req = requests.get("https://api.github.com/users/%s" % match[0], headers=headers, auth=auth).json()
                 if not "message" in req.keys():
-                    self.conman.gen_send(self.funcs["git_get_name"](self, req), msginfo)
+                    self.conman.gen_send(self.git_get_name(req), msginfo)
                 else:
                     self.conman.gen_send("User %s doesn't appear to exist" % match[0], msginfo)
 
@@ -74,12 +77,12 @@ def git(self, msginfo):
                 _ = req['message']
             except:
                 req['message'] = None
-            if not req['message'] == "Not Found" and self.funcs["git_allowed"](self, req):
+            if not req['message'] == "Not Found" and self.git_allowed(req):
                 try:
-                    tosend = "\x02%s\x02 - \x02%s\x02 - by \x02%s\x02 - Created: %s - Last push: %s" % (match[1], req["description"], self.funcs["git_get_name"](self, req["owner"]), req["created_at"].split("T")[0], req["pushed_at"].split("T")[0])
+                    tosend = "\x02%s\x02 - \x02%s\x02 - by \x02%s\x02 - Created: %s - Last push: %s" % (match[1], req["description"], self.git_get_name(req["owner"]), req["created_at"].split("T")[0], req["pushed_at"].split("T")[0])
                 except KeyError as e:
                     if e.args[0] == "description":
-                        tosend = "\x02%s\x02 - by \x02%s\x02 - Created: %s - Last push: %s" % (match[1], self.funcs["git_get_name"](self, req["owner"]), req["created_at"].split("T")[0], req["pushed_at"].split("T")[0])
+                        tosend = "\x02%s\x02 - by \x02%s\x02 - Created: %s - Last push: %s" % (match[1], self.git_get_name(req["owner"]), req["created_at"].split("T")[0], req["pushed_at"].split("T")[0])
                     else:
                         raise e
                 if req["has_issues"]:
@@ -88,7 +91,7 @@ def git(self, msginfo):
                     tosend += " - %s" % req["homepage"]
                 if req["fork"]:
                     tosend += " - Forked from %s (%s)" % (req["parent"]["full_name"], req["parent"]["html_url"])
-            elif not self.funcs["git_allowed"](self, req):
+            elif not self.git_allowed(req):
                 tosend = "\x02%s\x02 - by \x02%s\x02" % tuple(match)
             else:
                 tosend = "Repo \x02%s/%s\x02 does not exist" % (match[-2], match[-1])
@@ -100,8 +103,8 @@ def git(self, msginfo):
             # if issue number provided
             if len(match) == 4:
                 req = requests.get("https://api.github.com/repos/%s/%s/%s/%s" % tuple(match), headers=headers, auth=auth).json()
-                if self.funcs["git_allowed"](self, req):
-                    self.conman.gen_send("%s/%s#%s - \x02%s\x02 - by \x02%s\x02 - Created: %s - Updated: %s - State: %s%s" % (match[0], match[1], req["number"], req["title"], self.funcs["git_get_name"](self, req["user"]), req["created_at"].split("T")[0], req["updated_at"].split("T")[0], req["state"].capitalize(), (" - Tags: " + ", ".join("\x02%s\x02" % label["name"] for label in req["labels"]) if not len(req["labels"]) == 0 else "")), msginfo)
+                if self.git_allowed(req):
+                    self.conman.gen_send("%s/%s#%s - \x02%s\x02 - by \x02%s\x02 - Created: %s - Updated: %s - State: %s%s" % (match[0], match[1], req["number"], req["title"], self.git_get_name(req["user"]), req["created_at"].split("T")[0], req["updated_at"].split("T")[0], req["state"].capitalize(), (" - Tags: " + ", ".join("\x02%s\x02" % label["name"] for label in req["labels"]) if not len(req["labels"]) == 0 else "")), msginfo)
                 else:
                     self.conman.gen_send("%s/%s#%s" % (match[0], match[1], match[3]), msginfo)
 
@@ -114,13 +117,5 @@ def git(self, msginfo):
         # if github link to commit
         elif match[2] == "commit":
             req = requests.get("https://api.github.com/repos/%s/%s/git/%ss/%s" % tuple(match), headers=headers, auth=auth).json()
-            if self.funcs["git_allowed"](self, req):
+            if self.git_allowed(req):
                 self.conman.gen_send("\x02%s\x02 - by \x02%s\x02 - %s" % (req["message"], req["author"]["name"], req["committer"]["date"].split("T")[0]), msginfo)
-
-self.funcs["git_get_name"] = git_get_name
-self.funcs["git_allowed"] = git_allowed
-self.commandlist[".*https?://(www\.)?github.com/.*"] = {
-        "type": MAPTYPE_REGEX,
-        "function": git,
-        "prefix": "Github"
-        }

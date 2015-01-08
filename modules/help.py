@@ -1,5 +1,6 @@
 #Help module to display command definitions to channel
-def display_help(self, msginfo):
+@self.command(help="displays help. Syntax: .help [command]")
+def help(self, msginfo):
     args = msginfo["msg"].split(" ")[1:]
     if len(args) == 0:
         cmdlist = []
@@ -19,11 +20,4 @@ def display_help(self, msginfo):
                     arg = self.commandlist[arg]["pointer"]
                 self.conman.gen_send(".%s - %s" % (argo, self.commandlist[arg]["help"]), msginfo)
             except:
-                self.conman.gen_send("Help for %s not available" % command, msginfo)
-
-#Maps command and help text for command
-self.commandlist["help"] = {
-        "type": MAPTYPE_COMMAND,
-        "function": display_help,
-        "help": "displays help. Syntax: .help [command]"
-        }
+                self.conman.gen_send("Help for \x02%s\x02 not available" % arg, msginfo)

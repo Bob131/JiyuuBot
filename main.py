@@ -159,7 +159,7 @@ while 1:
                 # if msg is a command, execute
                 if msginfo["msg"].startswith("."):
                     msginfo["type"] = "PRIVMSG"
-                    plugman.execute_command(msginfo)
+                    plugman.execute_command(msginfo.copy())
 
                 # check whether message matches any mapped regex strings
                 matches = list(pattern for pattern in plugman.regex_cache if not re.match(pattern, msginfo["msg"]) == None)
@@ -167,7 +167,7 @@ while 1:
                     msginfo["type"] = "regex"
                     for match in matches:
                         msginfo["pattern"] = match
-                        plugman.execute_command(msginfo)
+                        plugman.execute_command(msginfo.copy())
 
             # allow modules to hook for other commands
             else:
