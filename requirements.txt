@@ -1,4 +1,4 @@
-python-mpd2==0.5.3
-requests==2.4.3
-BeautifulSoup4==4.3.2
-watchdog==0.8.2
+python-mpd2
+requests
+BeautifulSoup4
+watchdog
