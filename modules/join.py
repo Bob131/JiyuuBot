@@ -4,7 +4,7 @@ def who(self, msginfo):
     chan = re.findall("(#[^\s,]+)", msginfo["strg"])[0]
     host = msginfo["strg"][msginfo["strg"].index("@")+1:msginfo["strg"].index(" ")]
     if not chan in self.confman.get("join", "quiet_chans", []) and not host in self.confman.get("join", "quiet_hosts", []):
-        self.conman.queue_raw("NOTICE {} :{}".format(nick, self.confman.get("join", "greeter", "Hello {nick}, welcome to {chan}!").format(nick=nick, chan=chan)))
+        self.conman.instances["irc"].queue_raw("NOTICE {} :{}".format(nick, self.confman.get("join", "greeter", "Hello {nick}, welcome to {chan}!").format(nick=nick, chan=chan)))
 
 
 @self.command("quiet", help="Suppresses join messages for channel. Defaults to current channel. Syntax: .quiet [channel]")

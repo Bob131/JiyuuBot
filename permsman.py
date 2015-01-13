@@ -28,12 +28,15 @@ class PermsMan:
             self.set_cmd_perms(command, level)
 
     def get_perms(self, host, command):
-        userlvl = self.get_host_perms(host)
-        cmdlvl = self.get_cmd_perms(command)
-        if userlvl >= cmdlvl:
+        if host == None:
             return True
         else:
-            return False
+            userlvl = self.get_host_perms(host)
+            cmdlvl = self.get_cmd_perms(command)
+            if userlvl >= cmdlvl:
+                return True
+            else:
+                return False
 
     def get_msg_perms(self, host):
         return self.confman.get("msg", host, False, False)

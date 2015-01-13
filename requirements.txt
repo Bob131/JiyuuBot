@@ -2,3 +2,4 @@ python-mpd2
 requests
 BeautifulSoup4
 watchdog
+websocket-client

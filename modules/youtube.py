@@ -1,7 +1,7 @@
-@self.regex(".*(youtube\.com|youtu\.be)/(watch\?)?([^\#\?]+).*", prefix="YouTube")
+@self.regex(".*(youtube\.com|youtu\.be)/(watch\?)?([\w\d]+).*", prefix="YouTube")
 def youtube(self, msginfo):
     string = msginfo["msg"]
-    stuff = re.findall("youtu.be/([^\#\?\s]+)", string) + re.findall("youtube.com/watch\?([^\#\?\s]+)", string)
+    stuff = re.findall("youtu.be/([\w\d]+)", string) + re.findall("youtube.com/watch\?v=([\w\d]+)", string)
     if len(stuff) > 0:
         import requests
         for match in stuff:

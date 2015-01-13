@@ -3,7 +3,7 @@
 def nickname_taken(self, msginfo):
     self.conman.privmsg("Nickname request failed: Nickname is in use")
     self.glob_confman.setv("IRC", "NICK", self.glob_confman.get("IRC", "NICK")+"_", temp=True)
-    self.conman.queue_raw("NICK " + self.glob_confman.get("IRC", "NICK"))
+    self.conman.instances["irc"].queue_raw("NICK " + self.glob_confman.get("IRC", "NICK"))
 
 
 @self.irc("NICK")
@@ -20,10 +20,9 @@ self.alias("claim", "reclaim")
 def reclaim(self, msginfo):
     if len(msginfo["msg"].split(" ")) > 1:
         self.glob_confman.setv("IRC", "NICK", msginfo["msg"].split(" ")[1], temp=True)
-        self.conman.queue_raw("NICK {}".format(msginfo["msg"].split(" ")[1]))
-        self.conman.queue
+        self.conman.instances["irc"].queue_raw("NICK {}".format(msginfo["msg"].split(" ")[1]))
     else:
         #flush temporary nick
         self.glob_confman.load(True)
         #set new nick
-        self.conman.queue_raw("NICK {}".format(self.glob_confman.get("IRC", "NICK")))
+        self.conman.instances["irc"].queue_raw("NICK {}".format(self.glob_confman.get("IRC", "NICK")))
