@@ -12,7 +12,7 @@ def leave(self, msginfo):
         self.conman.instances["irc"].leave_irc(msginfo["chan"], msginfo["nick"])
     else:
         for chan in cmd:
-            if chan in self.conman.joined_chans:
+            if chan in self.conman.instances["irc"].joined_chans:
                 self.conman.instances["irc"].leave_irc(chan, msginfo["nick"])
             else:
                 self.conman.gen_send("Can't PART from a channel that hasn't been joined", msginfo)
@@ -22,7 +22,7 @@ def leave(self, msginfo):
 def join(self, msginfo):
     cmd = msginfo["msg"].split(" ")[1:]
     for chan in cmd:
-        if not chan in self.conman.joined_chans:
+        if not chan in self.conman.instances["irc"].joined_chans:
             self.conman.instances["irc"].join_irc(chan, msginfo["nick"])
         else:
             self.conman.gen_send("Already serving {}".format(chan), msginfo)
