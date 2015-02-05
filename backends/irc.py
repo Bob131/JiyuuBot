@@ -26,13 +26,16 @@ class irc_sock(socket.socket):
         if len(self._split_queue) == 0:
             ready, _, _ = select.select([self], [], [], float(timeout))
             if ready:
-                data = super(type(self), self).recv(self.confman.get("IRC", "BUFFER_SIZE"))
+                try:
+                    data = super(type(self), self).recv(self.confman.get("IRC", "BUFFER_SIZE"))
+                except:
+                    data = b"ERROR"
                 try:
                     data = data.decode("UTF-8").strip("\r\n")
                 except UnicodeDecodeError:
                     self._split_queue.append("")
                 else:
-                    if data.startswith("ERROR"):
+                    if data.startswith("ERROR") or data == "":
                         print("*** Server error ***")
                         if "throttled" in data:
                             print("*** Throttled. Waiting 60 seconds and trying again ***")
