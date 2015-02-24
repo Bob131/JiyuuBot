@@ -1,4 +1,4 @@
-@self.regex(".*\w+.wikipedia.org/wiki/[^\#\s\?]+.*")
+@self.regex(".*\w+.wikipedia.org/wiki/[^\#\s\?>]+.*")
 def wikipedia(self, msginfo):
     import requests
     from urllib import parse
