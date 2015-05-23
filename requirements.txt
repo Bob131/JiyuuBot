@@ -3,3 +3,4 @@ requests
 BeautifulSoup4
 watchdog
 websocket-client
+isodate
