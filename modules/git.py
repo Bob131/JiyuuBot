@@ -1,16 +1,12 @@
-@self.function
-def git_get_name(self, userdict, from_osrc=False):
+import re
+import requests
+from . import regex_handler, functions, send, config
+
+@functions
+def git_get_name(userdict):
     # string format to use if both a login and a name are available
     strfrmt = "%s (%s)"
 
-    # process is easy if from the Open Source Report Card
-    if from_osrc:
-        if not userdict["name"] == userdict["username"]:
-            return strfrmt % (userdict["name"], userdict["username"])
-        else:
-            return userdict["name"]
-
-    # if dict from api.github.com
     if "public_repos" in userdict.keys():
         if userdict["name"] == None or userdict["name"].strip() == "" or userdict["name"] == userdict["login"]:
             return userdict["login"]
@@ -19,30 +15,21 @@ def git_get_name(self, userdict, from_osrc=False):
     else:
         # if dict is like an owner block from a non-user request
         if "url" in userdict.keys():
-            import requests
             req = requests.get(userdict["url"]).json()
-            return self.git_get_name(req)
+            return functions.git_get_name(req)
         else:
             return userdict["login"]
 
-@self.function
-def git_allowed(self, req):
-    try:
-        _ = req['message']
-    except:
-        req['message'] = None
-    try:
-        if req['message'].startswith("API rate limit exceeded") or req['message'].startswith("Bad"):
-            print(req['message'])
-            return False
-        else:
-            return True
-    except:
+@functions
+def git_allowed(req):
+    if req.get("message") and (req['message'].startswith("API rate limit exceeded") or req['message'].startswith("Bad")):
+        print(req['message'])
+        return False
+    else:
         return True
 
-@self.regex(".*https?://(www\.)?github.com/.*")
-def github(self, msginfo):
-    import requests
+@regex_handler(".*https?://(www\.)?github.com/.*")
+def github(msginfo):
     matches = re.findall("github.com/(.+[^\s#?])", msginfo["msg"])
 
     for match in matches:
@@ -52,70 +39,55 @@ def github(self, msginfo):
         if match[-1] == "":
             del match[-1]
         headers = {'User-Agent': 'JiyuuBot'}
-        if not self.confman.get("git", "OAUTH") == "":
-            auth = (self.confman.get("git", "OAUTH", ""), "x-oauth-basic")
+        if config().get("oauth"):
+            auth = (config()["OAUTH"], "x-oauth-basic")
         else:
             auth = None
         # if github link to user profile
         if len(match) == 1:
-            req = requests.get("http://osrc.dfm.io/%s.json" % match[0]).json()
+            req = requests.get("https://api.github.com/users/" + match[0], headers=headers, auth=auth).json()
             if not "message" in req.keys():
-                self.conman.gen_send("\x02%s\x02 - %s repositories - %s contributions - Favourite language: %s (%s contributions)" % (self.git_get_name(req, True), len(req["repositories"]), req["usage"]["total"], req["usage"]["languages"][0]["language"], req["usage"]["languages"][0]["count"]), msginfo)
-            else:
-                req = requests.get("https://api.github.com/users/%s" % match[0], headers=headers, auth=auth).json()
-                if not "message" in req.keys():
-                    self.conman.gen_send(self.git_get_name(req), msginfo)
-                else:
-                    self.conman.gen_send("User %s doesn't appear to exist" % match[0], msginfo)
+                send(functions.git_get_name(req) + " on Github")
 
         # if github link to repo
         elif len(match) == 2:
             match[1] = match[1].replace(".git", "")
-            req = requests.get("https://api.github.com/repos/%s/%s" % tuple(match), headers=headers, auth=auth).json()
-            tosend = ""
-            try:
-                _ = req['message']
-            except:
-                req['message'] = None
-            if not req['message'] == "Not Found" and self.git_allowed(req):
-                try:
-                    tosend = "\x02%s\x02 - \x02%s\x02 - by \x02%s\x02 - Created: %s - Last push: %s" % (match[1], req["description"], self.git_get_name(req["owner"]), req["created_at"].split("T")[0], req["pushed_at"].split("T")[0])
-                except KeyError as e:
-                    if e.args[0] == "description":
-                        tosend = "\x02%s\x02 - by \x02%s\x02 - Created: %s - Last push: %s" % (match[1], self.git_get_name(req["owner"]), req["created_at"].split("T")[0], req["pushed_at"].split("T")[0])
-                    else:
-                        raise e
-                if req["has_issues"]:
-                    tosend += " - Open issues: %s" % req["open_issues_count"]
-                if not req["homepage"] == None and not req["homepage"] == "":
-                    tosend += " - %s" % req["homepage"]
+            req = requests.get("https://api.github.com/repos/{}/{}".format(*tuple(match)), headers=headers, auth=auth).json()
+            if functions.git_allowed(req) and not req.get('message') == "Not Found":
+                tosend = "\x02{}\x02".format(match[1])
+                if req.get("description"):
+                    tosend +=  " - \x02{}\x02".format(req["description"])
+                tosend += " - by \x02{}\x02".format(functions.git_get_name(req["owner"]))
+                tosend += " - Last push: {}".format(req["pushed_at"].split("T")[0])
+                if req["has_issues"] and req["open_issues_count"] > 0:
+                    tosend += " - Open issues: {}".format(req["open_issues_count"])
+                if req["homepage"]:
+                    tosend += " - {}".format(req["homepage"])
                 if req["fork"]:
-                    tosend += " - Forked from %s (%s)" % (req["parent"]["full_name"], req["parent"]["html_url"])
-            elif not self.git_allowed(req):
-                tosend = "\x02%s\x02 - by \x02%s\x02" % tuple(match)
-            else:
-                tosend = "Repo \x02%s/%s\x02 does not exist" % (match[-2], match[-1])
-            self.conman.gen_send(tosend, msginfo)
+                    tosend += " - Forked from {} ({})".format(req["parent"]["full_name"], req["parent"]["html_url"])
+                send(tosend)
 
         # if github link to issue
         elif match[2] == "issues" or match[2] == "pull":
             match[2] = "issues"
             # if issue number provided
             if len(match) == 4:
-                req = requests.get("https://api.github.com/repos/%s/%s/%s/%s" % tuple(match), headers=headers, auth=auth).json()
-                if self.git_allowed(req):
-                    self.conman.gen_send("%s/%s#%s - \x02%s\x02 - by \x02%s\x02 - Created: %s - Updated: %s - State: %s%s" % (match[0], match[1], req["number"], req["title"], self.git_get_name(req["user"]), req["created_at"].split("T")[0], req["updated_at"].split("T")[0], req["state"].capitalize(), (" - Tags: " + ", ".join("\x02%s\x02" % label["name"] for label in req["labels"]) if not len(req["labels"]) == 0 else "")), msginfo)
-                else:
-                    self.conman.gen_send("%s/%s#%s" % (match[0], match[1], match[3]), msginfo)
-
-        # if github link to file
-        elif match[2] == "tree" or match[2] == "blob":
-            branch = match[3]
-            filepath = "/".join(match[4:])
-            self.conman.gen_send("%s on branch %s - %s" % (filepath, branch, match[1]), msginfo)
+                req = requests.get("https://api.github.com/repos/{}/{}/{}/{}".format(*tuple(match)), headers=headers, auth=auth).json()
+                if functions.git_allowed(req):
+                    tosend = "\x02{}\x02".format(req["title"])
+                    tosend += " - by \x02{}\x02".format(functions.git_get_name(req["user"]))
+                    tosend += " - Last response: {}".format(req["updated_at"].split("T")[0])
+                    tosend += " - State: {}".format(req["state"].capitalize())
+                    if len(req["labels"]) > 0:
+                        tosend += " - Tags: "
+                        tosend += ", ".join("\x02{}\x02".format(label["name"]) for label in req["labels"])
+                    send(tosend)
 
         # if github link to commit
         elif match[2] == "commit":
-            req = requests.get("https://api.github.com/repos/%s/%s/git/%ss/%s" % tuple(match), headers=headers, auth=auth).json()
-            if self.git_allowed(req):
-                self.conman.gen_send("\x02%s\x02 - by \x02%s\x02 - %s" % (req["message"], req["author"]["name"], req["committer"]["date"].split("T")[0]), msginfo)
+            req = requests.get("https://api.github.com/repos/{}/{}/git/{}s/{}".format(*tuple(match)), headers=headers, auth=auth).json()
+            if functions.git_allowed(req):
+                tosend = "\x02{}\x02".format(req["message"])
+                tosend += " - by \x02{}\x02".format(req["author"]["name"])
+                tosend += " - {}".format(req["committer"]["date"].split("T")[0])
+                send(tosend)

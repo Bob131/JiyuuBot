@@ -1,7 +1,10 @@
-@self.regex(".*nyaa.se/\?page=view\&tid=.*")
-def nyaa(self, msginfo):
-    import requests
-    from bs4 import BeautifulSoup
+import re
+import requests
+from bs4 import BeautifulSoup
+from . import regex_handler, send
+
+@regex_handler(".*nyaa.se/\?page=view\&tid=.*")
+def nyaa(msginfo):
     urls = re.findall("https?://([\w\.]*)nyaa.se/\\?page=view&tid=(\d+)", msginfo["msg"])
     for url in urls:
         lewd, url = url
@@ -14,8 +17,8 @@ def nyaa(self, msginfo):
             up = soup.find(class_="viewsn").contents[0]
             down = soup.find(class_="viewln").contents[0]
             tosend = "\x02{}\x02 - Size: {} - Peers: {}".format(name, size, "\x033↑{}\x03/\x034↓{}\x03".format(up, down))
-            self.conman.gen_send(tosend, msginfo)
+            send(tosend)
         elif request.status_code == 200:
-            self.conman.gen_send("Error: Torrent ID \x02{}\x02 not found".format(url), msginfo)
+            send("Error: Torrent ID \x02{}\x02 not found".format(url))
         else:
-            self.conman.gen_send("Error fetching {}: {}".format(url, request.status_code.title), msginfo)
+            send("Error fetching {}: {}".format(url, request.status_code.title))

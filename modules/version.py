@@ -1,13 +1,16 @@
-@self.command(help="Prints commit hash and the time of the last git pull")
-def version(self, msginfo):
-    import datetime
-    import time
-    import math
+import os
+import datetime
+import time
+import math
+from . import command, send
+
+@command("Prints commit hash and the time of the last git pull")
+def version(msginfo):
     gitlogf = open(os.getcwd() + os.sep + ".git/logs/refs/remotes/origin/master", "r")
     gitlog = gitlogf.read()
     gitlogf.close()
     gitlog = gitlog.split("\n")[-2].split(" ")
     commit = gitlog[1][:7]
     timeg = int(gitlog[4])
-    vers = "http://github.com/JiyuuProject/JiyuuBot - Commit hash: \x02%s\x02 - Last pull: %s (%s ago)" % (commit, time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(timeg)), datetime.timedelta(seconds=math.floor(time.time()-timeg)))
-    self.conman.gen_send(vers, msginfo)
+    vers = "http://github.com/Bob131/JiyuuBot - Commit hash: \x02%s\x02 - Last pull: %s (%s ago)" % (commit, time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(timeg)), datetime.timedelta(seconds=math.floor(time.time()-timeg)))
+    send(vers)

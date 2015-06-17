@@ -1,0 +1,4 @@
+[IRC:Rizon]
+NICK = YourBot
+HOST = irc.rizon.net
+CHANS = #YourChan

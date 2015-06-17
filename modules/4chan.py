@@ -1,6 +1,9 @@
-@self.regex(".*https*://boards.4chan.org/\w+/(res|thread)/[\d\w]+.*", prefix="4chan")
-def chan(self, msginfo):
-    import requests
+import re
+import requests
+from . import regex_handler, send
+
+@regex_handler(".*https*://boards.4chan.org/\w+/(res|thread)/[\d\w]+.*")
+def chan(msginfo):
     matches = re.findall("boards.4chan.org/(\w+)/(?:res|thread)/([\d\#p]+)", msginfo["msg"])
     for match in matches:
         try:
@@ -15,6 +18,9 @@ def chan(self, msginfo):
                 thread = post
                 break
         if not thread == {}:
-            self.conman.gen_send("\x02>>%s\x02 - by \x02%s\x02 - posted at %s%s" % (thread["no"], thread["name"], thread["now"].replace("\\", ""), ("" if thread["resto"] == 0 else " - reply to %s" % thread["resto"])), msginfo)
+            resp = "\x02>>{}\x02 - by \x02{}\x02 - posted at {}".format(thread["no"], thread["name"], thread["now"].replace("\\", ""))
+            if not thread["resto"] == 0:
+                resp += " - reply to " + thread["resto"]
+            send(resp)
         else:
-            self.conman.gen_send("Post id not found", msginfo)
+            send("Post id not found")
