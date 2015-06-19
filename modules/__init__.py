@@ -114,12 +114,20 @@ def regex_handler(pattern):
         return f
     return decorator
 
-def command(f):
-    name = f.__name__
-    regex_handler("^.{}\s?.*".format(name))(f)
-    if inspect.getdoc(f):
-        help_messages[name] = inspect.getdoc(f)
-    return f
+def command(*arg):
+    def decorator(f):
+        aliases = arg
+        if callable(arg[0]):
+            aliases = [f.__name__]
+        for cmd in aliases:
+            regex_handler("^.{}[\s\Z].*".format(cmd))(f)
+        if inspect.getdoc(f):
+            help_messages[f.__name__] = inspect.getdoc(f)
+        return f
+    if callable(arg[0]):
+        return decorator(arg[0])
+    else:
+        return decorator
 
 def config():
     id = thread_details[threading.get_ident()]["_function_id"]
