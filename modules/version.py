@@ -4,8 +4,9 @@ import time
 import math
 from . import command, send
 
-@command("Prints commit hash and the time of the last git pull")
+@command
 def version(msginfo):
+    """.version - print commit hash and time of the last git pull"""
     gitlogf = open(os.getcwd() + os.sep + ".git/logs/refs/remotes/origin/master", "r")
     gitlog = gitlogf.read()
     gitlogf.close()

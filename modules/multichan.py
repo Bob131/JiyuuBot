@@ -2,8 +2,9 @@ import re
 from . import get_interface, command, raw_handler, subscribe, send
 
 @subscribe("IRC")
-@command("Displays channels being served")
+@command
 def chans(msginfo):
+    """.chans - shows channels we're serving"""
     chan_list = get_interface().joined_chans
     send("Serving {} channel{}: {}".format(len(chan_list), "s" if len(chan_list) > 1 else "", ", ".join(chan_list)))
 

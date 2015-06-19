@@ -1,5 +1,6 @@
 from . import command, send
 
-@command("get a list of bots in the current chan")
+@command
 def bots():
+    """.bots - report info about bot"""
     send("Reporting in! [Python3]")

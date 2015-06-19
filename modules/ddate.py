@@ -2,8 +2,9 @@ import datetime
 import calendar
 from . import command, send
 
-@command("Prints the current Discordian date")
+@command
 def ddate():
+    """.ddate - print the current Discordian date"""
     dSeasons = ["Chaos", "Discord", "Confusion", "Beureacracy", "The Aftermath"]
     dDays = ["Sweetmorn", "Boomtime", "Pungenday", "Prickle-Prickle", "Setting Orange"]
     year = int(datetime.datetime.now().strftime("%Y"))

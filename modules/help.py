@@ -1,7 +1,8 @@
 from . import command, send, help_messages
 
-@command("displays help. Syntax: .help [command]")
+@command
 def help(msginfo):
+    """.help [command] - display help, optionally for a specific command"""
     args = msginfo["msg"].split(" ")[1:]
     if len(args) == 0:
         cmdlist = []
@@ -14,6 +15,9 @@ def help(msginfo):
             if arg.startswith("."):
                 arg = arg[1:]
             if arg in help_messages:
-                send(".{} - {}".format(arg, help_messages[arg]))
+                messages = help_messages[arg].split("\n")
+                messages = [messages[0]] + ["  "+msg for msg in messages if not msg == messages[0] and msg.strip()]
+                for msg in messages:
+                    send(msg)
             else:
                 send("Help for \x02{}\x02 not available".format(arg))
