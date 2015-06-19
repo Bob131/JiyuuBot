@@ -1,9 +1,30 @@
 import re
-import datetime
-import locale
-import isodate
 import requests
-from . import regex_handler, config, send
+from . import functions, command, regex_handler, config, send
+
+@functions
+def youtube_info(id):
+    auth = config().get("apikey")
+    if not auth:
+        return None
+    jdata = requests.get("https://www.googleapis.com/youtube/v3/videos?id={}&key={}&part=snippet,contentDetails,statistics,status".format(id, auth)).json()
+    jdata = jdata["items"][0]
+    duration = jdata["contentDetails"]["duration"][2:].replace("H", "h ").replace("M", "m ").replace("S", "s ").strip()
+    info = "\x02{}\x02".format(jdata["snippet"]["title"])
+    info += " by \x02{}\x02".format(jdata["snippet"]["channelTitle"])
+    info += " ({})".format(duration)
+    info += " - {:,} views".format(int(jdata["statistics"]["viewCount"]))
+    likes = int(jdata["statistics"]["likeCount"])
+    dislikes = int(jdata["statistics"]["dislikeCount"])
+    if likes > 0 or dislikes > 0:
+        info += " - "
+        if likes > 0:
+            info += "\x033✔{:,}\x03".format(likes)
+        if likes > 0 and dislikes > 0:
+            info += "/"
+        if dislikes > 0:
+            info += "\x034✗{:,}\x03".format(dislikes)
+    return info
 
 @regex_handler(".*(youtube\.com|youtu\.be)/(watch\?)?([\w\d-]+).*")
 def youtube(msginfo):
@@ -14,19 +35,22 @@ def youtube(msginfo):
             match = re.findall("v=([\w-]+[^&\s])", match)[0]
         if ".be\/" in match:
             match = re.findall(".be\/([\w-]+[^&\s])")[0]
-        try:
-            auth = config().get("apikey")
-            if not auth:
-                raise ValueError
-            jdata = requests.get("https://www.googleapis.com/youtube/v3/videos?id=%s&key=%s&part=snippet,contentDetails,statistics,status" % (match, auth)).json()
-            jdata = jdata["items"][0]
-            duration = str(isodate.parse_duration(jdata["contentDetails"]["duration"]))
-            send("\x02{}\x02 - Uploaded by \x02{}\x02 - {:,} views - Duration {} - Rating \x033✔{:,}\x03/\x034✗{:,}\x03".format(jdata["snippet"]["title"], jdata["snippet"]["channelTitle"], int(jdata["statistics"]["viewCount"]), duration, int(jdata["statistics"]["likeCount"]), int(jdata["statistics"]["dislikeCount"])))
-        except KeyError as e:
-            # if stats unavailable
-            if getattr(e, 'args')[0] == "yt$statistics" or getattr(e, 'args')[0] == "yt$rating":
-                send("\x02%s\x02 - Uploaded by \x02%s\x02 - Uploaded %s - Duration %s" % (jdata["title"]["$t"], jdata["author"][0]["name"]["$t"], jdata["published"]["$t"].split("T")[0], duration))
-            else:
-                send("%s" % jdata["error"]["message"])
-        except ValueError:
-            pass
+        info = functions.youtube_info(match)
+        if info:
+            send(info)
+
+@command("yt")
+def youtube(msginfo):
+    """.youtube <query> - search for a video on YouTube"""
+    query = " ".join(msginfo["msg"].split(" ")[1:])
+    auth = config().get("apikey")
+    if auth and len(query) > 0:
+        data = requests.get("https://www.googleapis.com/youtube/v3/search?q={}&key={}&part=snippet".format(query, auth)).json()
+        if not len(data["items"]) > 0:
+            send("No results for \x02{}\x02".format(query))
+        else:
+            for result in data["items"]:
+                if result["id"]["kind"] == "youtube#video":
+                    id = result["id"]["videoId"]
+                    send("{} - https://youtu.be/{}".format(functions.youtube_info(id), id))
+                    break
