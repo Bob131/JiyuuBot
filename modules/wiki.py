@@ -10,7 +10,7 @@ def get_wiki_summary(title, lang='en'):
     summaries = requests.get("http://{}.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=&explaintext=&format=json&cllimit=10&cldir=descending&titles={}&redirects=".format(lang, title), headers={"user-agent": UA}).json()["query"]["pages"]
     summaries = summaries[list(summaries.keys())[0]]
     if not "missing" in summaries.keys():
-        return summaries["title"], re.split("(?<=[a-z]\.)\s+", summaries["extract"])[0]
+        return summaries["title"], re.split("(?<=[a-z]\.)\s+", summaries["extract"])[0].replace("\n", " ")
 
 
 @regex_handler(".*\w+.wikipedia.org/wiki/[^\#\s\?>]+.*")
@@ -24,7 +24,7 @@ def wikipedia(msginfo):
 
 @command("w", "wiki")
 def wikipedia(msginfo):
-    """.wiki <query> - searches Wikipedia for a query"""
+    """.wikipedia <query> - searches Wikipedia for a query"""
     query = " ".join(msginfo['msg'].split()[1:])
     searchresult = requests.get("https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={}&format=json&srprop=redirecttitle&srprop=snippet".format(query) , headers={"user-agent": UA}).json()['query']['search'][0]
     title = searchresult['title']
