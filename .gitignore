@@ -5,3 +5,4 @@ configs/*
 logs/*
 .idea
 JBEnv/
+/docs/_*

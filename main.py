@@ -6,6 +6,7 @@ import importlib
 
 #initialize plugin manager and load plugins
 interfaces = importlib.import_module("interfaces")
+interfaces.main()
 plugman = importlib.import_module("modules")
 plugman.setup(interfaces.interface_instances)
 

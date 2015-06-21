@@ -10,12 +10,12 @@ import unicodedata
 import re
 import traceback
 
-from . import BaseInterface, register
+from . import BaseInterface, register, recv_queue
 
 
 @register
 class IRC(BaseInterface):
-    MANDATORY_OPTIONS = ['HOST', 'NICK']
+    MANDATORY_CONFIG_OPTIONS = ['HOST', 'NICK']
 
     def init_hooks(self):
         self.s = socket.socket()
@@ -111,7 +111,7 @@ class IRC(BaseInterface):
                             msg["msg"] += char
                     msg["msg"] = msg["msg"].strip()
 
-                self.recv_queue.put(msg)
+                recv_queue.put(msg)
             except:
                 traceback.print_exc()
 

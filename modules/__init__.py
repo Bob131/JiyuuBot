@@ -81,7 +81,10 @@ class FunctionMapper:
 # don't import me!
 global threadman
 
+#: Decorator to register functions as well as object from which
+#: registered functions can be accessed
 functions = FunctionMapper()
+
 subscribers = {}
 raw_handlers = []
 regex_handlers = {}
@@ -92,57 +95,87 @@ thread_details = {}
 _config = configparser.ConfigParser()
 _config.read("{}/../configs/modules.ini".format(os.path.dirname(__file__)))
 
-def require(plugin):
-    if not plugin in functions:
-        raise Exception("Required function %s not loaded" % plugin)
+def require(name):
+    """Test whether required function has been loaded"""
+    if not name in functions:
+        raise Exception("Required function %s not loaded" % name)
 
-def subscribe(ifaces):
+def subscribe(*ifaces):
+    """Subscribe to receive messages only from specific interface types"""
     def decorator(f):
-        if isinstance(ifaces, str):
-            interfaces = [ifaces]
         subscribers[f.__name__] = ifaces
         return f
     return decorator
 
 def raw_handler(f):
+    """
+        Register function to handle raw messages.
+        Use with the `subscribe()` decorator.
+    """
     raw_handlers.append(f)
     return f
 
 def regex_handler(pattern):
+    """Call decorated function if `pattern` matches a parsed message"""
     def decorator(f):
-        regex_handlers[re.compile(pattern)] = f
+        regex_handlers[re.compile(pattern, re.IGNORECASE)] = f
         return f
     return decorator
 
-def command(*arg):
+def command(*aliases):
+    """
+        Convenience function for command-like functionality
+
+        Registers decorated function to handle regexes for lines
+        starting with .<function-name> (or an optional list of
+        aliases) and registers the function's docstring as a help
+        message
+    """
     def decorator(f):
-        aliases = arg
-        if callable(arg[0]):
-            aliases = [f.__name__]
-        for cmd in aliases:
-            regex_handler("^.{}[\s\Z].*".format(cmd))(f)
+        _aliases = aliases
+        if callable(aliases[0]):
+            _aliases = [f.__name__]
+        for cmd in _aliases:
+            regex_handler("^\.{}.*".format(cmd))(f)
         if inspect.getdoc(f):
             help_messages[f.__name__] = inspect.getdoc(f)
         return f
-    if callable(arg[0]):
-        return decorator(arg[0])
+    if callable(aliases[0]):
+        return decorator(aliases[0])
     else:
         return decorator
 
 def config():
+    """
+        Access this module's config
+
+        Returns a dictionary corresponding to the config section headed
+        by the calling function's __name__
+    """
     id = thread_details[threading.get_ident()]["_function_id"]
     if _config.has_section(id):
         return _config[id]
     return {}
 
 def get_interface():
+    """
+        Get invoking interface
+
+        Returns a reference to the interface that generated the message
+        currently being handled. The calling function must be explicitly
+        subscribed to handle messages from this interface
+    """
     msg = thread_details[threading.get_ident()]
     # make sure the module knows what its doing
     if threadman.subscribed(msg):
         return threadman.interfaces[msg["id"]]
-    raise Exception("Must be a raw handler and subscribed to access interface: "+msg["_function_id"])
+    raise Exception("Must be subscribed to access interface: "+msg["_function_id"])
 
 def send(text, dest=None, interface=None):
+    """
+        Send a message. Defaults to sending to the same destination of
+        the message currently being handled on the same interface
+    """
     id = threading.get_ident()
     msg = thread_details[id]
     if not interface:
