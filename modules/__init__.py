@@ -137,7 +137,7 @@ def command(*aliases):
             _aliases = []
         _aliases += (f.__name__,)
         for cmd in _aliases:
-            regex_handler("^\.{}[\s$].*".format(cmd))(f)
+            regex_handler("^\.{}\\b".format(cmd))(f)
         if inspect.getdoc(f):
             help_messages[f.__name__] = inspect.getdoc(f)
         return f
