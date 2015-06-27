@@ -2,7 +2,7 @@ import re
 import requests
 from . import command, send
 
-@command
+@command("isup")
 def isitup(msginfo):
     """
         .isitup <domain> - test whether a website is up
