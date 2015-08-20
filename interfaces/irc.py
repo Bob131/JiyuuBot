@@ -45,8 +45,8 @@ class IRC(BaseInterface):
                 break
             if "Nickname is already in use" in line:
                 self.config["NICK"] += "_"
-                self.s.send(bytes("NICK " + self.config["NICK"] + "\r\n", "UTF-8"))
                 self.print("Nick taken; trying {}".format(self.config["NICK"]))
+                self.s.send(bytes("NICK " + self.config["NICK"] + "\r\n", "UTF-8"))
             elif "PING" in line:
                 self.s.send(bytes("PONG :" + line[6:] + "\r\n", "UTF-8"))
 
@@ -105,6 +105,9 @@ class IRC(BaseInterface):
                             "src": line[:line.index("!")],
                             "tag": line.split(" ")[0],
                             })
+                    # correct dest
+                    if msg["dest"] == self.config["NICK"]:
+                        msg["dest"] = msg["src"]
                     # strip out non-printable chars. See http://www.unicode.org/reports/tr44/tr44-6.html#Code_Point_Labels
                     for char in line.split(":", 1)[1]:
                         if not unicodedata.category(char).startswith("C"):

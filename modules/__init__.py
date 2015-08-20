@@ -39,7 +39,7 @@ class ThreadManager:
         del thread_details[threading.get_ident()]
 
     def __call__(self, msginfo):
-        if msginfo.get("msg"):
+        if msginfo.get("msg") and msginfo.get("dest"):
             for f in [regex_handlers[regex] for regex in regex_handlers if re.match(regex, msginfo["msg"])]:
                 if self.subscribed(msginfo, f.__name__):
                     t = threading.Thread(target=self.trywrapper, args=(f, msginfo))

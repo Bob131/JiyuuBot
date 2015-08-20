@@ -96,8 +96,7 @@ from . import *
 
 
 def main():
-    """Initialise interfaces as per configuration"""
-
+    # Initialise interfaces as per configuration
     config = configparser.ConfigParser()
     config.read("{}/../configs/interfaces.ini".format(os.path.dirname(__file__)))
 
