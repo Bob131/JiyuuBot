@@ -11,7 +11,7 @@ import importlib
 import inspect
 import configparser
 
-_print = print
+_print = __builtins__["print"]
 
 def print(*args, **kwargs):
     class hack(io.TextIOWrapper):
@@ -60,6 +60,7 @@ class ThreadManager:
     # PluginMan constructor
     def __init__(self, interfaces):
         self.interfaces = interfaces
+        self.lock = threading.Lock()
 
 
 class FunctionMapper:
@@ -203,14 +204,15 @@ def load():
         module = os.path.basename(module)[:-3]
         if not module in blacklist:
             try:
-                importlib.import_module("."+module, "modules")
+                _ = importlib.import_module("."+module, "modules")
+                importlib.reload(_) # in case of a reload
                 plugincount += 1
             except:
                 traceback.print_exc()
                 failcount += 1
         elif not module == "__init__":
             blockcount += 1
-    loaded_modules = "Successfully loaded {} modules".format(plugincount)
+    loaded_modules = "Successfully (re)loaded {} modules".format(plugincount)
     if failcount > 0:
         loaded_modules += " | {} modules failed".format(failcount)
     if blockcount > 0:
