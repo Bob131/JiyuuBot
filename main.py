@@ -72,9 +72,13 @@ while 1:
         msg = interfaces.recv_queue.get(True)
         with plugman.threadman.lock:
             plugman.threadman(msg.copy())
-    except Exception as e:
-        if not type(e) == InterruptedError:
+    except (Exception, KeyboardInterrupt) as e:
+        if not isinstance(e, InterruptedError) and \
+                not isinstance(e, KeyboardInterrupt):
             traceback.print_exc()
         else:
-            observer.stop()
-            observer.join()
+            break
+
+print(" !!! Exiting...")
+observer.stop()
+observer.join()
