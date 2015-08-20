@@ -10,7 +10,16 @@ def get_wiki_summary(title, lang='en'):
     summaries = requests.get("http://{}.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=&explaintext=&format=json&cllimit=10&cldir=descending&titles={}&redirects=".format(lang, title), headers={"user-agent": UA}).json()["query"]["pages"]
     summaries = summaries[list(summaries.keys())[0]]
     if not "missing" in summaries.keys():
-        return summaries["title"], re.split("(?<=[a-z]\.)\s+", summaries["extract"])[0].replace("\n", " ")
+        if ":" in summaries["title"]:
+            summaries["title"] = summaries["title"].split(":", 1)[-1]
+            summaries["title"] = summaries["title"].split("/")[-1]
+            summaries["title"] = re.sub("(?<=[a-z])(?=[A-Z])", " ", summaries["title"])
+        try:
+            if summaries["extract"] == "":
+                raise KeyError
+            return summaries["title"], re.split("(?<=[a-z]\.)\s+", summaries["extract"])[0].replace("\n", " ")
+        except KeyError:
+            return summaries["title"]
 
 
 @regex_handler(".*\w+.wikipedia.org/wiki/[^\#\s\?>]+.*")
@@ -19,14 +28,26 @@ def wikipedia(msginfo):
     for match in matches:
         match = (match[0], urllib.parse.unquote(match[1]))
         if not match[1].startswith("File:"):
-            send("\x02{}\x02: {}".format(*functions.get_wiki_summary(match[1], match[0])))
+            summary = functions.get_wiki_summary(match[1], match[0])
+            if isinstance(summary, tuple):
+                send("\x02{}\x02: {}".format(*summary))
+            elif not summary == None:
+                send("\x02{}\x02".format(summary))
 
 
 @command("w", "wiki")
 def wikipedia(msginfo):
     """.wikipedia <query> - searches Wikipedia for a query"""
     query = " ".join(msginfo['msg'].split()[1:])
-    searchresult = requests.get("https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={}&format=json&srprop=redirecttitle&srprop=snippet".format(query) , headers={"user-agent": UA}).json()['query']['search'][0]
+    try:
+        searchresult = requests.get("https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={}&format=json&srprop=redirecttitle&srprop=snippet".format(query) , headers={"user-agent": UA}).json()['query']['search'][0]
+    except IndexError:
+        send("No results found")
+        return
     title = searchresult['title']
     url = "https://en.wikipedia.org/wiki/{}".format(urllib.parse.quote(title))
-    send("{} | {}".format(url, functions.get_wiki_summary(title)[1]))
+    summary = functions.get_wiki_summary(title)
+    if isinstance(summary, tuple):
+        send("{} | {}".format(url, summary[1]))
+    else:
+        send(url)
