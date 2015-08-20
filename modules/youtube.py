@@ -8,12 +8,18 @@ def youtube_info(id):
     if not auth:
         return None
     jdata = requests.get("https://www.googleapis.com/youtube/v3/videos?id={}&key={}&part=snippet,contentDetails,statistics,status".format(id, auth)).json()
-    jdata = jdata["items"][0]
+    try:
+        jdata = jdata["items"][0]
+    except IndexError:
+        return
     duration = jdata["contentDetails"]["duration"][2:].replace("H", "h ").replace("M", "m ").replace("S", "s ").strip()
     info = "\x02{}\x02".format(jdata["snippet"]["title"])
     info += " by \x02{}\x02".format(jdata["snippet"]["channelTitle"])
     info += " ({})".format(duration)
-    info += " - {:,} views".format(int(jdata["statistics"]["viewCount"]))
+    if int(jdata["statistics"]["viewCount"]) == 1:
+        info += " - {:,} view".format(int(jdata["statistics"]["viewCount"]))
+    else:
+        info += " - {:,} views".format(int(jdata["statistics"]["viewCount"]))
     likes = int(jdata["statistics"]["likeCount"])
     dislikes = int(jdata["statistics"]["dislikeCount"])
     if likes > 0 or dislikes > 0:
@@ -29,7 +35,7 @@ def youtube_info(id):
 @regex_handler(".*(youtube\.com|youtu\.be)/(watch\?)?([\w\d-]+).*")
 def youtube(msginfo):
     string = msginfo["msg"]
-    stuff = re.findall("youtu.be/([\w-]+[^&\s])", string) + re.findall("youtube.com/watch\?v=([\w\d-]+)", string)
+    stuff = re.findall("youtu.be/([\w-]+[^\?&\s])", string) + re.findall("youtube.com/watch\?v=([\w\d-]+)", string)
     for match in stuff:
         if "v=" in match:
             match = re.findall("v=([\w-]+[^&\s])", match)[0]
