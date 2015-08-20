@@ -52,7 +52,7 @@ class IRC(BaseInterface):
 
         self.s.settimeout(250)
 
-        self.joined_chans = []
+        self.joined_chans = set()
         for channel in self.config.get("CHANS", "").split(","):
             if not channel.strip() == "":
                 self.join_irc(channel)
@@ -94,7 +94,7 @@ class IRC(BaseInterface):
                     self.queue_raw("PONG :" + line[6:])
                 elif command == "JOIN":
                     chan = line.split(":")[1]
-                    self.joined_chans.append(chan)
+                    self.joined_chans.add(chan)
                 # we have a message! Parse it
                 elif command == "PRIVMSG":
                     # create dict for passing message info
@@ -128,7 +128,7 @@ class IRC(BaseInterface):
 
     # parting channels
     def leave_irc(self, chan):
-        del self.joined_chans[self.joined_chans.index(chan)]
+        self.joined_chans.remove(chan)
 
 
     # reconnect to IRC
