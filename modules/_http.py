@@ -7,6 +7,11 @@ handlers = {}
 
 @functions
 def http_link_handler(regex):
+    """
+        Convenience decorator for handling URLs.
+
+        Registers decorated function to handle lines containing a URL.
+    """
     def register(f):
         handlers[regex] = f
     return register

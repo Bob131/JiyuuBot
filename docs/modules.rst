@@ -10,109 +10,79 @@ Start by creating a new file in the modules folder:
 
     $ vim modules/example.py
 
-Lets try creating a new command. Import the required machinery and our
-command:
+Lets try creating a new regex handler. Import the required machinery and
+create our handler:
 
 .. code-block:: python
 
-    from . import command, send
+    from . import regex_handler, send
 
-    @command
+    @regex_handler(".*\\bhi\\b.*")
     def hello(msg):
         send("Hello!")
 
-We might want to add some aliases and a help message:
+.. NOTE:: Regex matching is done with the `IGNORECASE` flag, so this will
+          match "hi," "HI," "hI" etc
+
+This will fire off a cute "Hello!" to any message received containing
+"hi". Don't worry if this appears a little daunting, there are some
+methods below which makes things a little easier.
+
+The `modules` package contains an object which allows modules to export
+functions. This object (unsurprisingly) is called `functions`. Here it is
+in action:
 
 .. code-block:: python
 
-    from . import command, send
-
-    @command("hi")
-    def hello(msg):
-        """.hello - say hi!"""
-        send("Hello!")
-
-Great! Now we'll be run whenever someone in a chatroom that JiyuuBot
-services types ".hello" or ".hi", they'll get a cute response.
-The inclusion of this docstring also means we've been added to the list
-of commands shown by ".help" and our docstring will be shown on ".help
-hello".
-
-Lets suppose we want to respond differently depending on how we're
-invoked. We can do that by accessing the msg parameter:
-
-.. code-block:: python
-
-    from . import command, send
-
-    @command("hi")
-    def hello(msg):
-        """.hello - say hi!"""
-        # get the first word and remove the leading '.'
-        cmd = msg["msg"].split(" ")[0][1:]
-        if cmd == "hi":
-            send("Hello!")
-        elif cmd == "hello":
-            send("Hey!")
-
-But it seems this still isn't enough for our needs! We need to respond
-to people saying hello whenever!
-
-Lets start by putting our what-to-say logic in a new function:
-
-.. code-block:: python
-
-    from . import functions, command, send
+    from . import regex_handler, send, functions
 
     @functions
-    def how_to_hello(cmd):
-        if cmd == "hi":
-            return "Hello!"
-        elif cmd == "hello":
-            return "Hey!"
+    def how_to_hello(msg):
+        if "hi" in msg.lower():
+            return "Hiya!"
+        else:
+            return "Yo~"
 
-    @command("hi")
+    @regex_handler(".*\\bhi\\b.*")
+    @regex_handler(".*\\bhellow\\b.*")
     def hello(msg):
-        cmd = msg["msg"].split(" ")[0][1:]
-        send(functions.how_to_hello(cmd))
+        send(functions.how_to_hello(msg['msg']))
 
-This way if any other module needs our `how_to_hello` function, they can
-access it the same way.
+For more info on what kind of information you can expect in the `msg`
+argument, check out the interface writing docs.
 
-Now lets add regex handling:
+Writing UI via the `regex_handler` decorator is error prone and hardly
+concise. Luckily, there are modules who export functions to make our
+job a little easier. Have a look:
 
 .. code-block:: python
 
-    import re
-    from . import functions, regex_handler, command, send
+    from . import send, functions
 
-    @functions
-    def how_to_hello(cmd):
-        if cmd == "hi":
-            return "Hello!"
-        elif cmd == "hello":
-            return "Hey!"
+    @functions.command
+    def hello(_):
+        send("Hey!")
 
-    @command("hi")
-    def hello(msg):
-        cmd = msg["msg"].split(" ")[0][1:]
-        send(functions.how_to_hello(cmd))
+Now if you send your JiyuuBot instance ".hello," it will respond in kind.
+We can even add aliases and a help message:
 
-    @regex_handler(".*[^a-z]hello[^a-z].*")
-    @regex_handler(".*[^a-z]hi[^a-z].*")
-    def hello(msg):
-        cmd = re.match(".*[^a-z](hi|hello)[^a-z].*").group(0)
-        send(functions.how_to_hello(cmd))
+.. code-block:: python
 
-Since regex matching is done with the `IGNORECASE` flag, this is all we
-need.
+    @functions.command("hi")
+    def hello(_):
+        """.hello - Say hi!"""
+        send("Hey!")
+
+Now our command will be executed on ".hello" or ".hi" and will appear in
+the list produced by ".help".
+
 
 
 Handling raw messages
 ^^^^^^^^^^^^^^^^^^^^^
 
 Modules can also be used to handle raw messages from interfaces. See the
-below excerpt from `modules/multichan.py`:
+below excerpt from `modules/irc.py`:
 
 .. code-block:: python
 
@@ -138,4 +108,4 @@ instance which received the message being handled and calls `get_command()`
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: modules
-   :members: 
+   :members:

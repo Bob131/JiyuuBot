@@ -65,28 +65,20 @@ class ThreadManager:
         self.lock = threading.Lock()
 
 
-class FunctionMapper:
-    def __init__(self):
-        self._functions = {}
+class functions(object):
+    """
+        Decorator to register functions for later use.
 
-    def __call__(self, f):
-        self._functions[f.__name__] = f
+        Functions listed below are exported by modules.
+    """
+
+    def __new__(self, f):
+        setattr(self, f.__name__, f)
         return f
 
-    def __getattr__(self, key):
-        return self._functions[key]
-
-    def __contains__(self, key):
-        if self._functions.get(key):
-            return True
-        return False
 
 # don't import me!
 global threadman
-
-#: Decorator to register functions as well as object from which
-#: registered functions can be accessed
-functions = FunctionMapper()
 
 subscribers = {}
 raw_handlers = []
@@ -97,10 +89,6 @@ thread_details = {}
 _config = configparser.ConfigParser()
 _config.read("{}/../configs/modules.ini".format(os.path.dirname(__file__)))
 
-def _require(name):
-    if not name in functions:
-        raise Exception("Required function %s not loaded" % name)
-
 def requires(*names):
     """
         Decorator to indicate function depends on certain `names` being
@@ -110,7 +98,8 @@ def requires(*names):
         @wraps(f)
         def require(*args, **kwargs):
             for name in names:
-                _require(name)
+                if not getattr(functions, name, None):
+                    raise Exception("Required function {} not loaded".format(name))
             return f(*args, **kwargs)
         return require
     return decorate

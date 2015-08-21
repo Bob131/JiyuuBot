@@ -7,9 +7,9 @@ help_messages = {}
 @functions
 def command(*aliases):
     """
-        Convenience function for command-like functionality
+        Convenience decorator for command-like functionality
 
-        Registers decorated function to handle regexes for lines
+        Registers decorated function to handle lines
         starting with .<function-name> (or an optional list of
         aliases) and registers the function's docstring as a help
         message
