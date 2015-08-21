@@ -2,9 +2,9 @@ import os
 import datetime
 import time
 import math
-from . import command, send
+from . import send, functions
 
-@command
+@functions.command
 def version(msginfo):
     """.version - print commit hash"""
     gitlogf = open(os.getcwd() + os.sep + ".git/logs/refs/remotes/origin/master", "r")

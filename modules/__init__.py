@@ -89,7 +89,6 @@ functions = FunctionMapper()
 subscribers = {}
 raw_handlers = []
 regex_handlers = {}
-help_messages = {}
 
 thread_details = {}
 
@@ -122,30 +121,6 @@ def regex_handler(pattern):
         regex_handlers[re.compile(pattern, re.IGNORECASE)] = f
         return f
     return decorator
-
-def command(*aliases):
-    """
-        Convenience function for command-like functionality
-
-        Registers decorated function to handle regexes for lines
-        starting with .<function-name> (or an optional list of
-        aliases) and registers the function's docstring as a help
-        message
-    """
-    def decorator(f):
-        _aliases = aliases
-        if callable(aliases[0]):
-            _aliases = []
-        _aliases += (f.__name__,)
-        for cmd in _aliases:
-            regex_handler("^\.{}\\b".format(cmd))(f)
-        if inspect.getdoc(f):
-            help_messages[f.__name__] = inspect.getdoc(f)
-        return f
-    if callable(aliases[0]):
-        return decorator(aliases[0])
-    else:
-        return decorator
 
 def config():
     """

@@ -1,6 +1,6 @@
-from . import command, send
+from . import send, functions
 
-@command
+@functions.command
 def bots():
     """.bots - report info about bot"""
     send("Reporting in! [Python3]")

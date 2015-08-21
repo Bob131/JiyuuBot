@@ -1,8 +1,8 @@
 import datetime
 import calendar
-from . import command, send
+from . import send, functions
 
-@command
+@functions.command
 def ddate():
     """.ddate - print the current Discordian date"""
     dSeasons = ["Chaos", "Discord", "Confusion", "Beureacracy", "The Aftermath"]

@@ -1,8 +1,8 @@
 import re
 import requests
-from . import command, send
+from . import send, functions
 
-@command("isup")
+@functions.command("isup")
 def isitup(msginfo):
     """
         .isitup <domain> - test whether a website is up

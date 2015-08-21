@@ -1,7 +1,7 @@
 import re
 import urllib.parse
 import requests
-from . import functions, command, send
+from . import functions, send
 
 UA = "JiyuuBot/1 (http://github.com/Bob131/JiyuuBot; bob@bob131.so) BasedOnRequests/{}".format(requests.__version__)
 
@@ -35,7 +35,7 @@ def wikipedia(msginfo):
                 send("\x02{}\x02".format(summary))
 
 
-@command("w", "wiki")
+@functions.command("w", "wiki")
 def wikipedia(msginfo):
     """.wikipedia <query> - searches Wikipedia for a query"""
     query = " ".join(msginfo['msg'].split()[1:])

@@ -1,6 +1,6 @@
 import re
 import requests
-from . import functions, command, config, send
+from . import functions, config, send
 
 @functions
 def youtube_info(id):
@@ -45,7 +45,7 @@ def youtube(msginfo):
         if info:
             send(info)
 
-@command("yt")
+@functions.command("yt")
 def youtube(msginfo):
     """.youtube <query> - search for a video on YouTube"""
     query = " ".join(msginfo["msg"].split(" ")[1:])

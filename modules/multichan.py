@@ -1,8 +1,8 @@
 import re
-from . import get_interface, command, raw_handler, subscribe, send
+from . import get_interface, raw_handler, subscribe, send, functions
 
 @subscribe("IRC")
-@command
+@functions.command
 def chans(msginfo):
     """.chans - shows channels we're serving"""
     chan_list = get_interface().joined_chans
