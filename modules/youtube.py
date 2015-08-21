@@ -1,6 +1,6 @@
 import re
 import requests
-from . import functions, command, regex_handler, config, send
+from . import functions, command, config, send
 
 @functions
 def youtube_info(id):
@@ -32,7 +32,7 @@ def youtube_info(id):
             info += "\x034✗{:,}\x03".format(dislikes)
     return info
 
-@regex_handler(".*(youtube\.com|youtu\.be)/(watch\?)?([\w\d-]+).*")
+@functions.http_link_handler(".*(youtube\.com|youtu\.be)/(watch\?)?([\w\d-]+).*")
 def youtube(msginfo):
     string = msginfo["msg"]
     stuff = re.findall("youtu.be/([\w-]+[^\?&\s])", string) + re.findall("youtube.com/watch\?v=([\w\d-]+)", string)

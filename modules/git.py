@@ -1,6 +1,6 @@
 import re
 import requests
-from . import regex_handler, functions, send, config
+from . import functions, send, config
 
 @functions
 def git_get_name(userdict):
@@ -28,7 +28,7 @@ def git_allowed(req):
     else:
         return True
 
-@regex_handler(".*https?://(www\.)?github.com/.*")
+@functions.http_link_handler(".*https?://(www\.)?github.com/.+")
 def github(msginfo):
     matches = re.findall("github.com/(.+[^\s#?])", msginfo["msg"])
 

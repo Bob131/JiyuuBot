@@ -1,7 +1,7 @@
 import re
 import urllib.parse
 import requests
-from . import functions, command, regex_handler, send
+from . import functions, command, send
 
 UA = "JiyuuBot/1 (http://github.com/Bob131/JiyuuBot; bob@bob131.so) BasedOnRequests/{}".format(requests.__version__)
 
@@ -22,7 +22,7 @@ def get_wiki_summary(title, lang='en'):
             return summaries["title"]
 
 
-@regex_handler(".*\w+.wikipedia.org/wiki/[^\#\s\?>]+.*")
+@functions.http_link_handler(".*\w+.wikipedia.org/wiki/[^\#\s\?>]+.*")
 def wikipedia(msginfo):
     matches = re.findall("(\w+).wikipedia.org/wiki/([^\#\s\?]+)", msginfo["msg"])
     for match in matches:

@@ -197,7 +197,8 @@ def load():
     plugincount = 0
     failcount = 0
     blockcount = 0
-    modules = glob.glob(os.path.dirname(__file__)+"/*.py")
+    modules = sorted(glob.glob(os.path.dirname(__file__)+"/*.py"),
+            key=lambda x: (os.path.basename(x)[0]!="_", x))
     blacklist = [m.strip() for m in _config.get("DEFAULT", "blacklist", fallback="").split(",")]
     blacklist += ["__init__"] # make sure we don't load ourselves
     for module in modules:

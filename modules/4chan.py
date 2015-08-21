@@ -1,8 +1,8 @@
 import re
 import requests
-from . import regex_handler, send
+from . import functions, send
 
-@regex_handler(".*https*://boards.4chan.org/\w+/(res|thread)/[\d\w]+.*")
+@functions.http_link_handler(".*https*://boards.4chan.org/\w+/(res|thread)/[\d\w]+.*")
 def chan(msginfo):
     matches = re.findall("boards.4chan.org/(\w+)/(?:res|thread)/([\d\#p]+)", msginfo["msg"])
     for match in matches:

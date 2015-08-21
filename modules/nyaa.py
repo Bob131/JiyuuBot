@@ -1,9 +1,9 @@
 import re
 import requests
 from bs4 import BeautifulSoup
-from . import regex_handler, send
+from . import functions, send
 
-@regex_handler(".*nyaa.se/\?page=view\&tid=.*")
+@functions.http_link_handler(".*nyaa.se/\?page=view\&tid=.*")
 def nyaa(msginfo):
     urls = re.findall("https?://([\w\.]*)nyaa.se/\\?page=view&tid=(\d+)", msginfo["msg"])
     for url in urls:
