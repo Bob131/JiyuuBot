@@ -1,5 +1,6 @@
 import re
 import requests
+import traceback
 import humanize
 from . import send, regex_handler, functions
 
@@ -21,6 +22,8 @@ def http_link_handler(regex):
 def headers_to_readable(headers, url=None):
     readable = ""
     if 'content-type' in headers:
+        headers['content-type'] = re.split(";\s?",
+                headers['content-type'])[0]
         readable += headers['content-type']
     else:
         return
@@ -61,4 +64,4 @@ def link_dispatch(msg):
         assert(info != None)
         send(info)
     except:
-        pass
+        traceback.print_exc()
