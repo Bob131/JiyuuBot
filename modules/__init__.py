@@ -11,6 +11,8 @@ import importlib
 import inspect
 import configparser
 
+from functools import wraps
+
 _print = __builtins__["print"]
 
 def print(*args, **kwargs):
@@ -35,7 +37,7 @@ class ThreadManager:
         except Exception as e:
             traceback.print_exc()
             if msginfo.get("msg"):
-                send("Error executing {}: {}".format(command, e))
+                send("Error executing {}: {}".format(f, e))
         del thread_details[threading.get_ident()]
 
     def __call__(self, msginfo):
@@ -95,10 +97,23 @@ thread_details = {}
 _config = configparser.ConfigParser()
 _config.read("{}/../configs/modules.ini".format(os.path.dirname(__file__)))
 
-def require(name):
-    """Test whether required function has been loaded"""
+def _require(name):
     if not name in functions:
         raise Exception("Required function %s not loaded" % name)
+
+def requires(*names):
+    """
+        Decorator to indicate function depends on certain `names` being
+        loaded in `functions`
+    """
+    def decorate(f):
+        @wraps(f)
+        def require(*args, **kwargs):
+            for name in names:
+                _require(name)
+            return f(*args, **kwargs)
+        return require
+    return decorate
 
 def subscribe(*ifaces):
     """Subscribe to receive messages only from specific interface types"""
