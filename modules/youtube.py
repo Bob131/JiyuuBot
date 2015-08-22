@@ -32,9 +32,9 @@ def youtube_info(id):
             info += "\x034✗{:,}\x03".format(dislikes)
     return info
 
-@functions.http_link_handler(".*(youtube\.com|youtu\.be)/(watch\?)?([\w\d-]+).*")
-def youtube(msginfo):
-    string = msginfo["msg"]
+@functions.http_link_handler("(youtube\.com|youtu\.be)/(watch\?)?([\w\d-]+)")
+def youtube(msg):
+    string = msg["msg"]
     stuff = re.findall("youtu.be/([\w-]+[^\?&\s])", string) + re.findall("youtube.com/watch\?v=([\w\d-]+)", string)
     for match in stuff:
         if "v=" in match:

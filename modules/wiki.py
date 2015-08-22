@@ -22,9 +22,8 @@ def get_wiki_summary(title, lang='en'):
             return summaries["title"]
 
 
-@functions.http_link_handler(".*\w+.wikipedia.org/wiki/[^\#\s\?>]+.*")
-def wikipedia(msginfo):
-    matches = re.findall("(\w+).wikipedia.org/wiki/([^\#\s\?]+)", msginfo["msg"])
+@functions.http_link_handler("(\w+).wikipedia.org/wiki/([^\#\s\?]+)")
+def wikipedia(matches):
     for match in matches:
         match = (match[0], urllib.parse.unquote(match[1]))
         if not match[1].startswith("File:"):

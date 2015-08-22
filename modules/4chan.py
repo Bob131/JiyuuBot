@@ -2,9 +2,8 @@ import re
 import requests
 from . import functions, send
 
-@functions.http_link_handler(".*https*://boards.4chan.org/\w+/(res|thread)/[\d\w]+.*")
-def chan(msginfo):
-    matches = re.findall("boards.4chan.org/(\w+)/(?:res|thread)/([\d\#p]+)", msginfo["msg"])
+@functions.http_link_handler("https?://boards.4chan.org/(\w+)/(?:res|thread)/([\d\#p]+)")
+def chan(msg, matches):
     for match in matches:
         try:
             info = requests.get("https://a.4cdn.org/%s/res/%s.json" % (match[0], match[1].split("#")[0])).json()
@@ -23,4 +22,4 @@ def chan(msginfo):
                 resp += " - reply to " + thread["resto"]
             send(resp)
         else:
-            send("Post id not found")
+            send("Post ID not found")

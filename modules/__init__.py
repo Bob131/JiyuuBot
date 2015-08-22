@@ -24,16 +24,23 @@ def print(*args, **kwargs):
     kwargs["file"] = hack
     _print(*args, **kwargs)
 
+def _dispatch_ready(f):
+    @wraps(f)
+    def dispatch(**kwargs):
+        nkwargs = {}
+        for arg in inspect.signature(f).parameters.keys():
+            if not arg in kwargs:
+                raise Exception("Requested arg '{}' not provided: {}".format(arg, f))
+            nkwargs[arg] = kwargs[arg]
+        return f(**nkwargs)
+    return dispatch
 
 class ThreadManager:
     def trywrapper(self, f, msginfo):
         msginfo["_function_id"] = f.__name__
         thread_details[threading.get_ident()] = msginfo.copy()
         try:
-            if len(inspect.signature(f).parameters) > 0:
-                f(msginfo)
-            else:
-                f()
+            f(msg=msginfo)
         except Exception as e:
             traceback.print_exc()
             if msginfo.get("msg"):
@@ -42,7 +49,7 @@ class ThreadManager:
 
     def __call__(self, msginfo):
         if msginfo.get("msg") and msginfo.get("dest"):
-            for f in [regex_handlers[regex] for regex in regex_handlers if re.match(regex, msginfo["msg"])]:
+            for f in [regex_handlers[regex] for regex in regex_handlers if re.search(regex, msginfo["msg"])]:
                 if self.subscribed(msginfo, f.__name__):
                     t = threading.Thread(target=self.trywrapper, args=(f, msginfo))
                     t.daemon = 1
@@ -116,13 +123,13 @@ def raw_handler(f):
         Register function to handle raw messages.
         Use with the `subscribe()` decorator.
     """
-    raw_handlers.append(f)
+    raw_handlers.append(_dispatch_ready(f))
     return f
 
 def regex_handler(pattern):
     """Call decorated function if `pattern` matches a parsed message"""
     def decorator(f):
-        regex_handlers[re.compile(pattern, re.IGNORECASE)] = f
+        regex_handlers[re.compile(pattern, re.IGNORECASE)] = _dispatch_ready(f)
         return f
     return decorator
 

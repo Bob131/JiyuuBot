@@ -28,10 +28,8 @@ def git_allowed(req):
     else:
         return True
 
-@functions.http_link_handler(".*https?://(www\.)?github.com/.+")
-def github(msginfo):
-    matches = re.findall("github.com/(.+[^\s#?])", msginfo["msg"])
-
+@functions.http_link_handler("https?://(?:www\.)?github.com/(.+[^\s#?])")
+def github(matches):
     for match in matches:
         match = match.split(" ")[0]
         match = match.split("/")

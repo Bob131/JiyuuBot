@@ -3,10 +3,9 @@ import requests
 from bs4 import BeautifulSoup
 from . import functions, send
 
-@functions.http_link_handler(".*nyaa.se/\?page=view\&tid=.*")
-def nyaa(msginfo):
-    urls = re.findall("https?://([\w\.]*)nyaa.se/\\?page=view&tid=(\d+)", msginfo["msg"])
-    for url in urls:
+@functions.http_link_handler("https?://([\w\.]*)nyaa.se/\?page=view&tid=(\d+)")
+def nyaa(msg, matches):
+    for url in matches:
         lewd, url = url
         request = requests.get("http://{}nyaa.se/?page=view&tid={}".format(lewd, url))
         if request.status_code == 200 and not "does not appear to be in the database" in request.text:

@@ -60,7 +60,7 @@ job a little easier. Have a look:
     from . import send, functions
 
     @functions.command
-    def hello(_):
+    def hello():
         send("Hey!")
 
 Now if you send your JiyuuBot instance ".hello," it will respond in kind.
@@ -69,7 +69,7 @@ We can even add aliases and a help message:
 .. code-block:: python
 
     @functions.command("hi")
-    def hello(_):
+    def hello():
         """.hello - Say hi!"""
         send("Hey!")
 

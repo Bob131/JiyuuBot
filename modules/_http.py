@@ -1,8 +1,7 @@
 import re
 import requests
-import traceback
 import humanize
-from . import send, regex_handler, functions
+from . import send, regex_handler, functions, _dispatch_ready
 
 handlers = {}
 
@@ -14,7 +13,7 @@ def http_link_handler(regex):
         Registers decorated function to handle lines containing a URL.
     """
     def register(f):
-        handlers[regex] = f
+        handlers[regex] = _dispatch_ready(f)
     return register
 
 
@@ -48,11 +47,11 @@ def headers_to_readable(headers, url=None):
     return readable or None
 
 
-@regex_handler(".*\\bhttps?://\w+.*")
+@regex_handler("\\bhttps?://\w+")
 def link_dispatch(msg):
     for regex in handlers:
-        if re.match(regex, msg['msg']):
-            handlers[regex](msg)
+        if re.search(regex, msg['msg']):
+            handlers[regex](msg=msg, matches=re.findall(regex, msg['msg']))
             return
 
     links = re.findall("\\b(https?://[^\s]*)\\b", msg['msg'])
@@ -64,4 +63,4 @@ def link_dispatch(msg):
         assert(info != None)
         send(info)
     except:
-        traceback.print_exc()
+        pass
