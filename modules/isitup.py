@@ -3,12 +3,12 @@ import requests
 from . import send, functions
 
 @functions.command("isup")
-def isitup(msginfo):
+def isitup(args):
     """
         .isitup <domain> - test whether a website is up
         Service provided by https://isitup.org
     """
-    domains = msginfo["msg"].split(" ")[1:]
+    domains = args[1:]
     if len(domains) > 0:
         for domain in domains:
             domain = re.sub(".*://", "", domain)

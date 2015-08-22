@@ -1,6 +1,8 @@
+import re
 import inspect
-from . import functions, regex_handler, send
+from . import functions, regex_handler, send, _dispatch_ready
 
+commands = {}
 help_messages = {}
 
 
@@ -20,7 +22,7 @@ def command(*aliases):
             _aliases = []
         _aliases += (f.__name__,)
         for cmd in _aliases:
-            regex_handler("^\.{}\\b".format(cmd))(f)
+            commands[cmd] = _dispatch_ready(f)
         if inspect.getdoc(f):
             help_messages[f.__name__] = inspect.getdoc(f)
         return f
@@ -30,10 +32,17 @@ def command(*aliases):
         return decorator
 
 
+@regex_handler("^\.\w+")
+def command_dispatch(msg):
+    cmd = re.findall("^\.(\w+)", msg['msg'])[0]
+    if cmd in commands:
+        commands[cmd](msg=msg, args=msg['msg'].split(" "))
+
+
 @command
-def help(msginfo):
+def help(args):
     """.help [command] - display help, optionally for a specific command"""
-    args = msginfo["msg"].split(" ")[1:]
+    args = args[1:]
     if len(args) == 0:
         cmdlist = []
         for key in help_messages:

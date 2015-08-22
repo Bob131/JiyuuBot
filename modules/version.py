@@ -5,7 +5,7 @@ import math
 from . import send, functions
 
 @functions.command
-def version(msginfo):
+def version():
     """.version - print commit hash"""
     gitlogf = open(os.getcwd() + os.sep + ".git/logs/refs/remotes/origin/master", "r")
     gitlog = gitlogf.read()

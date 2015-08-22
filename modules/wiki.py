@@ -35,9 +35,9 @@ def wikipedia(matches):
 
 
 @functions.command("w", "wiki")
-def wikipedia(msginfo):
+def wikipedia(args):
     """.wikipedia <query> - searches Wikipedia for a query"""
-    query = " ".join(msginfo['msg'].split()[1:])
+    query = " ".join(args[1:])
     try:
         searchresult = requests.get("https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={}&format=json&srprop=redirecttitle&srprop=snippet".format(query) , headers={"user-agent": UA}).json()['query']['search'][0]
     except IndexError:

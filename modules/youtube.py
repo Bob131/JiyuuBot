@@ -46,9 +46,9 @@ def youtube(msg):
             send(info)
 
 @functions.command("yt")
-def youtube(msginfo):
+def youtube(args):
     """.youtube <query> - search for a video on YouTube"""
-    query = " ".join(msginfo["msg"].split(" ")[1:])
+    query = " ".join(args[1:])
     auth = config().get("apikey")
     if auth and len(query) > 0:
         data = requests.get("https://www.googleapis.com/youtube/v3/search?q={}&key={}&part=snippet".format(query, auth)).json()
