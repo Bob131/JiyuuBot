@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 import time
 import traceback
 import importlib
@@ -12,9 +13,10 @@ import watchdog.observers
 
 
 #initialize plugin manager and load plugins
+plugman = importlib.import_module("modules")
+#init interfaces
 interfaces = importlib.import_module("interfaces")
 interfaces.main()
-plugman = importlib.import_module("modules")
 plugman.setup(interfaces.interface_instances)
 
 
@@ -79,6 +81,11 @@ while 1:
         else:
             break
 
+print("\b\b !!! Locking receive queue...")
+interfaces.recv_queue._lock = True
+print(" !!! Flushing send queues and destroying interfaces...")
+for iface in interfaces.interface_instances.values():
+    iface._cleanup()
 print(" !!! Exiting...")
 observer.stop()
 observer.join()

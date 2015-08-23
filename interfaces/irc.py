@@ -10,7 +10,7 @@ import unicodedata
 import re
 import traceback
 
-from . import BaseInterface, register, recv_queue
+from . import BaseInterface, register
 
 
 @register
@@ -56,6 +56,12 @@ class IRC(BaseInterface):
         for channel in self.config.get("CHANS", "").split(","):
             if not channel.strip() == "":
                 self.join_irc(channel)
+
+
+    def del_hooks(self):
+        self.queue_raw("QUIT :Bot shutdown requested")
+        self._wait_on_queue()
+        self.s.close()
 
 
     def send(self):
@@ -114,7 +120,7 @@ class IRC(BaseInterface):
                             msg["msg"] += char
                     msg["msg"] = msg["msg"].strip()
 
-                recv_queue.put(msg)
+                self.recv_queue.put(msg)
             except:
                 traceback.print_exc()
 

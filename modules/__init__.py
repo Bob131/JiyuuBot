@@ -13,8 +13,6 @@ import configparser
 
 from functools import wraps
 
-_print = __builtins__["print"]
-
 def print(*args, **kwargs):
     class hack(io.TextIOWrapper):
         def write(b):
@@ -22,7 +20,7 @@ def print(*args, **kwargs):
                 sys.stdout.write(" !!! ")
             sys.stdout.write(b)
     kwargs["file"] = hack
-    _print(*args, **kwargs)
+    __builtins__["print"](*args, **kwargs)
 
 def _dispatch_ready(f):
     @wraps(f)
