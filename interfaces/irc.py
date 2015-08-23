@@ -116,7 +116,7 @@ class IRC(BaseInterface):
                         msg["dest"] = msg["src"]
                     # strip out non-printable chars. See http://www.unicode.org/reports/tr44/tr44-6.html#Code_Point_Labels
                     for char in line.split(":", 1)[1]:
-                        if not unicodedata.category(char).startswith("C"):
+                        if not unicodedata.category(char).startswith("C") or char == "\x01":
                             msg["msg"] += char
                     msg["msg"] = msg["msg"].strip()
 
