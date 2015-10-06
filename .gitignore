@@ -6,3 +6,4 @@ logs/*
 .idea
 JBEnv/
 /docs/_*
+/modules/g-dump.txt
