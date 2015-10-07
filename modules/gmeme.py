@@ -76,10 +76,6 @@ def generate():
     return sentence
 
 
-if os.path.exists(os.path.join(os.path.dirname(__file__), "g-dump.txt")):
-    load()
-
-
 if __name__ == "__main__":
     import requests
     import sys
@@ -113,11 +109,16 @@ if __name__ == "__main__":
                 f.write("\n")
 
     else:
+        load()
         for j in range(0, 5):
             print(generate())
 
 else:
     from . import send, functions
+
+    if os.path.exists(os.path.join(os.path.dirname(__file__), "g-dump.txt")):
+        load()
+
     @functions.command
     def gmeme():
         print(__file__)
