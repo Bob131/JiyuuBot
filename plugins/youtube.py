@@ -41,7 +41,7 @@ class youtube_base:
 
 
 
-class youtube_regex(GObject.Object, JiyuuBot.PluginsBasePlugin, youtube_base):
+class youtube_regex(GObject.Object, youtube_base):
     config = GObject.Property(type=JiyuuBot.ConfigPluginConfig)
 
     def do_activate(self, config):
@@ -64,7 +64,7 @@ class youtube_regex(GObject.Object, JiyuuBot.PluginsBasePlugin, youtube_base):
 
 
 
-class youtube_cmd(GObject.Object, JiyuuBot.PluginsBasePlugin, youtube_base):
+class youtube_cmd(GObject.Object, youtube_base):
     config = GObject.Property(type=JiyuuBot.ConfigPluginConfig)
 
     def do_activate(self, config):
@@ -89,3 +89,20 @@ class youtube_cmd(GObject.Object, JiyuuBot.PluginsBasePlugin, youtube_base):
                         break
         elif not auth:
             msg.send("Cannot access Youtube API: Invalid credentials")
+
+
+class youtube_multiplex(GObject.Object, JiyuuBot.PluginsBasePlugin):
+    def do_activate(self, config):
+        self.regex = youtube_regex()
+        self.regex.do_activate(config)
+        self.cmd = youtube_cmd()
+        self.cmd.do_activate(config)
+
+    def do_should_exec(self, msg):
+        return self.regex.do_should_exec(msg) or self.cmd.do_should_exec(msg)
+
+    def do_exec(self, msg):
+        if self.regex.do_should_exec(msg):
+            self.regex.do_exec(msg)
+        if self.cmd.do_should_exec(msg):
+            self.cmd.do_exec(msg)

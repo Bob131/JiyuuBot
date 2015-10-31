@@ -27,7 +27,7 @@ class wiki_base:
                 return summaries["title"]
 
 
-class wiki_regex(GObject.Object, JiyuuBot.PluginsBasePlugin, wiki_base):
+class wiki_regex(wiki_base):
     regex = "(\w+).wikipedia.org/wiki/([^\#\s\?]+)"
 
     def do_activate(self, _):
@@ -47,7 +47,7 @@ class wiki_regex(GObject.Object, JiyuuBot.PluginsBasePlugin, wiki_base):
                     msg.send("\x02{}\x02".format(summary))
 
 
-class wiki_cmd(GObject.Object, JiyuuBot.PluginsBasePlugin, wiki_base):
+class wiki_cmd(wiki_base):
     def do_activate(self, _):
         pass
 
@@ -69,3 +69,18 @@ class wiki_cmd(GObject.Object, JiyuuBot.PluginsBasePlugin, wiki_base):
             msg.send("{} | {}".format(url, summary[1]))
         else:
             msg.send(url)
+
+
+class wiki_multiplex(GObject.Object, JiyuuBot.PluginsBasePlugin):
+    def do_activate(self, _):
+        self.regex = wiki_regex()
+        self.cmd = wiki_cmd()
+
+    def do_should_exec(self, msg):
+        return self.regex.do_should_exec(msg) or self.cmd.do_should_exec(msg)
+
+    def do_exec(self, msg):
+        if self.regex.do_should_exec(msg):
+            self.regex.do_exec(msg)
+        if self.cmd.do_should_exec(msg):
+            self.cmd.do_exec(msg)
