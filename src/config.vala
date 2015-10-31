@@ -56,7 +56,7 @@ namespace JiyuuBot {
                     var account = new AccountInfo(group.split(":")[0], group.split(":")[1]);
 
                     if (file.has_key(group, "autojoin-chats")) {
-                        account.chats = file.get_string_list(group, "autojoin-chats");
+                        account.chats = /,\s*/.split(file.get_value(group, "autojoin-chats"));
                         file.remove_key(group, "autojoin-chats");
                     }
 
