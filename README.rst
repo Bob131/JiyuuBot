@@ -1,6 +1,8 @@
 JiyuuBot
 ========
 
+**DEPRECATED**: See https://github.com/Bob131/JiyuuBot-ng
+
 .. image:: https://readthedocs.org/projects/jiyuubot/badge/?version=latest
 
 Yet another IRC bot. Requires Python 3.
