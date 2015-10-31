@@ -1,0 +1,4 @@
+[Plugin]
+Name=wiki
+Module=wiki
+Loader=python3

@@ -1,0 +1,4 @@
+[Plugin]
+Name=Four Chan
+Module=four_chan
+Loader=python3

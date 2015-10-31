@@ -1,0 +1,4 @@
+[Plugin]
+Name=bots
+Module=bots
+Loader=python3

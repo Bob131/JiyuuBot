@@ -1,0 +1,4 @@
+[Plugin]
+Name=youtube
+Module=youtube
+Loader=python3

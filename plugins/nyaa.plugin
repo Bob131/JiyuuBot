@@ -1,0 +1,4 @@
+[Plugin]
+Name=nyaa
+Module=nyaa
+Loader=python3

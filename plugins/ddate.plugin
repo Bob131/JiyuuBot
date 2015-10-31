@@ -1,0 +1,4 @@
+[Plugin]
+Name=ddate
+Module=ddate
+Loader=python3

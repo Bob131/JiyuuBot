@@ -1,0 +1,4 @@
+[Plugin]
+Name=git
+Module=git
+Loader=python3
