@@ -38,7 +38,6 @@ jiyuubot_SOURCES = \
 
 jiyuubot_VALAFLAGS = \
 	--pkg gio-2.0 \
-	--pkg libpeas-1.0 \
 	--pkg gee-0.8 \
 	--pkg libsoup-2.4 \
 	--pkg posix \
@@ -55,6 +54,7 @@ jiyuubot_CFLAGS = \
 	-DROOTDIR=\"$(abs_top_srcdir)\" \
 	-DGITREV=\"$(GIT_REV)\" \
 	-I. \
+	-I$(top_srcdir)/vapi \
 	$(jiyuubot_U_CFLAGS)
 
 jiyuubot_LDADD = \

@@ -1,4 +1,0 @@
-[Plugin]
-Name=version
-Module=version
-Loader=python3

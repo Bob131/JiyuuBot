@@ -26,10 +26,10 @@ PKG_CHECK_MODULES(jiyuubot_U, [
   gobject-2.0 >= $GOBJ_REQUIRED
   gio-2.0 >= $GIO_REQUIRED
   gee-0.8
-  libpeas-1.0
   purple
   libsoup-2.4
   python3
+  pygobject-3.0
 ])
 
 AC_SUBST([GLIB_REQUIRED])

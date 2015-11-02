@@ -22,7 +22,6 @@ class chan(GObject.Object, JiyuuBot.PluginsBasePlugin):
                 info = requests.get("https://a.4cdn.org/%s/res/%s.json" % (match[0], match[1].split("#")[0])).json()
             except ValueError:
                 break
-            print(match)
             try:
                 match = int(match[-1].split("#p")[-1])
             except ValueError:
