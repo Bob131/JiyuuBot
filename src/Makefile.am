@@ -7,7 +7,7 @@ noinst_bin_PROGRAMS = jiyuubot
 
 
 libjiyuubot_api_la_SOURCES = \
-	plugins-api.vala
+	plugin-api.vala
 
 libjiyuubot_api_la_VALAFLAGS = \
 	--pkg gio-2.0 \
@@ -31,7 +31,8 @@ libjiyuubot_api_la_LIBADD = $(jiyuubot_U_LIBS)
 
 jiyuubot_SOURCES = \
 	config.vala \
-	plugins.vala \
+	plugin-loader.vala \
+	plugin-url-handler.vala \
 	purple.vala \
 	main.vala
 
