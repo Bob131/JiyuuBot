@@ -1,11 +1,9 @@
 namespace JiyuuBot {
     namespace Plugins {
-        private class FinalURLHandler : Object, BasePlugin {
+        private class FinalURLHandler : BasePlugin {
             private const string regex = "\\b(https?://[^\\s]+)\\b";
 
-            public void activate(Config.PluginConfig _) {}
-
-            public bool should_exec(Prpl.Message msg) {
+            public override bool should_exec(Prpl.Message msg) {
                 return msg.regex(regex);
             }
 
@@ -31,7 +29,7 @@ namespace JiyuuBot {
                 return readable;
             }
 
-            public void exec(Prpl.Message msg) {
+            public override void exec(Prpl.Message msg) {
                 var session = new Soup.Session();
                 var rx = new Regex(regex, RegexCompileFlags.CASELESS);
                 MatchInfo mi;

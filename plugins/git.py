@@ -6,7 +6,7 @@ from gi.repository import JiyuuBot
 import re
 import requests
 
-class git(GObject.Object, JiyuuBot.PluginsBasePlugin):
+class git(JiyuuBot.PluginsBasePlugin):
     regex = "https?://(?:www\.)?github.com/(.+[^\s#?])"
     config = GObject.Property(type=JiyuuBot.ConfigPluginConfig)
 

@@ -7,11 +7,8 @@ import re
 import requests
 
 
-class chan(GObject.Object, JiyuuBot.PluginsBasePlugin):
+class chan(JiyuuBot.PluginsBasePlugin):
     regex = "https?://boards.4chan.org/(\w+)/(?:res|thread)/([\d]+)/([\w\-\d\#p]+)"
-
-    def do_activate(self, _):
-        pass
 
     def do_should_exec(self, msg):
         return msg.regex(self.regex, False)

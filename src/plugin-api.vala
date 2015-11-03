@@ -107,9 +107,9 @@ namespace JiyuuBot {
 
 
     namespace Plugins {
-        public interface BasePlugin : Object {
-            // plugin setup
-            public abstract void activate(Config.PluginConfig config);
+        public abstract class BasePlugin : Object {
+            // plugin setup, optional
+            public virtual void activate(Config.PluginConfig config) {}
             // test whether plugin should exec
             // true to call exec, false to do otherwise
             public abstract bool should_exec(Prpl.Message msg);

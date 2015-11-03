@@ -6,10 +6,7 @@ from gi.repository import JiyuuBot
 import datetime
 import calendar
 
-class ddate(GObject.Object, JiyuuBot.PluginsBasePlugin):
-    def do_activate(self, _):
-        pass
-
+class ddate(JiyuuBot.PluginsBasePlugin):
     def do_should_exec(self, msg):
         return msg.command('ddate')
 

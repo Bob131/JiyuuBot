@@ -7,10 +7,7 @@ import re
 import requests
 
 
-class isitup(GObject.Object, JiyuuBot.PluginsBasePlugin):
-    def do_activate(self, _):
-        pass
-
+class isitup(JiyuuBot.PluginsBasePlugin):
     def do_should_exec(self, msg):
         return msg.command('isitup') or msg.command('isup')
 

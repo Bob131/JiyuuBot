@@ -8,11 +8,8 @@ import requests
 from bs4 import BeautifulSoup
 
 
-class nyaa(GObject.Object, JiyuuBot.PluginsBasePlugin):
+class nyaa(JiyuuBot.PluginsBasePlugin):
     regex = "https?://([\w\.]*)nyaa.se/\?page=view&tid=(\d+)"
-
-    def do_activate(self, _):
-        pass
 
     def do_should_exec(self, msg):
         return msg.regex(self.regex, False)

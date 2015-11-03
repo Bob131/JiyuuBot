@@ -4,10 +4,7 @@ gi.require_version('JiyuuBot', '1.0')
 from gi.repository import JiyuuBot
 
 
-class version(GObject.Object, JiyuuBot.PluginsBasePlugin):
-    def do_activate(self, _):
-        pass
-
+class version(JiyuuBot.PluginsBasePlugin):
     def do_should_exec(self, msg):
         return msg.command('version') or msg.regex("CTCP 'VERSION'", False)
 
