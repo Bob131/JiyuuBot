@@ -46,9 +46,10 @@ namespace JiyuuBot {
             }
 
 
-            public void send(string new_message) {
+            public void send(owned string new_message) {
                 Idle.add(() => {
                     message(@"$(us): $(new_message)", null);
+                    new_message = Purple.markup_escape_text(new_message, new_message.length);
                     weak Purple.ConvChat chat = conv.get_chat_data();
                     if (chat == null) {
                         weak Purple.ConvIm im = conv.get_im_data();
