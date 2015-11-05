@@ -25,6 +25,7 @@ PKG_CHECK_MODULES(jiyuubot_U, [
   glib-2.0 >= $GLIB_REQUIRED
   gobject-2.0 >= $GOBJ_REQUIRED
   gio-2.0 >= $GIO_REQUIRED
+  gmodule-2.0
   gee-0.8
   purple
   libsoup-2.4
@@ -42,6 +43,7 @@ dnl ###########################################################################
 AC_CONFIG_FILES([
 Makefile
 src/Makefile
+plugins/Makefile
 ])
 GLIB_GSETTINGS
 LT_INIT([disable-static])

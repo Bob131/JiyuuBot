@@ -108,6 +108,9 @@ namespace JiyuuBot {
 
 
     namespace Plugins {
+        [CCode (has_target = false)]
+        public delegate Type[] RegisterPlugin();
+
         public abstract class BasePlugin : Object {
             // plugin setup, optional
             public virtual void activate(Config.PluginConfig config) {}
