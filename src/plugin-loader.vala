@@ -37,7 +37,6 @@ namespace JiyuuBot {
                     FileUtils.test(plugin_path, FileTest.IS_DIR));
 
                 extensions_store = {};
-                c_modules = {};
 
                 var loaded = 0;
                 var failed_to_load = 0;
@@ -159,7 +158,7 @@ namespace JiyuuBot {
 
                 plugins_monitor = plugin_path_file.monitor_directory(FileMonitorFlags.NONE);
                 plugins_monitor.changed.connect((file, _, ev) => {
-                    if (file.get_path().has_suffix(".py") || file.get_path().has_suffix(".la"))
+                    if (file.get_path().has_suffix(".py"))
                         if (ev == FileMonitorEvent.CHANGES_DONE_HINT)
                             load_plugins();
                 });
