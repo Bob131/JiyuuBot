@@ -109,6 +109,9 @@ namespace PyGObject {
     [CCode (cname = "pyg_enable_threads")]
     public void enable_threads();
 
+    [CCode (cname = "pygobject_new")]
+    public Python.Object new_from_obj(GLib.Object obj);
+
     [CCode (cname = "pyg_type_wrapper_new")]
     public Python.Object type_wrapper_new(GLib.Type type);
     [CCode (cname = "pyg_type_from_object")]

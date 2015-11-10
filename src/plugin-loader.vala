@@ -23,7 +23,10 @@ namespace JiyuuBot {
                 int execed = 0;
                 foreach (var ext in extensions_store) {
                     if (ext.should_exec(msg)) {
-                        ext.exec(msg);
+                        Idle.add(() => {
+                            ext.exec(msg);
+                            return false;
+                        });
                         execed++;
                     }
                 }
@@ -65,11 +68,9 @@ namespace JiyuuBot {
                 }
 
                 // load C plugins
-                var can_load = true;
-                if (Module.supported() == false) {
+                var can_load = Module.supported();
+                if (!can_load)
                     message("Error loading modules: Dynamic modules are not supported on this system");
-                    can_load = false;
-                }
                 paths.glob(Path.build_filename(plugin_path, "*.la"));
                 foreach (var path in paths.pathv) {
                     failed_to_load++;
