@@ -9,7 +9,7 @@ import requests
 
 
 class wiki_base:
-    UA = "JiyuuBot/1 (http://github.com/Bob131/JiyuuBot; bob@bob131.so) BasedOnRequests/{}".format(requests.__version__)
+    UA = "{}BasedOnRequests/{}".format(JiyuuBot.UA, requests.__version__)
 
     def get_wiki_summary(self, title, lang='en'):
         summaries = requests.get("http://{}.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=&explaintext=&format=json&cllimit=10&cldir=descending&titles={}&redirects=".format(lang, title), headers={"user-agent": self.UA}).json()["query"]["pages"]

@@ -9,6 +9,6 @@ class version(JiyuuBot.PluginsBasePlugin):
         return msg.command('version') or msg.regex("CTCP 'VERSION'", False)
 
     def do_exec(self, msg):
-        tosend = "Commit hash: {} (libpurple v{})".format(JiyuuBot.get_gitrev(), JiyuuBot.prpl_get_version())
+        tosend = "Commit hash: {} (libpurple v{})".format(JiyuuBot.misc_get_gitrev(), JiyuuBot.prpl_get_version())
         tosend += " - http://github.com/Bob131/JiyuuBot-ng"
         msg.send(tosend)

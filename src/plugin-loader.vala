@@ -17,7 +17,7 @@ namespace JiyuuBot {
             private FileMonitor plugins_monitor;
             private Python.Object python_loader;
 
-            private FinalURLHandler url_handler;
+            private FinalURLHandler? url_handler = null;
 
             public virtual signal void incoming_message(Prpl.Message msg) {
                 int execed = 0;
@@ -45,6 +45,11 @@ namespace JiyuuBot {
                 var failed_to_load = 0;
                 Posix.Glob paths = {};
 
+                var soup_session = new Soup.Session();
+                soup_session.user_agent = Misc.UA;
+                if (url_handler == null)
+                    url_handler = (FinalURLHandler) Object.new(typeof(FinalURLHandler), session: soup_session);
+
                 // load Python plugins
                 var wrapped_type = PyGObject.type_wrapper_new(typeof(BasePlugin));
                 paths.glob(Path.build_filename(plugin_path, "*.py"));
@@ -62,7 +67,7 @@ namespace JiyuuBot {
                     var type = PyGObject.type_from_object(init_types[i]);
                     i++;
                     var name = ((Python.String) init_types[i]).to_string();
-                    var instance = (BasePlugin) Object.new(type);
+                    var instance = (BasePlugin) Object.new(type, session: soup_session);
                     extensions_store += instance;
                     instance.activate(configs.get_group(name));
                 }
@@ -100,7 +105,7 @@ namespace JiyuuBot {
                             success = false;
                             break;
                         }
-                        var instance = (BasePlugin) Object.new(type);
+                        var instance = (BasePlugin) Object.new(type, session: soup_session);
                         extensions_store += instance;
                         instance.activate(configs.get_group(base_name.replace(".la", "")));
                     }
@@ -133,8 +138,6 @@ namespace JiyuuBot {
                 var plugin_path_file = File.new_for_path(plugin_path);
 
                 configs = new Config.PluginConfigStore();
-
-                url_handler = new FinalURLHandler();
 
                 if (!Python.is_initialized()) {
                     Python.initialize_ex(false);

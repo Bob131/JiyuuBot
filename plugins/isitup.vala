@@ -6,13 +6,11 @@ class isitup : Plugins.BasePlugin {
     }
 
     public override void exec(Prpl.Message msg) {
-        var session = new Soup.Session();
-        session.user_agent = "JiyuuBot ";
         foreach (var domain in msg.get_args()) {
             domain = /\w+:\/\//.replace(domain, -1, 0, "");
             domain = domain.split("/")[0];
             var message = new Soup.Message("GET", @"https://isitup.org/$domain.json");
-            session.queue_message(message, (_, __) => {
+            this.session.queue_message(message, (_, __) => {
                 var parser = new Json.Parser();
                 parser.load_from_data((string) message.response_body.flatten().data);
                 var data = parser.get_root().get_object();

@@ -5,8 +5,13 @@ void message(string text, void* _) {
 
 
 namespace JiyuuBot {
-    public string get_gitrev() {
-        return git_rev;
+    namespace Misc {
+        // use with libsoup, requests etc.
+        public const string UA = "JiyuuBot (http://github.com/Bob131/JiyuuBot-ng; bob@bob131.so) ";
+
+        public string get_gitrev() {
+            return git_rev;
+        }
     }
 
 
@@ -112,6 +117,8 @@ namespace JiyuuBot {
         public delegate Type[] RegisterPlugin();
 
         public abstract class BasePlugin : Object {
+            public Soup.Session session {construct; protected get;}
+
             // plugin setup, optional
             public virtual void activate(Config.PluginConfig config) {}
             // test whether plugin should exec

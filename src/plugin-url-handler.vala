@@ -36,13 +36,12 @@ namespace JiyuuBot {
             }
 
             public override void exec(Prpl.Message msg) {
-                var session = new Soup.Session();
                 var rx = new Regex(regex, RegexCompileFlags.CASELESS);
                 MatchInfo mi;
                 rx.match(msg.text, 0, out mi);
                 foreach (var url in mi.fetch_all()) {
                     var message = new Soup.Message("HEAD", url);
-                    session.queue_message(message, (_who, __dontcare) => {
+                    this.session.queue_message(message, (_who, __dontcare) => {
                         if (message.status_code == 200) {
                             double? length;
                             var readable = headers_to_readable(message.response_headers, out length);
@@ -54,9 +53,9 @@ namespace JiyuuBot {
                                 message.got_chunk.connect((buf) => {
                                     recv_length += buf.length;
                                     if (recv_length > 1048576)
-                                        session.cancel_message(message, 400);
+                                        this.session.cancel_message(message, 400);
                                 });
-                                session.queue_message(message, (_, __) => {
+                                this.session.queue_message(message, (_, __) => {
                                     var text = (string) message.response_body.flatten().data;
                                     // anger the regex gods
                                     MatchInfo title_stuff;

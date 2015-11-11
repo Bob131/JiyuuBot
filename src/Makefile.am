@@ -12,6 +12,7 @@ libjiyuubot_api_la_SOURCES = \
 libjiyuubot_api_la_VALAFLAGS = \
 	--pkg gio-2.0 \
 	--pkg gee-0.8 \
+	--pkg libsoup-2.4 \
 	--pkg purple \
 	--pkg constants \
 	--thread \
