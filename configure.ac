@@ -29,6 +29,7 @@ PKG_CHECK_MODULES(jiyuubot_U, [
   gee-0.8
   purple
   libsoup-2.4
+  json-glib-1.0
   libxml-2.0
   python3
   pygobject-3.0
