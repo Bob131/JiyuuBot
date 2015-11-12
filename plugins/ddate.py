@@ -7,6 +7,9 @@ import datetime
 import calendar
 
 class ddate(JiyuuBot.PluginsBasePlugin):
+    def do_activate(self, help, _):
+        help.add('ddate', 'show the current discordian date')
+
     def do_should_exec(self, msg):
         return msg.command('ddate')
 
@@ -19,7 +22,7 @@ class ddate(JiyuuBot.PluginsBasePlugin):
         today = datetime.date(year, month, day)
         boolLeapYear = calendar.isleap(year)
         if boolLeapYear and month == 2 and day == 29:
-            send("Today is St. Tib's Day, {} YOLD".format(year + 1166))
+            msg.send("Today is St. Tib's Day, {} YOLD".format(year + 1166))
             return
         dayofYear = today.timetuple().tm_yday - 1
         if boolLeapYear and dayofYear >=60:

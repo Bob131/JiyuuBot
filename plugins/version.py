@@ -5,6 +5,9 @@ from gi.repository import JiyuuBot
 
 
 class version(JiyuuBot.PluginsBasePlugin):
+    def do_activate(self, help, _):
+        help.add('version', 'show what commit hash the JiyuuBot core was built from')
+
     def do_should_exec(self, msg):
         return msg.command('version') or msg.regex("CTCP 'VERSION'", False)
 

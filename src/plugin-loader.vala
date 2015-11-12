@@ -49,6 +49,8 @@ namespace JiyuuBot {
                 soup_session.user_agent = Misc.UA;
                 if (url_handler == null)
                     url_handler = (FinalURLHandler) Object.new(typeof(FinalURLHandler), session: soup_session);
+                var help = new Help();
+                extensions_store += help;
 
                 // load Python plugins
                 var wrapped_type = PyGObject.type_wrapper_new(typeof(BasePlugin));
@@ -69,7 +71,7 @@ namespace JiyuuBot {
                     var name = ((Python.String) init_types[i]).to_string();
                     var instance = (BasePlugin) Object.new(type, session: soup_session);
                     extensions_store += instance;
-                    instance.activate(configs.get_group(name));
+                    instance.activate(help, configs.get_group(name));
                 }
 
                 // load C plugins
@@ -107,7 +109,7 @@ namespace JiyuuBot {
                         }
                         var instance = (BasePlugin) Object.new(type, session: soup_session);
                         extensions_store += instance;
-                        instance.activate(configs.get_group(base_name.replace(".la", "")));
+                        instance.activate(help, configs.get_group(base_name.replace(".la", "")));
                     }
                     if (!success)
                         continue;

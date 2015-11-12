@@ -33,6 +33,7 @@ libjiyuubot_api_la_LIBADD = $(jiyuubot_U_LIBS)
 jiyuubot_SOURCES = \
 	config.vala \
 	plugin-loader.vala \
+	plugin-help.vala \
 	plugin-url-handler.vala \
 	purple.vala \
 	main.vala

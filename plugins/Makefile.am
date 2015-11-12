@@ -13,6 +13,7 @@ base_CFLAGS = \
 base_VALAFLAGS = \
 	--pkg gio-2.0 \
 	--pkg gee-0.8 \
+	--pkg libsoup-2.4 \
 	--pkg purple \
 	--pkg jiyuubot-api \
 	--vapidir $(top_srcdir)/vapi \
@@ -34,7 +35,6 @@ bots_la_LDFLAGS = $(base_LDFLAGS)
 isitup_la_SOURCES = isitup.vala
 isitup_la_CFLAGS = $(base_CFLAGS)
 isitup_la_VALAFLAGS = \
-	--pkg libsoup-2.4 \
 	--pkg json-glib-1.0 \
 	$(base_VALAFLAGS)
 isitup_la_LIBADD = $(base_LIBADD)

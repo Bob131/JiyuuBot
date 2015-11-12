@@ -44,7 +44,7 @@ class youtube_base:
 class youtube_regex(JiyuuBot.PluginsBasePlugin, youtube_base):
     config = GObject.Property(type=JiyuuBot.ConfigPluginConfig)
 
-    def do_activate(self, config):
+    def do_activate(self, _, config):
         self.config = config
 
     def do_should_exec(self, msg):
@@ -67,8 +67,9 @@ class youtube_regex(JiyuuBot.PluginsBasePlugin, youtube_base):
 class youtube_cmd(JiyuuBot.PluginsBasePlugin, youtube_base):
     config = GObject.Property(type=JiyuuBot.ConfigPluginConfig)
 
-    def do_activate(self, config):
+    def do_activate(self, help, config):
         self.config = config
+        help.add('youtube', 'search YouTube for supplied search term')
 
     def do_should_exec(self, msg):
         return msg.command('yt') or msg.command('youtube')

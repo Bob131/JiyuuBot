@@ -11,7 +11,7 @@ class git(JiyuuBot.PluginsBasePlugin):
     config = GObject.Property(type=JiyuuBot.ConfigPluginConfig)
 
 
-    def do_activate(self, config):
+    def do_activate(self, _, config):
         self.config = config
 
 
