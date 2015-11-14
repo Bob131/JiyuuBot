@@ -90,7 +90,7 @@ class git(JiyuuBot.PluginsBasePlugin):
                     req = requests.get("https://api.github.com/repos/{}/{}/{}/{}".format(*tuple(match)), headers=headers, auth=auth).json()
                     if self.git_allowed(req):
                         tosend = "{}".format(req["title"])
-                        tosend += " - by {}".format(functions.git_get_name(req["user"]))
+                        tosend += " - by {}".format(self.git_get_name(req["user"]))
                         tosend += " - Last response: {}".format(req["updated_at"].split("T")[0])
                         tosend += " - State: {}".format(req["state"].capitalize())
                         if len(req["labels"]) > 0:
