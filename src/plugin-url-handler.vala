@@ -36,7 +36,7 @@ namespace JiyuuBot {
                         var readable = type.dup();
                         if (message.status_code == 200)
                             readable += readable_size(data.length);
-                        else if (message.status_code == 400 && message.response_headers.get_one("content-length") != null)
+                        else if (message.response_headers.get_one("content-length") != null)
                             readable += readable_size(double.parse(message.response_headers.get_one("content-length")));
                         if (type == "text/html") {
                             var text = (string) data.data;
