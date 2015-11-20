@@ -40,7 +40,7 @@ namespace JiyuuBot {
                                 size_t recv_length = 0;
                                 message.got_chunk.connect((buf) => {
                                     recv_length += buf.length;
-                                    if (recv_length > 1048576)
+                                    if (recv_length > 40960)
                                         this.session.cancel_message(message, Soup.Status.CANCELLED);
                                 });
                                 this.session.queue_message(message, (_, __) => {
