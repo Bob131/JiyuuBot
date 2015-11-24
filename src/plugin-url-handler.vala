@@ -21,6 +21,21 @@ namespace JiyuuBot {
                 return ", %.*f %s".printf(i, size, units[i]);
             }
 
+            private string? get_title(Xml.Node* data) {
+                for (var node = data->children; node != null; node = node->next) {
+                    if (node->type == Xml.ElementType.ELEMENT_NODE) {
+                        if (node->name == "title")
+                            return node->get_content();
+                        else if (node->children != null) {
+                            var result = get_title(node);
+                            if (result != null)
+                                return result;
+                        }
+                    }
+                }
+                return null;
+            }
+
             public override void exec(Prpl.Message msg) {
                 var sniffer = new Soup.ContentSniffer();
                 var rx = new Regex(regex, RegexCompileFlags.CASELESS);
@@ -54,19 +69,15 @@ namespace JiyuuBot {
                                             readable += readable_size(double.parse(message.response_headers.get_one("content-length")));
                                         if (type == "text/html") {
                                             var text = (string) data.data;
-                                            // anger the regex gods
-                                            MatchInfo title_stuff;
-                                            var ___ = /(?<=\<title\>).*?(?=\<.title\>)/si.match(text, 0, out title_stuff);
-                                            var title = title_stuff.fetch(0);
+                                            string? title = null;
+                                            var doc = Html.Doc.read_doc(text, "");
+                                            if (doc != null) {
+                                                var doc_root = doc->get_root_element();
+                                                if (doc_root != null)
+                                                    title = get_title(doc_root);
+                                            }
                                             if (title != null) {
                                                 title = /\s+/s.replace(title, -1, 0, " ").strip();
-                                                MatchInfo char_ents;
-                                                var ____ = /&[\w\d]+?;/i.match(title, 0, out char_ents);
-                                                foreach (var entity in char_ents.fetch_all()) {
-                                                    var desc = Html.EntityDesc.lookup(/[&;]/.replace(entity, -1, 0, ""));
-                                                    if (desc != null)
-                                                        title = title.replace(entity, ((char) desc->value).to_string());
-                                                }
                                                 readable = @"$(title) [$(readable)]";
                                             }
                                         }

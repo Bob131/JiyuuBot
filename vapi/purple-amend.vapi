@@ -3,11 +3,11 @@ namespace PurpleAmend {
     [CCode (cname = "PurpleCoreUiOps")]
     [Compact]
     public struct CoreUiOps {
-	public weak GLib.Callback debug_ui_init;
-	public weak GLib.Callback get_ui_info;
-	public weak GLib.Callback quit;
-	public weak GLib.Callback ui_init;
-	public weak GLib.Callback ui_prefs_init;
+        public weak GLib.Callback debug_ui_init;
+        public weak GLib.Callback get_ui_info;
+        public weak GLib.Callback quit;
+        public weak GLib.Callback ui_init;
+        public weak GLib.Callback ui_prefs_init;
     }
     public class Core {
         public static void set_ui_ops (ref PurpleAmend.CoreUiOps ops);
