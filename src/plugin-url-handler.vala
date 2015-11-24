@@ -70,7 +70,8 @@ namespace JiyuuBot {
                                         if (type == "text/html") {
                                             var text = (string) data.data;
                                             string? title = null;
-                                            var doc = Html.Doc.read_doc(text, "");
+                                            var doc = Html.Doc.read_doc(text, "", null,
+                                                Html.ParserOption.RECOVER|Html.ParserOption.NOERROR|Html.ParserOption.NOWARNING);
                                             if (doc != null) {
                                                 var doc_root = doc->get_root_element();
                                                 if (doc_root != null)
