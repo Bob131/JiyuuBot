@@ -21,21 +21,6 @@ namespace JiyuuBot {
                 return ", %.*f %s".printf(i, size, units[i]);
             }
 
-            private string? get_title(Xml.Node* data) {
-                for (var node = data->children; node != null; node = node->next) {
-                    if (node->type == Xml.ElementType.ELEMENT_NODE) {
-                        if (node->name == "title")
-                            return node->get_content();
-                        else if (node->children != null) {
-                            var result = get_title(node);
-                            if (result != null)
-                                return result;
-                        }
-                    }
-                }
-                return null;
-            }
-
             public override void exec(Prpl.Message msg) {
                 var sniffer = new Soup.ContentSniffer();
                 var rx = new Regex(regex, RegexCompileFlags.CASELESS);
@@ -70,12 +55,11 @@ namespace JiyuuBot {
                                         if (type == "text/html") {
                                             var text = (string) data.data;
                                             string? title = null;
-                                            var doc = Html.Doc.read_doc(text, "", null,
-                                                Html.ParserOption.RECOVER|Html.ParserOption.NOERROR|Html.ParserOption.NOWARNING);
+                                            var doc = Misc.SaneDoc.read_doc(text);
                                             if (doc != null) {
-                                                var doc_root = doc->get_root_element();
-                                                if (doc_root != null)
-                                                    title = get_title(doc_root);
+                                                var title_tags = doc->find_all(Misc.CssToXPath.tag("title"));
+                                                if (title_tags.length > 0)
+                                                    title = title_tags[0]->get_content();
                                             }
                                             if (title != null) {
                                                 title = /\s+/s.replace(title, -1, 0, " ").strip();

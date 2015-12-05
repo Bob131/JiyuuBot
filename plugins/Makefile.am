@@ -2,7 +2,8 @@ noinst_libdir = $(abs_builddir)
 
 noinst_lib_LTLIBRARIES = \
 	bots.la \
-	isitup.la
+	isitup.la \
+	nyaa.la
 
 
 base_CFLAGS = \
@@ -39,3 +40,11 @@ isitup_la_VALAFLAGS = \
 	$(base_VALAFLAGS)
 isitup_la_LIBADD = $(base_LIBADD)
 isitup_la_LDFLAGS = $(base_LDFLAGS)
+
+nyaa_la_SOURCES = nyaa.vala
+nyaa_la_CFLAGS = $(base_CFLAGS)
+nyaa_la_VALAFLAGS = \
+	--pkg libxml-2.0 \
+	$(base_VALAFLAGS)
+nyaa_la_LIBADD = $(base_LIBADD)
+nyaa_la_LDFLAGS = $(base_LDFLAGS)

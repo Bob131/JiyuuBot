@@ -5,12 +5,41 @@ void message(string text, void* _) {
 
 
 namespace JiyuuBot {
+    // some helpers
     namespace Misc {
         // use with libsoup, requests etc.
         public const string UA = "JiyuuBot (http://github.com/Bob131/JiyuuBot-ng; bob@bob131.so) ";
 
         public string get_gitrev() {
             return git_rev;
+        }
+
+        [Compact]
+        public class SaneDoc : Html.Doc {
+            public static SaneDoc* read_doc(string cur) {
+                return (SaneDoc) Html.Doc.read_doc(cur, "", null,
+                    Html.ParserOption.RECOVER|Html.ParserOption.NOERROR|Html.ParserOption.NOWARNING);
+            }
+
+            public Xml.Node*[] find_all(string xpath) {
+                var context = new Xml.XPath.Context(this);
+                var obj = context.eval(xpath);
+                Xml.Node*[] nodes = {};
+                for (var i = 0; i < obj->nodesetval->length(); i++) {
+                    nodes += obj->nodesetval->item(i);
+                }
+                return nodes;
+            }
+        }
+
+        namespace CssToXPath {
+            public string class(string cls) {
+                return @"//*[contains(concat(\" \", @class, \" \"), \" $cls \")]";
+            }
+
+            public string tag(string t) {
+                return @"//$t";
+            }
         }
     }
 
