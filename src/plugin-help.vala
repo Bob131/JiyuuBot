@@ -17,8 +17,11 @@ namespace JiyuuBot {
                         else
                             msg.send(@"Command '$cmd' unknown");
                     }
-                } else
-                    msg.send("Available commands: %s".printf(string.joinv(" ", infos.keys.to_array())));
+                } else {
+                    var commands = infos.keys.to_array();
+                    qsort_with_data(commands, sizeof(string), (CompareDataFunc) strcmp);
+                    msg.send("Available commands: %s".printf(string.joinv(" ", commands)));
+                }
             }
 
             public void add(string command, string help_info) {
