@@ -45,8 +45,8 @@ class wiki_regex(JiyuuBot.PluginsBasePlugin, wiki_base):
 
 
 class wiki_cmd(JiyuuBot.PluginsBasePlugin, wiki_base):
-    def do_activate(self, help, _):
-        help.add('wikipedia', 'search Wikipedia for supplied search term')
+    def do_activate(self):
+        self.get_help().add('wikipedia', 'search Wikipedia for supplied search term')
 
     def do_should_exec(self, msg):
         return msg.command('w') or msg.command('wiki') or msg.command('wikipedia')

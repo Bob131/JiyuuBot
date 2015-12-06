@@ -10,7 +10,7 @@ import requests
 
 class youtube_base:
     def youtube_info(self, id):
-        auth = self.config.get_value("APIKey")
+        auth = self.get_config().get_value("APIKey")
         if not auth:
             print("Bad credentials")
             return None
@@ -42,11 +42,6 @@ class youtube_base:
 
 
 class youtube_regex(JiyuuBot.PluginsBasePlugin, youtube_base):
-    config = GObject.Property(type=JiyuuBot.ConfigPluginConfig)
-
-    def do_activate(self, _, config):
-        self.config = config
-
     def do_should_exec(self, msg):
         return msg.regex('(youtube\.com|youtu\.be)/(watch\?)?([\w\d-]+)', False)
 
@@ -65,11 +60,8 @@ class youtube_regex(JiyuuBot.PluginsBasePlugin, youtube_base):
 
 
 class youtube_cmd(JiyuuBot.PluginsBasePlugin, youtube_base):
-    config = GObject.Property(type=JiyuuBot.ConfigPluginConfig)
-
-    def do_activate(self, help, config):
-        self.config = config
-        help.add('youtube', 'search YouTube for supplied search term')
+    def do_activate(self):
+        self.get_help().add('youtube', 'search YouTube for supplied search term')
 
     def do_should_exec(self, msg):
         return msg.command('yt') or msg.command('youtube')
@@ -77,7 +69,7 @@ class youtube_cmd(JiyuuBot.PluginsBasePlugin, youtube_base):
     def do_exec(self, msg):
         args = msg.get_args()
         query = " ".join(args)
-        auth = self.config.get_value("APIKey")
+        auth = self.get_config().get_value("APIKey")
         if auth and len(query) > 0:
             data = requests.get("https://www.googleapis.com/youtube/v3/search?q={}&key={}&part=snippet".format(query, auth)).json()
             if not len(data["items"]) > 0:

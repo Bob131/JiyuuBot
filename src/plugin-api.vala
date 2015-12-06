@@ -151,9 +151,11 @@ namespace JiyuuBot {
 
         public abstract class BasePlugin : Object {
             public Soup.Session session {construct; protected get;}
+            public HelpInfoRegistrar help {construct; protected get;}
+            public Config.PluginConfig config {construct; protected get;}
 
-            // plugin setup, optional
-            public virtual void activate(HelpInfoRegistrar registrar, Config.PluginConfig config) {}
+            // runs on plugin load; optional
+            public virtual void activate() {}
             // test whether plugin should exec
             // true to call exec, false to do otherwise
             public abstract bool should_exec(Prpl.Message msg);

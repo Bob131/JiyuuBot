@@ -8,11 +8,6 @@ import requests
 
 class git(JiyuuBot.PluginsBasePlugin):
     regex = "https?://(?:www\.)?github.com/(.+[^\s#?])"
-    config = GObject.Property(type=JiyuuBot.ConfigPluginConfig)
-
-
-    def do_activate(self, _, config):
-        self.config = config
 
 
     def do_should_exec(self, msg):
@@ -53,8 +48,8 @@ class git(JiyuuBot.PluginsBasePlugin):
             if match[-1] == "":
                 del match[-1]
             headers = {'User-Agent': 'JiyuuBot'}
-            if self.config.has_key("Oauth"):
-                auth = (self.config.get_value("Oauth"), "x-oauth-basic")
+            if self.get_config().has_key("Oauth"):
+                auth = (self.get_config().get_value("Oauth"), "x-oauth-basic")
             else:
                 auth = None
 

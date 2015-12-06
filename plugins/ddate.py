@@ -7,8 +7,8 @@ import datetime
 import calendar
 
 class ddate(JiyuuBot.PluginsBasePlugin):
-    def do_activate(self, help, _):
-        help.add('ddate', 'show the current discordian date')
+    def do_activate(self):
+        self.get_help().add('ddate', 'show the current discordian date')
 
     def do_should_exec(self, msg):
         return msg.command('ddate')

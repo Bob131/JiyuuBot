@@ -69,9 +69,10 @@ namespace JiyuuBot {
                     var type = PyGObject.type_from_object(init_types[i]);
                     i++;
                     var name = ((Python.String) init_types[i]).to_string();
-                    var instance = (BasePlugin) Object.new(type, session: soup_session);
+                    var instance = (BasePlugin) Object.new(type,
+                        session: soup_session, help: help, config: configs.get_group(name));
                     extensions_store += instance;
-                    instance.activate(help, configs.get_group(name));
+                    instance.activate();
                 }
 
                 // load C plugins
@@ -107,9 +108,11 @@ namespace JiyuuBot {
                             success = false;
                             break;
                         }
-                        var instance = (BasePlugin) Object.new(type, session: soup_session);
+                        var instance = (BasePlugin) Object.new(type,
+                            session: soup_session, help: help,
+                            config: configs.get_group(base_name.replace(".la", "")));
                         extensions_store += instance;
-                        instance.activate(help, configs.get_group(base_name.replace(".la", "")));
+                        instance.activate();
                     }
                     if (!success)
                         continue;

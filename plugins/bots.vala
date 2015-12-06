@@ -1,7 +1,7 @@
 using JiyuuBot;
 
 class bots : Plugins.BasePlugin {
-    public override void activate(Plugins.HelpInfoRegistrar help, Config.PluginConfig _) {
+    public override void activate() {
         help.add("bots", "announce my presence as a bot");
     }
 

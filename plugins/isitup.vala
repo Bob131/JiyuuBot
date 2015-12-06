@@ -1,7 +1,7 @@
 using JiyuuBot;
 
 class isitup : Plugins.BasePlugin {
-    public override void activate(Plugins.HelpInfoRegistrar help, Config.PluginConfig _) {
+    public override void activate() {
         help.add("isitup", "checks whether supplied domains are responsive");
     }
 
