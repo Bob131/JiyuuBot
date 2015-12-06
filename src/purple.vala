@@ -44,8 +44,23 @@ namespace JiyuuBot {
                 return Source.remove(tag);
             }
 
+            private static string construct_account_id(Purple.Account account) {
+                return string.join(":", account.get_username(), account.get_protocol_id());
+            }
+
+            private static int join_on_invite(Purple.Account account,
+                                              string inviter,
+                                              string chat,
+                                              string? invite_message,
+                                              HashTable components,
+                                              void* data)
+            {
+                self.accounts[construct_account_id(account)].add_chat(chat);
+                return 1;
+            }
+
             private static void join_chats(Purple.Connection conn) {
-                var acc_id = conn.get_account().get_username();
+                var acc_id = string.join(":", conn.get_account().get_username(), conn.get_account().get_protocol_id());
 
                 foreach (var chat_name in self.accounts[acc_id].chats) {
                     HashTable? hash = null;
@@ -83,32 +98,35 @@ namespace JiyuuBot {
                 PurpleAmend.Core.set_ui_ops(ref ui_ops);
 
                 loop_ops = {
-                    (GLib.Callback) input_handler,
+                    (Callback) input_handler,
                     null,
-                    (GLib.Callback) source_remove,
-                    (GLib.Callback) timeout_add,
+                    (Callback) source_remove,
+                    (Callback) timeout_add,
                     null,
-                    (GLib.Callback) source_remove
+                    (Callback) source_remove
                 };
                 PurpleAmend.eventloop_set_ui_ops(ref loop_ops);
 
                 conn_ops = {
                     null,
-                    (GLib.Callback) join_chats
+                    (Callback) join_chats
                 };
                 PurpleAmend.connections_set_ui_ops(ref conn_ops);
 
                 conv_ops = {};
-                conv_ops.write_chat = (GLib.Callback) receive_message;
-                conv_ops.write_im = (GLib.Callback) receive_message;
+                conv_ops.write_chat = (Callback) receive_message;
+                conv_ops.write_im = (Callback) receive_message;
                 PurpleAmend.conversations_set_ui_ops(ref conv_ops);
 
                 Purple.Core.init(app_id);
 
+                Purple.signal_connect(Purple.conversations_get_handle(),
+                    "chat-invited", this, (Purple.Callback) join_on_invite, null);
+
                 Purple.set_blist(Purple.blist_new());
 
                 foreach (var account_info in accounts) {
-                    var account = new Purple.Account(account_info.id, account_info.protocol);
+                    var account = new Purple.Account(account_info.username, account_info.protocol);
 
                     account_info.settings.map_iterator().foreach((key, val) => {
                         if (val.get_type_string() == "b")

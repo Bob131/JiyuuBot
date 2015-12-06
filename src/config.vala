@@ -2,21 +2,46 @@ namespace JiyuuBot {
     namespace Config {
         public class AccountInfo : Object {
             public string id {construct; get;}
+            public string username {construct; get;}
             public string protocol {construct; get;}
 
             public Purple.Account account;
-
             public Gee.HashMap<string, Variant> settings = new Gee.HashMap<string, Variant>();
-            public string[] chats = {};
 
-            public AccountInfo(string id, string p) {
-                Object(id: id, protocol: p);
+            public signal void chats_altered();
+            private Gee.HashSet<string> _chats = new Gee.HashSet<string>();
+            public string[] chats {
+                owned get {
+                    string[] r = {};
+                    foreach (var chat in _chats) {
+                        r += chat;
+                    }
+                    return r;
+                }
+            }
+
+            public void add_chat(string chat) {
+                _chats.add(chat);
+                chats_altered();
+            }
+
+            public void remove_chat(string chat) {
+                _chats.remove(chat);
+                chats_altered();
+            }
+
+            public AccountInfo(string id, string[] chats) {
+                Object(id: id, username: id.split(":")[0], protocol: id.split(":")[1]);
+                foreach (var chat in chats) {
+                    _chats.add(chat);
+                }
             }
         }
 
 
         public class AccountList : Object {
-            private Gee.HashMap<string, AccountInfo> accounts;
+            public Gee.HashMap<string, AccountInfo> accounts {construct; private get;}
+            public KeyFile file {construct; private get;}
 
             public int length {
                 get {
@@ -37,11 +62,10 @@ namespace JiyuuBot {
             }
 
             public AccountList.load_from_config() {
-                Object();
+                Object(accounts: new Gee.HashMap<string, AccountInfo>(), file: new KeyFile());
                 var config_path = Path.build_filename(root_dir, "config", "purple.ini");
-                var file = new KeyFile();
                 try {
-                    file.load_from_file(config_path, 0);
+                    file.load_from_file(config_path, KeyFileFlags.KEEP_COMMENTS|KeyFileFlags.KEEP_TRANSLATIONS);
                 } catch (Error e) {
                     stderr.printf(@"Could not read config file: $(e.message)\n");
                     Posix.exit(1);
@@ -53,14 +77,20 @@ namespace JiyuuBot {
                         continue;
                     }
 
-                    var account = new AccountInfo(group.split(":")[0], group.split(":")[1]);
-
+                    string[] chats = {};
                     if (file.has_key(group, "autojoin-chats")) {
-                        account.chats = /,\s*/.split(file.get_value(group, "autojoin-chats"));
-                        file.remove_key(group, "autojoin-chats");
+                        chats = /,\s*/.split(file.get_value(group, "autojoin-chats").replace("\"", ""));
                     }
+                    var account = new AccountInfo(group, chats);
+
+                    account.chats_altered.connect(() => {
+                        file.set_string(account.id, "autojoin-chats", "\"" + string.joinv(", ", account.chats) + "\"");
+                        file.save_to_file(config_path);
+                    });
 
                     foreach (var key in file.get_keys(group)) {
+                        if (key == "autojoin-chats")
+                            continue;
                         try {
                             var variant = Variant.parse(null, file.get_value(group, key));
 
@@ -81,10 +111,6 @@ namespace JiyuuBot {
                     stderr.printf("No accounts defined in purple.ini, exiting\n");
                     Posix.exit(1);
                 }
-            }
-
-            construct {
-                accounts = new Gee.HashMap<string, AccountInfo>();
             }
         }
 
