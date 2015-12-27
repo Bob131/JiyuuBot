@@ -85,7 +85,7 @@ namespace JiyuuBot {
             {
                 if (sender != conv.get_gc().get_display_name() && sender != null) {
                     var unescaped = Purple.unescape_html(Purple.markup_strip_html(msg));
-                    var purple_message = new Message(sender, unescaped, conv);
+                    var purple_message = new Message(sender, unescaped, msg, conv);
                     self.incoming_message(purple_message);
                 }
             }

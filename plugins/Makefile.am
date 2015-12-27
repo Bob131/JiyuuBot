@@ -3,7 +3,8 @@ noinst_libdir = $(abs_builddir)
 noinst_lib_LTLIBRARIES = \
 	bots.la \
 	isitup.la \
-	nyaa.la
+	nyaa.la \
+	uno.la
 
 
 base_CFLAGS = \
@@ -49,3 +50,11 @@ nyaa_la_VALAFLAGS = \
 	$(base_VALAFLAGS)
 nyaa_la_LIBADD = $(base_LIBADD)
 nyaa_la_LDFLAGS = $(base_LDFLAGS)
+
+uno_la_SOURCES = uno.vala
+uno_la_CFLAGS = $(base_CFLAGS)
+uno_la_VALAFLAGS = \
+	--pkg posix \
+	$(base_VALAFLAGS)
+uno_la_LIBADD = $(base_LIBADD)
+uno_la_LDFLAGS = $(base_LDFLAGS)

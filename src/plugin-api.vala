@@ -52,6 +52,7 @@ namespace JiyuuBot {
         public class Message : Object {
             public string sender {construct; get;}
             public string text {construct; get;}
+            public string raw_text {construct; get;}
 
             public weak Purple.Conversation conv {construct; private get;}
 
@@ -66,8 +67,8 @@ namespace JiyuuBot {
             }}
 
 
-            public Message(string sender, string text, Purple.Conversation conv) {
-                Object(sender: sender, text: text, conv: conv);
+            public Message(string sender, string text, string raw, Purple.Conversation conv) {
+                Object(sender: sender, text: text, raw_text: raw, conv: conv);
             }
 
             construct {
