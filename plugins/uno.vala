@@ -76,8 +76,12 @@ class UnoGame : Object {
             if ("[" in pot_card && "]" in pot_card) {
                 var color = pot_card.split("\"")[1];
                 var number = pot_card.split("[")[1].split("]")[0];
-                if (color == "cyan")
+                if (color == "cyan" || color == "light blue")
                     color = "B";
+                else if (number == "WD4" || number == "W")
+                    color = "W";
+                else if (color == null)
+                    color = "W";
                 else
                     color = color.up()[0].to_string();
                 _cards += new UnoCard(CardColor.get(color), CardNumber.get(number));
@@ -166,7 +170,7 @@ class UnoPlayer : Plugins.BasePlugin {
         } else if (games.has_key(msg.sender)) {
             if (msg.text == "Game stopped." || msg.text.has_prefix("We have a winner!")) {
                 games.unset(msg.sender);
-            } else if (msg.us.down() in msg.text && "top card" in msg.text.down()) {
+            } else if (msg.us.down() in msg.text.down() && "top card" in msg.text.down()) {
                 var top_card = msg.text.split("Top Card: ")[1];
                 var color = top_card[1].to_string();
                 var number = top_card.split("[")[1].replace("]", "");
@@ -190,11 +194,9 @@ class UnoPlayer : Plugins.BasePlugin {
         var game = games[msg.sender];
         game.enumerate_cards(msg.raw_text);
         UnoCard? to_play = null;
-        foreach (var card in game.cards) {
-            var score = game.score_card(card);
+        foreach (var card in game.cards)
             if (game.card_playable(card) && game.score_card(card) > game.score_card(to_play))
                 to_play = card;
-        }
         if (to_play != null)
             game.play_card(to_play);
         else
