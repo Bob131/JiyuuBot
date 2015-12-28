@@ -163,7 +163,7 @@ class UnoPlayer : Plugins.BasePlugin {
 
     public override bool should_exec(Prpl.Message msg) {
         if (msg.at_us) {
-            if (msg.text.down() == ".uno")
+            if (msg.text.down().strip() == ".uno")
                 msg.send(".uno");
             else if (msg.text.down().has_prefix(".deal")) {
                 games.foreach((e) => {
@@ -175,7 +175,7 @@ class UnoPlayer : Plugins.BasePlugin {
                     return true;
                 });
             }
-        } else if (msg.text.has_prefix("IRC-UNO started by")) {
+        } else if (msg.text.has_prefix("IRC-UNO started by") && !games.has_key(msg.sender)) {
             games.set(msg.sender, new UnoGame(msg.sender, msg));
             if (!(msg.us.down() in msg.text.down()))
                 msg.send(".ujoin");
