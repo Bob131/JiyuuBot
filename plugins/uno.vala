@@ -80,8 +80,6 @@ class UnoGame : Object {
                     color = "B";
                 else if (number == "WD4" || number == "W")
                     color = "W";
-                else if (color == null)
-                    color = "W";
                 else
                     color = color.up()[0].to_string();
                 _cards += new UnoCard(CardColor.get(color), CardNumber.get(number));
