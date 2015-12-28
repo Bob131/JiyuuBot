@@ -164,9 +164,23 @@ class UnoPlayer : Plugins.BasePlugin {
     }
 
     public override bool should_exec(Prpl.Message msg) {
-        if (msg.text.has_prefix("IRC-UNO started by")) {
+        if (msg.at_us) {
+            if (msg.text.down().has_prefix(".uno"))
+                msg.send(".uno");
+            else if (msg.text.down().has_prefix(".deal")) {
+                games.foreach((e) => {
+                    var game = e.value;
+                    if (game.init_message.chat == msg.chat) {
+                        game.init_message.send(".deal");
+                        return false;
+                    }
+                    return true;
+                });
+            }
+        } else if (msg.text.has_prefix("IRC-UNO started by")) {
             games.set(msg.sender, new UnoGame(msg.sender, msg));
-            msg.send(".ujoin");
+            if (!(msg.us.down() in msg.text.down()))
+                msg.send(".ujoin");
         } else if (games.has_key(msg.sender)) {
             if (@"new owner is $(games[msg.sender].init_message.us.down())" in msg.text.down()) {
                 games[msg.sender].init_message.send(".unostop");
