@@ -168,7 +168,9 @@ class UnoPlayer : Plugins.BasePlugin {
             games.set(msg.sender, new UnoGame(msg.sender, msg));
             msg.send(".ujoin");
         } else if (games.has_key(msg.sender)) {
-            if (msg.text == "Game stopped." || msg.text.has_prefix("We have a winner!")) {
+            if (@"new owner is $(games[msg.sender].init_message.us.down())" in msg.text.down()) {
+                games[msg.sender].init_message.send(".unostop");
+            } else if (msg.text == "Game stopped." || msg.text.has_prefix("We have a winner!")) {
                 games.unset(msg.sender);
             } else if (msg.us.down() in msg.text.down() && "top card" in msg.text.down()) {
                 var top_card = msg.text.split("Top Card: ")[1];
