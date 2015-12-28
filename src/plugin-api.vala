@@ -51,8 +51,9 @@ namespace JiyuuBot {
 
         public class Message : Object {
             public string sender {construct; get;}
-            public string text {construct; get;}
             public string raw_text {construct; get;}
+            public string text {private set; get;}
+            public bool at_us {private set; get;}
 
             public weak Purple.Conversation conv {construct; private get;}
 
@@ -67,11 +68,17 @@ namespace JiyuuBot {
             }}
 
 
-            public Message(string sender, string text, string raw, Purple.Conversation conv) {
-                Object(sender: sender, text: text, raw_text: raw, conv: conv);
-            }
+            public Message(string sender, string ptext, string raw, Purple.Conversation conv) {
+                Object(sender: sender, raw_text: raw, conv: conv);
 
-            construct {
+                text = ptext.dup();
+                var texts = Regex.split_simple(@"^$(us)[:,\\s]", text, RegexCompileFlags.CASELESS);
+                if (texts.length > 1) {
+                    texts = texts[1:texts.length];
+                    text = string.joinv(us, texts).strip();
+                    at_us = true;
+                }
+
                 string log;
                 if (sender == "")
                     log = @"$(chat): $(text)";
