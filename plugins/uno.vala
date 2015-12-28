@@ -163,7 +163,7 @@ class UnoPlayer : Plugins.BasePlugin {
 
     public override bool should_exec(Prpl.Message msg) {
         if (msg.at_us) {
-            if (msg.text.down().has_prefix(".uno"))
+            if (msg.text.down() == ".uno")
                 msg.send(".uno");
             else if (msg.text.down().has_prefix(".deal")) {
                 games.foreach((e) => {
