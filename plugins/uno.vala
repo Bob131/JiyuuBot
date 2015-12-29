@@ -21,9 +21,9 @@ enum CardColor {
 }
 
 enum CardNumber {
-    WD4, D2, R, S,
+    NULL, W,
     _0, _1, _2, _3, _4, _5, _6, _7, _8, _9,
-    W, NULL;
+    S, R, D2, WD4;
 
     public string to_string() {
         var enumc = (EnumClass) typeof(CardNumber).class_ref();
@@ -77,10 +77,10 @@ class UnoGame : Object {
             if ("[" in pot_card && "]" in pot_card) {
                 var color = pot_card.split("\"")[1];
                 var number = pot_card.split("[")[1].split("]")[0];
-                if (color == "cyan" || color == "light blue")
-                    color = "B";
-                else if (number == "WD4" || number == "W")
+                if (number == "WD4" || number == "W")
                     color = "W";
+                else if (color == "cyan" || color == "light blue")
+                    color = "B";
                 else
                     color = color.up()[0].to_string();
                 _cards += new UnoCard(CardColor.get(color), CardNumber.get(number));
@@ -110,18 +110,16 @@ class UnoGame : Object {
             }
             return true;
         });
-        if (col != null)
-            recommended_color = col;
+        recommended_color = col;
         cards = _cards;
     }
 
     public bool play_card(UnoCard card) {
         if (card.color == top_card.color || card.number == top_card.number) {
-            init_message.send(".p %s %s".printf(card.color.to_string(), card.number.to_string()));
+            init_message.send(@".p $(card.color) $(card.number)");
             return true;
         } else if (card.color == CardColor.W) {
-            init_message.send(".p %s %s".printf(card.number.to_string(),
-                recommended_color.to_string()));
+            init_message.send(@".p $(card.number) $(recommended_color)");
             return true;
         }
         return false;
@@ -135,22 +133,18 @@ class UnoGame : Object {
     public int score_card(UnoCard? card, Gee.HashMap<string, int>? hm = null) {
         if (card == null)
             return 0;
+        assert (card.number != CardNumber.NULL);
         if (hm == null)
             hm = color_rec;
-        if (recommended_color != null && top_card.color == recommended_color
-                && card.color == CardColor.W)
-            return 1;
-        if (card.number == CardNumber.WD4)
-            return 500;
-        if (card.number == CardNumber.W)
-            return (int) CardNumber.W;
+        if (card.color == CardColor.W) {
+            if (top_card.color == recommended_color || card.number == CardNumber.W)
+                return 1;
+            return int.MAX; // this means we're a WD4 that isn't going to be wasted
+        }
         var number = (int) card.number;
-        if (number > CardNumber._0)
+        if (CardNumber._0 <= number <= CardNumber._9)
             number = CardNumber._0;
-        var result = (hm[card.color.to_string()] * 10) / number;
-        if (result < 0)
-            return 1;
-        return result;
+        return hm[card.color.to_string()] * number;
     }
 
     public UnoGame(string gm, Prpl.Message msg) {
