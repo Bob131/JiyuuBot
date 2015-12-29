@@ -64,11 +64,12 @@ class UnoGame : Object {
     public UnoCard[] cards;
 
     private Gee.HashMap<string, int> color_rec;
-    public CardColor recommended_color;
+    public CardColor? recommended_color;
 
     public void enumerate_cards(string text) {
         cards = {};
         color_rec = new Gee.HashMap<string, int>();
+        recommended_color = null;
         var color_count = new Gee.HashMap<string, int>();
         UnoCard[] _cards = {};
         var tags = text.split("</FONT>");
@@ -136,6 +137,9 @@ class UnoGame : Object {
             return 0;
         if (hm == null)
             hm = color_rec;
+        if (recommended_color != null && top_card.color == recommended_color
+                && card.color == CardColor.W)
+            return 1;
         if (card.number == CardNumber.WD4)
             return 500;
         if (card.number == CardNumber.W)
