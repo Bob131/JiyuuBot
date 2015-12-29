@@ -187,7 +187,8 @@ class UnoPlayer : Plugins.BasePlugin {
             if (@"new owner is $(games[msg.sender].init_message.us.down())" in msg.text.down()) {
                 games[msg.sender].init_message.send(".unostop");
             } else if (msg.text == "Game stopped." || msg.text.has_prefix("We have a winner!")) {
-                games.unset(msg.sender);
+                if (games[msg.sender].init_message.chat == msg.chat)
+                    games.unset(msg.sender);
             } else if (msg.us.down() in msg.text.down() && "top card" in msg.text.down()) {
                 var top_card = msg.text.split("Top Card: ")[1];
                 var color = top_card[1].to_string();
