@@ -91,6 +91,8 @@ namespace JiyuuBot {
             }
 
             construct {
+                if (Environment.get_variable("PURPLE_DEBUG") != null)
+                    Purple.debug_set_enabled(true);
                 message("libpurple version: " + Purple.Core.get_version(), null);
                 Purple.util_set_user_dir("/dev/null");
 
