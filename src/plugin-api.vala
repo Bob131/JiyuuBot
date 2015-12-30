@@ -49,39 +49,51 @@ namespace JiyuuBot {
             return Purple.Core.get_version();
         }
 
+        public class Context : Object {
+            public unowned Purple.Conversation conv {construct; private get;}
+
+            public string protocol {get {
+                return this.conv.get_account().get_protocol_name();
+            }}
+            public string username {get {
+                return this.conv.get_account().get_username();
+            }}
+            public string display_name {get {
+                return this.conv.get_gc().get_display_name();
+            }}
+            public string chat {get {
+                return this.conv.get_name();
+            }}
+
+            public Context(Purple.Conversation conv) {
+                Object(conv: conv);
+            }
+        }
+
         public class Message : Object {
             public string sender {construct; get;}
             public string raw_text {construct; get;}
             public string text {private set; get;}
             public bool at_us {private set; get;}
+            public Context context {construct; get;}
 
-            public weak Purple.Conversation conv {construct; private get;}
-
-            public unowned string protocol {get {
-                return this.conv.get_account().get_protocol_name();
-            }}
-            public unowned string chat {get {
-                return this.conv.get_name();
-            }}
-            public unowned string us {get {
-                return this.conv.get_gc().get_display_name();
-            }}
-
+            private unowned Purple.Conversation conv;
 
             public Message(string sender, string ptext, string raw, Purple.Conversation conv) {
-                Object(sender: sender, raw_text: raw, conv: conv);
+                Object(sender: sender, raw_text: raw, context: new Context(conv));
+                this.conv = conv;
 
                 text = ptext.dup();
-                var texts = Regex.split_simple(@"^$(us)[:,\\s]", text, RegexCompileFlags.CASELESS);
+                var texts = Regex.split_simple(@"^$(context.display_name)[:,\\s]", text, RegexCompileFlags.CASELESS);
                 if (texts.length > 1) {
                     texts = texts[1:texts.length];
-                    text = string.joinv(us, texts).strip();
+                    text = string.joinv(context.display_name, texts).strip();
                     at_us = true;
                 }
 
                 string log;
                 if (sender == "")
-                    log = @"$(chat): $(text)";
+                    log = @"$(context.chat): $(text)";
                 else
                     log = @"$(sender): $(text)";
                 message(log, null);
@@ -90,7 +102,7 @@ namespace JiyuuBot {
 
             public void send(owned string new_message) {
                 Idle.add(() => {
-                    message(@"$(us): $(new_message)", null);
+                    message(@">$(context.chat): $(new_message)", null);
                     new_message = Purple.markup_escape_text(new_message, new_message.length);
                     weak Purple.ConvChat chat = conv.get_chat_data();
                     if (chat == null) {
@@ -121,6 +133,13 @@ namespace JiyuuBot {
                 if (args[0].has_prefix("."))
                     args = args[1:args.length];
                 return args;
+            }
+
+            public static bool same_context(Message a, Message b) {
+                return a.context.protocol == b.context.protocol &&
+                    a.context.username == b.context.username &&
+                    a.context.display_name == b.context.display_name &&
+                    a.context.chat == b.context.chat;
             }
         }
     }

@@ -1,7 +1,7 @@
 using JiyuuBot;
 
 enum CardColor {
-    W, B, R, Y, G;
+    NULL, W, B, R, Y, G;
 
     public string to_string() {
         var enumc = (EnumClass) typeof(CardColor).class_ref();
@@ -54,6 +54,28 @@ class UnoCard : Object {
     public UnoCard(CardColor color, CardNumber number) {
         Object(color: color, number: number);
     }
+
+    public UnoCard.from_text(string text) {
+        assert ("[" in text && "]" in text);
+        var color = text.split("\"")[1];
+        var number = text.split("[")[1].split("]")[0];
+        if (number == "WD4" || number == "W")
+            color = "W";
+        else if (color == "cyan" || color == "light blue")
+            color = "B";
+        else
+            color = color.up()[0].to_string();
+        Object(color: CardColor.get(color), number: CardNumber.get(number));
+    }
+
+    public static UnoCard[] all_from_text(owned string text) {
+        text = text.replace("<B>", "").replace("</B>", "");
+        UnoCard[] cards = {};
+        foreach (var pot_card in text.split("</FONT>"))
+            if (pot_card != "")
+                cards += new UnoCard.from_text(pot_card);
+        return cards;
+    }
 }
 
 class UnoGame : Object {
@@ -71,21 +93,7 @@ class UnoGame : Object {
         color_rec = new Gee.HashMap<string, int>();
         recommended_color = null;
         var color_count = new Gee.HashMap<string, int>();
-        UnoCard[] _cards = {};
-        var tags = text.split("</FONT>");
-        foreach (var pot_card in tags) {
-            if ("[" in pot_card && "]" in pot_card) {
-                var color = pot_card.split("\"")[1];
-                var number = pot_card.split("[")[1].split("]")[0];
-                if (number == "WD4" || number == "W")
-                    color = "W";
-                else if (color == "cyan" || color == "light blue")
-                    color = "B";
-                else
-                    color = color.up()[0].to_string();
-                _cards += new UnoCard(CardColor.get(color), CardNumber.get(number));
-            }
-        }
+        var _cards = UnoCard.all_from_text(text);
         foreach (var card in _cards) {
             if (card.color == CardColor.W)
                 continue;
@@ -119,6 +127,8 @@ class UnoGame : Object {
             init_message.send(@".p $(card.color) $(card.number)");
             return true;
         } else if (card.color == CardColor.W) {
+            if (recommended_color == null)
+                recommended_color = top_card.color;
             init_message.send(@".p $(card.number) $(recommended_color)");
             return true;
         }
@@ -163,32 +173,36 @@ class UnoPlayer : Plugins.BasePlugin {
         if (msg.at_us) {
             if (msg.text.down().strip() == ".uno")
                 msg.send(".uno");
-            else if (msg.text.down().has_prefix(".deal")) {
-                games.foreach((e) => {
-                    var game = e.value;
-                    if (game.init_message.chat == msg.chat) {
+            else if (msg.text.down().has_prefix(".deal"))
+                foreach (var game in games.values) {
+                    if (Prpl.Message.same_context(msg, game.init_message)) {
                         game.init_message.send(".deal");
-                        return false;
+                        break;
                     }
-                    return true;
-                });
-            }
+                }
         } else if (msg.text.has_prefix("IRC-UNO started by") && !games.has_key(msg.sender)) {
-            games.set(msg.sender, new UnoGame(msg.sender, msg));
-            if (!(msg.us.down() in msg.text.down()))
-                msg.send(".ujoin");
+            var game_in_progress = false;
+            foreach (var game in games.values) {
+                if (Prpl.Message.same_context(msg, game.init_message)) {
+                    game_in_progress = true;
+                    break;
+                }
+            }
+            if (!game_in_progress) {
+                games.set(msg.sender, new UnoGame(msg.sender, msg));
+                if (!(msg.context.display_name.down() in msg.text.down()))
+                    msg.send(".ujoin");
+            }
         } else if (games.has_key(msg.sender)) {
-            if (@"new owner is $(games[msg.sender].init_message.us.down())" in msg.text.down()) {
-                games[msg.sender].init_message.send(".unostop");
-            } else if (msg.text == "Game stopped." || msg.text.has_prefix("We have a winner!")) {
-                if (games[msg.sender].init_message.chat == msg.chat)
+            if (Prpl.Message.same_context(msg, games[msg.sender].init_message)) {
+                if (@"new owner is $(games[msg.sender].init_message.context.display_name.down())" in msg.text.down()) {
+                    games[msg.sender].init_message.send(".unostop");
+                } else if (msg.text == "Game stopped." || msg.text.has_prefix("We have a winner!")) {
                     games.unset(msg.sender);
-            } else if (msg.us.down() in msg.text.down() && "top card" in msg.text.down()) {
-                var top_card = msg.text.split("Top Card: ")[1];
-                var color = top_card[1].to_string();
-                var number = top_card.split("[")[1].replace("]", "");
-                games[msg.sender].top_card =
-                    new UnoCard(CardColor.get(color), CardNumber.get(number));
+                } else if (msg.context.display_name.down() in msg.text.down() && "Top Card: " in msg.text) {
+                    games[msg.sender].top_card =
+                        new UnoCard.from_text(msg.raw_text.split("Top Card: ")[1]);
+                }
             } else if (msg.text.has_prefix("(notice) Drawn card:")) {
                 var game = games[msg.sender];
                 var wc = game.recommended_color;
