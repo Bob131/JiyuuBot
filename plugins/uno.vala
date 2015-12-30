@@ -51,6 +51,10 @@ class UnoCard : Object {
     public CardColor color {construct; get;}
     public CardNumber number {construct; get;}
 
+    public string to_string() {
+        return @"$(color) $(number)";
+    }
+
     public UnoCard(CardColor color, CardNumber number) {
         Object(color: color, number: number);
     }
@@ -85,36 +89,39 @@ class UnoGame : Object {
     public UnoCard top_card;
     public UnoCard[] cards;
 
-    private Gee.HashMap<string, int> color_rec;
+    private Gee.HashMap<UnoCard, int> card_scores;
     public CardColor? recommended_color;
 
     public void enumerate_cards(string text) {
         cards = {};
-        color_rec = new Gee.HashMap<string, int>();
+        card_scores = new Gee.HashMap<UnoCard, int>();
         recommended_color = null;
-        var color_count = new Gee.HashMap<string, int>();
+        var color_count = new Gee.HashMap<int, int>();
+        var color_rec = new Gee.HashMap<int, int>();
         var _cards = UnoCard.all_from_text(text);
         foreach (var card in _cards) {
             if (card.color == CardColor.W)
                 continue;
-            if (!color_count.has_key(card.color.to_string()))
-                color_count.set(card.color.to_string(), 0);
-            color_count[card.color.to_string()] = color_count[card.color.to_string()] + 1;
+            if (!color_count.has_key(card.color))
+                color_count.set(card.color, 0);
+            color_count[card.color] = color_count[card.color] + 1;
         }
         foreach (var card in _cards) {
             if (card.color == CardColor.W)
                 continue;
-            if (!color_rec.has_key(card.color.to_string()))
-                color_rec.set(card.color.to_string(), 0);
-            color_rec[card.color.to_string()] = color_rec[card.color.to_string()]
-                + score_card(card, color_count);
+            if (!color_rec.has_key(card.color))
+                color_rec.set(card.color, 0);
+            color_rec[card.color] = color_rec[card.color] + _score_card(card, color_count);
+        }
+        foreach (var card in _cards) {
+            card_scores[card] = _score_card(card, color_rec);
         }
         int num = 0;
         CardColor? col = null;
         color_rec.foreach((e) => {
             if (e.value > num) {
                 num = e.value;
-                col = CardColor.get(e.key);
+                col = (CardColor) e.key;
             }
             return true;
         });
@@ -122,9 +129,35 @@ class UnoGame : Object {
         cards = _cards;
     }
 
+    private int _score_card(UnoCard card, Gee.HashMap<int, int>? hm = null) {
+        if (card.color == CardColor.W) {
+            if (top_card.color == recommended_color || card.number == CardNumber.W)
+                return 1;
+            return int.MAX; // this means we're a WD4 that isn't going to be wasted
+        }
+        var number = (int) card.number;
+        if (CardNumber._0 <= number <= CardNumber._9)
+            number = CardNumber._0;
+        return hm[card.color] * number;
+    }
+
+    public int score_card(UnoCard? card) {
+        if (card == null)
+            return 0;
+        assert (card.number != CardNumber.NULL);
+        assert (card in card_scores.keys);
+        var score = card_scores[card];
+        if (score == int.MAX)
+            return score; // don't add anything to avoid segfault/overflow/etc.
+        foreach (var icard in card_scores.keys)
+            if (card.number == icard.number && card.color != icard.color)
+                score += card_scores[icard];
+        return score;
+    }
+
     public bool play_card(UnoCard card) {
         if (card.color == top_card.color || card.number == top_card.number) {
-            init_message.send(@".p $(card.color) $(card.number)");
+            init_message.send(@".p $(card)");
             return true;
         } else if (card.color == CardColor.W) {
             if (recommended_color == null)
@@ -138,23 +171,6 @@ class UnoGame : Object {
     public bool card_playable(UnoCard card) {
         return card.color == CardColor.W || card.color == top_card.color ||
             card.number == top_card.number;
-    }
-
-    public int score_card(UnoCard? card, Gee.HashMap<string, int>? hm = null) {
-        if (card == null)
-            return 0;
-        assert (card.number != CardNumber.NULL);
-        if (hm == null)
-            hm = color_rec;
-        if (card.color == CardColor.W) {
-            if (top_card.color == recommended_color || card.number == CardNumber.W)
-                return 1;
-            return int.MAX; // this means we're a WD4 that isn't going to be wasted
-        }
-        var number = (int) card.number;
-        if (CardNumber._0 <= number <= CardNumber._9)
-            number = CardNumber._0;
-        return hm[card.color.to_string()] * number;
     }
 
     public UnoGame(string gm, Prpl.Message msg) {
