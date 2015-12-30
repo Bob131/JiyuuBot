@@ -51,7 +51,7 @@ Makefile.in
 /so_locations
 /src/Makefile.in
 /stamp-h1
-/tags
+*/tags
 /m4
 /src/*.c
 /plugins/*.c
