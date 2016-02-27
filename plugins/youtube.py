@@ -27,8 +27,12 @@ class youtube_base:
             info += " - {:,} view".format(int(jdata["statistics"]["viewCount"]))
         else:
             info += " - {:,} views".format(int(jdata["statistics"]["viewCount"]))
-        likes = int(jdata["statistics"]["likeCount"])
-        dislikes = int(jdata["statistics"]["dislikeCount"])
+        try:
+            likes = int(jdata["statistics"]["likeCount"])
+            dislikes = int(jdata["statistics"]["dislikeCount"])
+        except KeyError:
+            likes = 0
+            dislikes = 0
         if likes > 0 or dislikes > 0:
             info += " - "
             if likes > 0:
