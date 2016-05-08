@@ -19,16 +19,21 @@ libjiyuubot_api_la_VALAFLAGS = \
 	--thread \
 	--library jiyuubot-api \
 	-H jiyuubot-api.h \
-	--vapi $(top_srcdir)/vapi/jiyuubot-api.vapi \
 	--gir JiyuuBot-1.0.gir \
-	--vapidir $(top_srcdir)/vapi \
-	--target-glib $(GLIB_REQUIRED)
+	$(jiyuubot_U_VALAFLAGS)
 
 libjiyuubot_api_la_CFLAGS = \
 	-DGITREV=\"$(GIT_REV)\" \
 	$(jiyuubot_U_CFLAGS)
 
 libjiyuubot_api_la_LIBADD = $(jiyuubot_U_LIBS)
+
+
+JiyuuBot-1.0.typelib: libjiyuubot-api.la
+	$(AM_V_GEN) $(GIR_COMPILER) --shared-library libjiyuubot-api.so \
+		--output JiyuuBot-1.0.typelib JiyuuBot-1.0.gir
+
+BUILT_SOURCES = JiyuuBot-1.0.typelib
 
 
 jiyuubot_SOURCES = \
@@ -51,8 +56,7 @@ jiyuubot_VALAFLAGS = \
 	--pkg constants \
 	--pkg python \
 	--pkg jiyuubot-api \
-	--vapidir $(top_srcdir)/vapi \
-	--target-glib $(GLIB_REQUIRED)
+	$(jiyuubot_U_VALAFLAGS)
 
 jiyuubot_CFLAGS = \
 	-DAPPID=\"so.bob131.jiyuubot\" \
@@ -68,8 +72,15 @@ jiyuubot_LDADD = \
 	$(jiyuubot_U_LIBS)
 
 
-all:
-	g-ir-compiler \
-		--shared-library libjiyuubot-api.so \
-		--output JiyuuBot-1.0.typelib \
-		JiyuuBot-1.0.gir 2> /dev/null
+CLEANFILES = \
+	$(libjiyuubot_api_la_SOURCES:%.vala=%.c) \
+	$(jiyuubot_SOURCES:%.vala=%.c) \
+	$(BUILT_SOURCES) \
+	*.stamp \
+	*.stamp-t
+
+EXTRA_DIST = \
+	plugin-loader.py
+
+dist-hook:
+	cd $(distdir); rm -f $(CLEANFILES)

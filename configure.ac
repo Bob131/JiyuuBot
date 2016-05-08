@@ -4,6 +4,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIRS([m4])
 
 AM_INIT_AUTOMAKE([foreign])
+AM_SILENT_RULES([yes])
 
 AM_PROG_VALAC([0.24])
 AM_PROG_CC_C_O
@@ -16,15 +17,13 @@ dnl Dependencies
 dnl ###########################################################################
 
 GOBJECT_INTROSPECTION_CHECK([1.44.0])
-
 GLIB_REQUIRED=2.38.0
-GOBJ_REQUIRED=2.0.0
-GIO_REQUIRED=2.0.0
+AC_SUBST([GLIB_REQUIRED])
 
 PKG_CHECK_MODULES(jiyuubot_U, [
   glib-2.0 >= $GLIB_REQUIRED
-  gobject-2.0 >= $GOBJ_REQUIRED
-  gio-2.0 >= $GIO_REQUIRED
+  gobject-2.0 >= $GLIB_REQUIRED
+  gio-2.0 >= $GLIB_REQUIRED
   gmodule-2.0
   gee-0.8
   purple
@@ -35,7 +34,10 @@ PKG_CHECK_MODULES(jiyuubot_U, [
   pygobject-3.0
 ])
 
-AC_SUBST([GLIB_REQUIRED])
+AC_SUBST([jiyuubot_U_VALAFLAGS], ["--vapidir=\$(top_srcdir)/vapi \
+          --target-glib=$GLIB_REQUIRED"])
+
+AC_PATH_PROG(GIR_COMPILER, g-ir-compiler)
 
 dnl ###########################################################################
 dnl Files to generate

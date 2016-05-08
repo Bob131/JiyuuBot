@@ -19,8 +19,7 @@ base_VALAFLAGS = \
 	--pkg libxml-2.0 \
 	--pkg purple \
 	--pkg jiyuubot-api \
-	--vapidir $(top_srcdir)/vapi \
-	--target-glib $(GLIB_REQUIRED)
+	$(jiyuubot_U_VALAFLAGS)
 
 base_LIBADD = \
 	$(top_srcdir)/src/libjiyuubot-api.la \
@@ -58,3 +57,22 @@ uno_la_VALAFLAGS = \
 	$(base_VALAFLAGS)
 uno_la_LIBADD = $(base_LIBADD)
 uno_la_LDFLAGS = $(base_LDFLAGS)
+
+
+CLEANFILES = \
+	$(bots_la_SOURCES:%.vala=%.c) \
+	$(isitup_la_SOURCES:%.vala=%.c) \
+	$(nyaa_la_SOURCES:%.vala=%.c) \
+	$(uno_la_SOURCES:%.vala=%.c) \
+	*.stamp \
+	*.stamp-t
+
+EXTRA_DIST = \
+	ddate.py \
+	git.py \
+	version.py \
+	wiki.py \
+	youtube.py
+
+dist-hook:
+	cd $(distdir); rm -f $(CLEANFILES)
