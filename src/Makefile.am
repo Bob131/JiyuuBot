@@ -1,0 +1,1 @@
+SUBDIRS = libjiyuubot jiyuubot clients
