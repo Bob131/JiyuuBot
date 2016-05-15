@@ -47,6 +47,7 @@ Makefile
 src/Makefile
 src/libjiyuubot/Makefile
 src/jiyuubot/Makefile
+src/jiyuubot/tests/Makefile
 src/clients/Makefile
 ])
 LT_INIT([disable-static])

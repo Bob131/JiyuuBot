@@ -1,8 +1,13 @@
-SUBDIRS = src tests
+AM_MAKEFLAGS = --no-print-directory
+
+SUBDIRS = src
 
 docs:
 if HAS_VALADOC
 	$(AM_V_GEN) valadoc -o docs --pkg gio-2.0 --pkg telepathy-glib src/libjiyuubot/libjiyuubot.vala
+else
+	@echo "ERROR: valadoc not found in PATH"
+	return 1
 endif
 
 
