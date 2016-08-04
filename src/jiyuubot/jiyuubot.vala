@@ -15,20 +15,40 @@ class JiyuuBot.App : Application {
     bool list_proto = false;
     bool print_version = false;
 
+    KeyFile config;
+
+    void load_config() {
+        config = new KeyFile();
+        try {
+            config.load_from_file(config_path, 0);
+        } catch (Error e) {
+            fatal("Failed to load config: %s", e.message);
+            return;
+        }
+    }
+
     protected override void activate() {
         this.hold();
 
         SourceFunc signal_callback = () => {
             this.quit();
-            return false;
+            return Source.REMOVE;
         };
         Unix.signal_add(ProcessSignal.INT, (owned) signal_callback);
         Unix.signal_add(ProcessSignal.TERM, (owned) signal_callback);
 
         Unix.signal_add(ProcessSignal.HUP, () => {
-            message("Config reload stub");
+            load_config();
             return Source.CONTINUE;
         });
+
+        // TODO: implement config-finding logic
+        if (config_path == "") {
+            fatal("Config file path required");
+            return;
+        }
+
+        load_config();
     }
 
     protected override int handle_local_options(VariantDict _) {
