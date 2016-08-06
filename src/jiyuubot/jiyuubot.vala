@@ -31,44 +31,51 @@ class JiyuuBot.App : Application {
         }
     }
 
+    const string[] ignore_keys = {"connection-manager", "protocol", "rooms"};
+
     async void create_accounts() {
         foreach (var display_name in config.get_groups()) {
-            TelepathyGLib.AccountRequest req;
+            TelepathyGLib.AccountRequest acc_req;
+            string[] rooms = {};
 
             try {
-                req = new TelepathyGLib.AccountRequest(
+                acc_req = new TelepathyGLib.AccountRequest(
                     account_manager,
                     config.get_string(display_name, "connection-manager"),
                     config.get_string(display_name, "protocol"),
                     display_name);
 
                 var conman = new TelepathyGLib.ConnectionManager(
-                    account_manager.dbus_daemon, req.connection_manager, null);
+                    account_manager.dbus_daemon, acc_req.connection_manager,
+                    null);
                 yield conman.prepare_async(null);
 
                 TelepathyGLib.Protocol? _proto =
-                    conman.get_protocol_object(req.protocol);
+                    conman.get_protocol_object(acc_req.protocol);
                 if (_proto == null)
                     throw new TelepathyGLib.Error.INVALID_ARGUMENT(
                         "Protocol '%s' on connection manager '%s' %s",
-                        req.protocol, req.connection_manager, "doesn't exist");
+                        acc_req.protocol, acc_req.connection_manager, "doesn't exist");
                 var proto = (!) _proto;
 
                 foreach (var key in config.get_keys(display_name)) {
-                    if (key == "connection-manager" || key == "protocol")
+                    if (key in ignore_keys)
                         continue;
 
                     if (!proto.has_param(key))
                         throw new TelepathyGLib.Error.INVALID_ARGUMENT(
                             "Protocol '%s' does not have parameter '%s'",
-                            req.protocol, key);
+                            acc_req.protocol, key);
 
                     var tp_param = proto.get_param(key);
                     var variant = Variant.parse(tp_param.dup_variant_type(),
                         config.get_string(display_name, key));
 
-                    req.set_parameter(key, variant);
+                    acc_req.set_parameter(key, variant);
                 }
+
+                if (config.has_key(display_name, "rooms"))
+                    rooms = config.get_string_list(display_name, "rooms");
             } catch (Error e) {
                 fatal("Couldn't set up account '%s': %s", display_name,
                     e.message);
@@ -76,23 +83,44 @@ class JiyuuBot.App : Application {
             }
 
             // https://bugs.freedesktop.org/show_bug.cgi?id=97210
-            if (req.connection_manager == "idle" && req.protocol == "irc") {
-                var dict = new VariantDict(req.parameters);
+            if (acc_req.connection_manager == "idle" &&
+                    acc_req.protocol == "irc") {
+                var dict = new VariantDict(acc_req.parameters);
                 if (!dict.contains("fullname"))
-                    req.set_parameter("fullname", "Jiyuu Bot");
+                    acc_req.set_parameter("fullname", "Jiyuu Bot");
                 if (!dict.contains("username"))
-                    req.set_parameter("username", "JiyuuBot");
+                    acc_req.set_parameter("username", "JiyuuBot");
             }
 
-            req.set_enabled(true);
-            req.set_connect_automatically(true);
+            acc_req.set_enabled(true);
+            acc_req.set_connect_automatically(true);
 
+            TelepathyGLib.Account account;
             try {
-                accounts.add(yield req.create_account_async());
+                account = yield acc_req.create_account_async();
+                accounts.add(account);
             } catch (Error e) {
-                fatal("Failed to create account '%s': %s", req.display_name,
+                fatal("Failed to create account '%s': %s", acc_req.display_name,
                     e.message);
                 return;
+            }
+
+            foreach (var room in rooms) {
+                var chan_req =
+                    new TelepathyGLib.AccountChannelRequest.text(account,
+                    TelepathyGLib.USER_ACTION_TIME_NOT_USER_ACTION);
+                chan_req.set_target_id(TelepathyGLib.HandleType.ROOM, room);
+
+                // we don't want to yield, but we want to notify on error
+                chan_req.ensure_channel_async.begin((string) null, null,
+                    (obj, res) => {
+                        try {
+                            chan_req.ensure_channel_async.end(res);
+                        } catch (Error e) {
+                            warning("Failed to join room '%s': %s", room,
+                                e.message);
+                        }
+                    });
             }
         }
 
