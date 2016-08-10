@@ -1,4 +1,4 @@
-AC_INIT([jiyuubot], m4_esyscmd_s([echo "3-`git describe --always`"]))
+AC_INIT([jiyuubot], [0.3])
 
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIRS([m4])
@@ -8,6 +8,13 @@ AM_SILENT_RULES([yes])
 
 AM_PROG_VALAC([0.28])
 AM_PROG_CC_C_O
+
+SHORT_VERSION=$(echo $VERSION | cut -d. -f-2)
+AC_SUBST([SHORT_VERSION])
+
+LT_INIT([disable-static])
+
+CFLAGS="$CFLAGS -w"
 
 dnl ###########################################################################
 dnl Dependencies
@@ -34,8 +41,6 @@ AC_SUBST([jiyuubot_U_VALAFLAGS], ["--pkg gio-2.0 \
 AC_PATH_PROG([VALADOC], [valadoc], [xno])
 AM_CONDITIONAL([HAS_VALADOC], [test x$has_valadoc != xno])
 
-CFLAGS="$CFLAGS -w"
-
 GLIB_TESTS
 
 dnl ###########################################################################
@@ -50,5 +55,4 @@ src/jiyuubot/Makefile
 src/jiyuubot/tests/Makefile
 src/clients/Makefile
 ])
-LT_INIT([disable-static])
 AC_OUTPUT
