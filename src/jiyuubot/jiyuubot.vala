@@ -1,13 +1,16 @@
 [CCode (cname = "VERSION")]
 extern const string DAEMON_VERSION;
 
-// Don't use [NoReturn], execution should return to the mainloop for shutdown
+[NoReturn]
 [Diagnostics]
 void fatal(string message, ...) {
     stderr.printf("** FATAL: ");
     stderr.vprintf(message, va_list());
     stderr.printf("\n");
-    Process.raise(ProcessSignal.TERM);
+
+    Application.get_default().shutdown();
+
+    Process.exit(1);
 }
 
 class JiyuuBot.App : Application {
@@ -17,6 +20,7 @@ class JiyuuBot.App : Application {
     bool print_version = false;
 
     KeyFile config;
+
     TelepathyGLib.AccountManager account_manager;
     GenericSet<TelepathyGLib.Account> accounts =
         new GenericSet<TelepathyGLib.Account>(direct_hash, direct_equal);
@@ -27,7 +31,6 @@ class JiyuuBot.App : Application {
             config.load_from_file(config_path, 0);
         } catch (Error e) {
             fatal("Failed to load config: %s", e.message);
-            return;
         }
     }
 
@@ -79,7 +82,6 @@ class JiyuuBot.App : Application {
             } catch (Error e) {
                 fatal("Couldn't set up account '%s': %s", display_name,
                     e.message);
-                return;
             }
 
             // https://bugs.freedesktop.org/show_bug.cgi?id=97210
@@ -102,7 +104,6 @@ class JiyuuBot.App : Application {
             } catch (Error e) {
                 fatal("Failed to create account '%s': %s", acc_req.display_name,
                     e.message);
-                return;
             }
 
             foreach (var room in rooms) {
@@ -146,11 +147,18 @@ class JiyuuBot.App : Application {
             }
     }
 
+    protected override void shutdown() {
+        var disconnected = false;
+        tear_down_accounts.begin(() => {disconnected = true;});
+        while (!disconnected)
+            MainContext.default().iteration(true);
+    }
+
     protected override void activate() {
         this.hold();
 
         SourceFunc signal_callback = () => {
-            tear_down_accounts.begin(() => {this.quit();});
+            this.quit();
             return Source.REMOVE;
         };
         Unix.signal_add(ProcessSignal.INT, (owned) signal_callback);
@@ -165,19 +173,15 @@ class JiyuuBot.App : Application {
         });
 
         // TODO: implement config-finding logic
-        if (config_path == "") {
+        if (config_path == "")
             fatal("Config file path required");
-            return;
-        }
 
         load_config();
 
         TelepathyGLib.AccountManager? accman =
             TelepathyGLib.AccountManager.dup();
-        if (accman == null) {
+        if (accman == null)
             fatal("Failed to obtain account manager reference");
-            return;
-        }
         account_manager = (!) accman;
 
         create_accounts.begin();
@@ -195,8 +199,6 @@ class JiyuuBot.App : Application {
                             .end(res);
                     } catch (GLib.Error e) {
                         fatal("DBus probing failed: %s", e.message);
-                        this.release();
-                        return;
                     }
                     foreach (var manager in managers) {
                         stdout.printf("%s:\n", manager.cm_name);
