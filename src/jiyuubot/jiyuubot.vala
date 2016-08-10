@@ -1,18 +1,6 @@
 [CCode (cname = "VERSION")]
 extern const string DAEMON_VERSION;
 
-[NoReturn]
-[Diagnostics]
-void fatal(string message, ...) {
-    stderr.printf("** FATAL: ");
-    stderr.vprintf(message, va_list());
-    stderr.printf("\n");
-
-    Application.get_default().shutdown();
-
-    Process.exit(1);
-}
-
 class JiyuuBot.App : Application {
     string config_path = "";
     bool list_proto = false;

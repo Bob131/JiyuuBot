@@ -1,4 +1,5 @@
 AM_MAKEFLAGS = --no-print-directory
+DISTCHECK_CONFIGURE_FLAGS = --enable-introspection
 
 SUBDIRS = src
 
@@ -10,9 +11,7 @@ else
 	return 1
 endif
 
-
 EXTRA_DIST = autogen.sh
-
 
 clean-local:
 	rm -rf docs

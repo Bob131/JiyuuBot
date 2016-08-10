@@ -9,6 +9,7 @@ jiyuubot.vala:
 -include ../Makefile.am
 
 jiyuubot_test_SOURCES = \
+	$(top_srcdir)/src/libjiyuubot/jiyuubot.vapi \
 	jiyuubot.vala \
 	jiyuubot-test.vala
 jiyuubot_test_VALAFLAGS = \

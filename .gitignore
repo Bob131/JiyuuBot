@@ -54,9 +54,16 @@ Makefile.in
 .libs/
 
 /docs/
+
+src/libjiyuubot/JiyuuBot-*
+src/libjiyuubot/jiyuubot*
+!src/libjiyuubot/jiyuubot.pc.in
+
 src/jiyuubot/jiyuubot
+
 **/tests/*
 !**/tests/*.vala
 !**/tests/Makefile.am
 src/jiyuubot/tests/jiyuubot.vala
+
 *.conf

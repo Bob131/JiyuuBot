@@ -41,6 +41,8 @@ AC_SUBST([jiyuubot_U_VALAFLAGS], ["--pkg gio-2.0 \
 AC_PATH_PROG([VALADOC], [valadoc], [xno])
 AM_CONDITIONAL([HAS_VALADOC], [test x$has_valadoc != xno])
 
+GOBJECT_INTROSPECTION_CHECK([1.40.0])
+
 GLIB_TESTS
 
 dnl ###########################################################################
@@ -51,6 +53,8 @@ AC_CONFIG_FILES([
 Makefile
 src/Makefile
 src/libjiyuubot/Makefile
+src/libjiyuubot/tests/Makefile
+src/libjiyuubot/jiyuubot.pc
 src/jiyuubot/Makefile
 src/jiyuubot/tests/Makefile
 src/clients/Makefile
