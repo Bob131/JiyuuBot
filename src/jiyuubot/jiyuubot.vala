@@ -140,6 +140,8 @@ class JiyuuBot.App : Application {
         tear_down_accounts.begin(() => {disconnected = true;});
         while (!disconnected)
             MainContext.default().iteration(true);
+
+        base.shutdown();
     }
 
     protected override void activate() {

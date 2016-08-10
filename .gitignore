@@ -60,6 +60,7 @@ src/libjiyuubot/jiyuubot*
 !src/libjiyuubot/jiyuubot.pc.in
 
 src/jiyuubot/jiyuubot
+src/jiyuubot/jiyuubot-launcher
 
 **/tests/*
 !**/tests/*.vala
