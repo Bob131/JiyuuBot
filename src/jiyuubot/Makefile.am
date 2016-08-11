@@ -4,6 +4,7 @@ bin_PROGRAMS = jiyuubot jiyuubot-launcher
 
 jiyuubot_SOURCES = \
 	$(top_srcdir)/src/libjiyuubot/jiyuubot.vapi \
+	accounts.vala \
 	jiyuubot.vala
 jiyuubot_VALAFLAGS = \
 	$(jiyuubot_U_VALAFLAGS)
