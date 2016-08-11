@@ -1,5 +1,4 @@
-[CCode (cname = "VERSION")]
-extern const string DAEMON_VERSION;
+extern const string VERSION;
 
 class JiyuuBot.App : Application {
     string config_path = "";
@@ -272,8 +271,7 @@ class JiyuuBot.App : Application {
         }
 
         if (print_version) {
-            stdout.printf("Library version: %s\n", "STUB");
-            stdout.printf("Daemon version:  %s\n", DAEMON_VERSION);
+            stdout.printf("jiyuubot %s\n", VERSION);
             return 0;
         }
 

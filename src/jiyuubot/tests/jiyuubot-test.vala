@@ -97,7 +97,7 @@ public static int main(string[] args) {
     Test.add_func("/jiyuubot/cli/version", () => {
         if (!Test.subprocess()) {
             Test.trap_subprocess((string) null, 0, 0);
-            Test.trap_assert_stdout("Library version*\nDaemon version*");
+            Test.trap_assert_stdout(@"jiyuubot $(VERSION)\n");
             return;
         }
 
