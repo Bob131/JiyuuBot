@@ -153,14 +153,6 @@ class JiyuuBot.App : Application {
         Unix.signal_add(ProcessSignal.INT, (owned) signal_callback);
         Unix.signal_add(ProcessSignal.TERM, (owned) signal_callback);
 
-        Unix.signal_add(ProcessSignal.HUP, () => {
-            tear_down_accounts.begin(() => {
-                load_config();
-                create_accounts.begin();
-            });
-            return Source.CONTINUE;
-        });
-
         // TODO: implement config-finding logic
         if (config_path == "")
             fatal("Config file path required");
