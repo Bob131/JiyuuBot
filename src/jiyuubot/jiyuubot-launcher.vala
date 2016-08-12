@@ -87,12 +87,17 @@ class JiyuuBot.Launcher : Application {
                 var parts = service.split(".");
                 if (parts.length < 4)
                     continue;
-                switch (parts[3]) {
-                    case "AccountManager":
-                    case "ConnectionManager":
-                        FileUtils.symlink(
-                            Path.build_filename(services_path, service),
-                            Path.build_filename(tmp_services_path, service));
+                var prefix = string.joinv(".", (string?[]?) parts[0:4]);
+                switch (prefix) {
+                    case "org.freedesktop.Telepathy.AccountManager":
+                    case "org.freedesktop.Telepathy.ConnectionManager":
+                        var source =
+                            Path.build_filename(services_path, service);
+                        var dest =
+                            Path.build_filename(tmp_services_path, service);
+                        if (FileUtils.symlink(source, dest) == -1)
+                            warning("Failed to symlink %s to %s: %s", source,
+                                dest, strerror(errno));
                         break;
                 }
             }
