@@ -1,3 +1,5 @@
+extern const string DATADIR;
+
 const string DBUS_CONFIG = """
 <!DOCTYPE busconfig PUBLIC "-//freedesktop//DTD D-Bus Bus Configuration 1.0//EN"
  "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
@@ -69,6 +71,7 @@ class JiyuuBot.Launcher : Application {
         }
 
         var xdg_paths = Environment.get_system_data_dirs();
+        xdg_paths += DATADIR;
         xdg_paths += Environment.get_user_data_dir();
 
         foreach (var path in xdg_paths) {

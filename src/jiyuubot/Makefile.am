@@ -21,6 +21,7 @@ jiyuubot_launcher_SOURCES = \
 jiyuubot_launcher_VALAFLAGS = \
 	$(jiyuubot_U_VALAFLAGS)
 jiyuubot_launcher_CFLAGS = \
+	-DDATADIR=\"$(datadir)\" \
 	-I$(top_srcdir)/src/libjiyuubot \
 	$(jiyuubot_U_CFLAGS)
 jiyuubot_launcher_LDADD = \
