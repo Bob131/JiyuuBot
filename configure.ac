@@ -27,12 +27,9 @@ PKG_CHECK_MODULES(jiyuubot_U, [
   glib-2.0 >= $GLIB_REQUIRED
   gobject-2.0 >= $GLIB_REQUIRED
   gio-2.0 >= $GLIB_REQUIRED
-  telepathy-glib
 ])
 
 AC_SUBST([jiyuubot_U_VALAFLAGS], ["--pkg gio-2.0 \
-          --pkg telepathy-glib \
-          --vapidir=\$(top_srcdir)/vapi \
           --target-glib=$GLIB_REQUIRED \
           --enable-experimental \
           --enable-experimental-non-null \
@@ -52,6 +49,8 @@ dnl ###########################################################################
 AC_CONFIG_FILES([
 Makefile
 src/Makefile
+src/libtp/Makefile
+src/libtp/tp.pc
 src/libjiyuubot/Makefile
 src/libjiyuubot/tests/Makefile
 src/libjiyuubot/jiyuubot.pc

@@ -22,7 +22,7 @@ const string DBUS_CONFIG = """
 [DBus (name = "org.freedesktop.DBus")]
 interface DBusIface : Object {
     public abstract uint32 start_service_by_name(string name, uint32 flags = 0)
-        throws IOError;
+        throws Error;
 }
 
 [DBus (name = "so.bob131.JiyuuBot.Bus")]
@@ -133,7 +133,7 @@ class JiyuuBot.Launcher : Application {
             assert (BusType.get_address_sync(BusType.SESSION) == bus.address);
             DBusIface bus = GLib.Bus.get_proxy_sync(BusType.SESSION,
                 "org.freedesktop.DBus", "/");
-            bus.start_service_by_name(TelepathyGLib.ACCOUNT_MANAGER_BUS_NAME);
+            bus.start_service_by_name(Tp.ACCOUNT_MANAGER);
         } catch (Error e) {
             fatal("Failed to start account manager: %s", e.message);
         }

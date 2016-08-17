@@ -1,1 +1,1 @@
-SUBDIRS = libjiyuubot jiyuubot clients
+SUBDIRS = libtp libjiyuubot jiyuubot clients

@@ -53,11 +53,14 @@ Makefile.in
 *.la
 .libs/
 
-/docs/
+*.gir
+*.typelib
+*.deps
+*.h
+*.pc
+*.vapi
 
-src/libjiyuubot/JiyuuBot-*
-src/libjiyuubot/jiyuubot*
-!src/libjiyuubot/jiyuubot.pc.in
+/docs/
 
 src/jiyuubot/jiyuubot
 src/jiyuubot/jiyuubot-launcher

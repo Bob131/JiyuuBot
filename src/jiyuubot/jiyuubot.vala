@@ -57,22 +57,31 @@ class JiyuuBot.App : Application {
         if (list_proto) {
             debug("Probing for available protocols...");
             this.hold();
-            TelepathyGLib.list_connection_managers_async.begin(null,
-                (obj, res) => {
-                    List<TelepathyGLib.ConnectionManager> managers;
-                    try {
-                        managers = TelepathyGLib.list_connection_managers_async
-                            .end(res);
-                    } catch (GLib.Error e) {
-                        fatal("DBus probing failed: %s", e.message);
-                    }
-                    foreach (var manager in managers) {
-                        stdout.printf("%s:\n", manager.cm_name);
-                        foreach (var protocol in manager.dup_protocol_names())
+            Tp.list_connection_managers.begin((obj, res) => {
+                Tp.ConnectionManager[] managers;
+                try {
+                    managers = Tp.list_connection_managers.end(res);
+                } catch (Error e) {
+                    fatal("DBus probing failed: %s", e.message);
+                }
+                foreach (var manager in managers) {
+                    stdout.printf("%s:\n", manager.get_cm_name());
+                    this.hold();
+                    manager.list_protocols.begin((obj, res) => {
+                        string[] protocols = {};
+                        try {
+                            manager.list_protocols.end(res);
+                        } catch (IOError e) {
+                            fatal("Failed to fetch protocol list: %s",
+                                e.message);
+                        }
+                        foreach (var protocol in protocols)
                             stdout.printf("  %s\n", protocol);
-                    }
-                    this.release();
-                });
+                        this.release();
+                    });
+                }
+                this.release();
+            });
             return 0;
         }
 
@@ -89,59 +98,47 @@ class JiyuuBot.App : Application {
             var connman_name = input[0];
             var proto_name = input[1];
 
-            TelepathyGLib.ConnectionManager connman;
-            try {
-                connman = new TelepathyGLib.ConnectionManager(
-                    TelepathyGLib.DBusDaemon.dup(), connman_name, null);
+            Tp.ConnectionManager? connman = null;
+            Tp.ConnectionManager.get_manager.begin(connman_name, (obj, res) => {
+                try {
+                    connman = Tp.ConnectionManager.get_manager.end(res);
+                } catch (Error e) {
+                    stderr.printf("Failed to obtain %s: %s\n",
+                        "connection manager reference", e.message);
+                    Process.exit(1);
+                }
+            });
 
-                var prepared = false;
-                connman.prepare_async.begin(null, () => {prepared = true;});
+            var mc = MainContext.default();
+            while (connman == null)
+                mc.iteration(true);
 
-                var mc = MainContext.default();
-                while (!prepared)
-                    mc.iteration(true);
-            } catch (Error e) {
-                stderr.printf("Failed to obtain connection %s: %s\n",
-                    "manager reference", e.message);
-                return 1;
-            }
+            Tp.ProtocolParameter[]? @params = null;
+            ((!) connman).get_parameters.begin(proto_name, (obj, res) => {
+                try {
+                    @params = ((!) connman).get_parameters.end(res);
+                } catch (Error e) {
+                    stderr.printf("Failed to get protocol %s '%s': %s\n",
+                        "parameters for", proto_name, e.message);
+                    Process.exit(1);
+                }
+            });
 
-            if (connman.info_source == TelepathyGLib.CMInfoSource.NONE) {
-                stderr.printf("Unknown connection manager '%s'. Use -l to %s\n",
-                    connman_name, "list protocols");
-                return 1;
-            }
+            while (@params == null)
+                mc.iteration(true);
 
-            if (!connman.has_protocol(proto_name)) {
-                stderr.printf("Unknown protocol '%s'. Use -l to list %s\n",
-                    proto_name, "protocols");
-                return 1;
-            }
+            if (@params.length > 0)
+                foreach (var param in @params) {
+                    stdout.printf("%s\n", param.name);
+                    stdout.printf("  Type:     %s\n", param.signature);
+                    stdout.printf("  Required: %s\n",
+                        (Tp.ProtocolParameterFlags.REQUIRED in param.flags).to_string());
 
-            var @params = connman.get_protocol_object(proto_name).dup_params();
-            var printed = false;
-
-            foreach (var param in @params) {
-                // I don't know what this means, but it's probably a good idea
-                // to respect it
-                if (param.is_secret())
-                    continue;
-
-                printed = true;
-
-                stdout.printf("%s\n", param.get_name());
-                stdout.printf("  Type:     %s\n",
-                    param.dup_variant_type().dup_string());
-                stdout.printf("  Required: %s\n",
-                    param.is_required().to_string());
-
-                Variant? default = param.dup_default_variant();
-                if (default != null)
-                    stdout.printf("  Default:  %s\n",
-                        ((!) default).print(false));
-            }
-
-            if (!printed)
+                    if (Tp.ProtocolParameterFlags.HAS_DEFAULT in param.flags)
+                        stdout.printf("  Default:  %s\n",
+                            param.default_value.print(false));
+                }
+            else
                 stderr.printf("No parameters for this protocol\n");
 
             return 0;

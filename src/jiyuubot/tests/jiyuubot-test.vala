@@ -4,16 +4,19 @@ const string IDLE_QUERY_CONFIG = """account
 server
   Type:     s
   Required: true
+port
+  Type:     q
+  Required: false
+  Default:  6667
+password
+  Type:     s
+  Required: false
 fullname
   Type:     s
   Required: false
 username
   Type:     s
   Required: false
-port
-  Type:     q
-  Required: false
-  Default:  6667
 charset
   Type:     s
   Required: false
@@ -75,8 +78,7 @@ public static int main(string[] args) {
     Test.add_func("/jiyuubot/cli/query-config/unknown-cm", () => {
         if (!Test.subprocess()) {
             Test.trap_subprocess((string) null, 0, 0);
-            Test.trap_assert_stderr(
-                "Unknown connection manager 'unk'. Use -l to list protocols\n");
+            Test.trap_assert_stderr("*unk was not provided*");
             return;
         }
 
@@ -86,8 +88,7 @@ public static int main(string[] args) {
     Test.add_func("/jiyuubot/cli/query-config/unknown-protocol", () => {
         if (!Test.subprocess()) {
             Test.trap_subprocess((string) null, 0, 0);
-            Test.trap_assert_stderr(
-                "Unknown protocol 'unk'. Use -l to list protocols\n");
+            Test.trap_assert_stderr("*unknown protocol unk\n");
             return;
         }
 

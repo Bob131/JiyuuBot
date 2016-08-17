@@ -21,7 +21,7 @@ BUILT_SOURCES = \
 	JiyuuBot-$(SHORT_VERSION).gir JiyuuBot-$(SHORT_VERSION).typelib
 
 jiyuubot.deps:
-	$(AM_V_GEN) printf "gio-2.0\ntelepathy-glib\n" > $@
+	$(AM_V_GEN) printf "gio-2.0\ntp\n" > $@
 
 JiyuuBot-$(SHORT_VERSION).typelib: JiyuuBot-$(SHORT_VERSION).gir
 	$(AM_V_GEN) g-ir-compiler --shared-library=libjiyuubot --output=$@ $<
@@ -34,7 +34,9 @@ libjiyuubot_la_VALAFLAGS = \
 	--gir JiyuuBot-$(SHORT_VERSION).gir \
 	$(jiyuubot_U_VALAFLAGS)
 libjiyuubot_la_CFLAGS = $(jiyuubot_U_CFLAGS)
-libjiyuubot_la_LIBADD = $(jiyuubot_U_LIBS)
+libjiyuubot_la_LIBADD = \
+	$(top_srcdir)/src/libtp/libtp.la \
+	$(jiyuubot_U_LIBS)
 libjiyuubot_la_LDFLAGS = \
 	-release $(SHORT_VERSION)
 
