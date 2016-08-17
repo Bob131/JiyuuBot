@@ -161,6 +161,13 @@ class JiyuuBot.Launcher : Application {
             try {
                 bot.wait_async.end(res);
             } catch {}
+
+            if (bot.get_if_signaled()) {
+                var sig = (ProcessSignal) bot.get_term_sig();
+                if (sig != ProcessSignal.INT && sig != ProcessSignal.TERM)
+                    critical(strsignal(sig));
+            }
+
             this.quit();
         });
     }
