@@ -6,6 +6,7 @@ jiyuubot_SOURCES = \
 	$(top_srcdir)/src/libtp/tp.vapi \
 	$(top_srcdir)/src/libjiyuubot/jiyuubot.vapi \
 	accounts.vala \
+	clients.vala \
 	jiyuubot.vala
 jiyuubot_VALAFLAGS = \
 	$(jiyuubot_U_VALAFLAGS)

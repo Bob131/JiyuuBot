@@ -27,6 +27,7 @@ Tp-$(SHORT_VERSION).typelib: Tp-$(SHORT_VERSION).gir
 libtp_la_SOURCES = \
 	accounts.vala \
 	channels.vala \
+	clients.vala \
 	connections.vala \
 	handles.vala \
 	messages.vala \

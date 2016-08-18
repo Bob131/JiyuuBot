@@ -7,7 +7,9 @@ class JiyuuBot.App : Application {
     bool print_version = false;
 
     KeyFile config;
+
 #if !TEST
+    Handler handler;
     AccountManager account_manager;
 #endif
 
@@ -48,6 +50,19 @@ class JiyuuBot.App : Application {
         load_config();
 
 #if !TEST
+        handler = new Handler();
+        Bus.own_name(BusType.SESSION, @"$(Tp.CLIENT).JiyuuBot.Handler", 0,
+            null, (connection, name) => {
+                try {
+                    connection.register_object<Tp.Client>(
+                        Tp.path_from_name(name), new Client());
+                    connection.register_object<Tp.Handler>(
+                        Tp.path_from_name(name), handler);
+                } catch (Error e) {
+                    fatal("Failed to register handler: %s", e.message);
+                }
+            });
+
         account_manager = new AccountManager(config);
         account_manager.create_accounts.begin();
 #endif
