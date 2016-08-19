@@ -12,6 +12,12 @@ AM_PROG_CC_C_O
 SHORT_VERSION=$(echo $VERSION | cut -d. -f-2)
 AC_SUBST([SHORT_VERSION])
 
+AC_SUBST([clientdir], "\$(libexecdir)/jiyuubot")
+AC_SUBST([pkgconfigdir], ["\$(libdir)/pkgconfig"])
+AC_SUBST([vapidir], ["\$(datadir)/vala/vapi"])
+AC_SUBST([girdir], ["\$(datadir)/gir-1.0"])
+AC_SUBST([typelibdir], ["\$(libdir)/girepository-1.0"])
+
 LT_INIT([disable-static])
 
 CFLAGS="$CFLAGS -w"

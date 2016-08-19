@@ -1,15 +1,11 @@
 lib_LTLIBRARIES = libtp.la
 
 include_HEADERS = tp.h
-pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = tp.pc
 
-vapidir = $(datadir)/vala/vapi
 vapi_DATA = tp.vapi tp.deps
 
-girdir = $(datadir)/gir-1.0
 gir_DATA = Tp-$(SHORT_VERSION).gir
-typelibdir = $(libdir)/girepository-1.0
 typelib_DATA = Tp-$(SHORT_VERSION).typelib
 
 BUILT_SOURCES = \

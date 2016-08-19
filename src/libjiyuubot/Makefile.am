@@ -3,15 +3,11 @@ SUBDIRS = tests
 lib_LTLIBRARIES = libjiyuubot.la
 
 include_HEADERS = jiyuubot.h
-pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = jiyuubot.pc
 
-vapidir = $(datadir)/vala/vapi
 vapi_DATA = jiyuubot.vapi jiyuubot.deps
 
-girdir = $(datadir)/gir-1.0
 gir_DATA = JiyuuBot-$(SHORT_VERSION).gir
-typelibdir = $(libdir)/girepository-1.0
 typelib_DATA = JiyuuBot-$(SHORT_VERSION).typelib
 
 BUILT_SOURCES = \
