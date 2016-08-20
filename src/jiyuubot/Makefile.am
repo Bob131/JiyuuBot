@@ -27,13 +27,9 @@ jiyuubot_launcher_VALAFLAGS = \
 	$(jiyuubot_U_VALAFLAGS)
 jiyuubot_launcher_CFLAGS = \
 	-DDATADIR=\"$(datadir)\" \
-	-I$(top_srcdir)/src/libtp \
-	-I$(top_srcdir)/src/libjiyuubot \
-	$(jiyuubot_U_CFLAGS)
+	$(jiyuubot_CFLAGS)
 jiyuubot_launcher_LDADD = \
-	$(top_srcdir)/src/libtp/libtp.la \
-	$(top_srcdir)/src/libjiyuubot/libjiyuubot.la \
-	$(jiyuubot_U_LIBS)
+	$(jiyuubot_LDADD)
 
 CLEANFILES = \
 	$(jiyuubot_SOURCES:%.vala=%.c) \
