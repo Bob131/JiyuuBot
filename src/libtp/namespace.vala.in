@@ -1,0 +1,2 @@
+[CCode (gir_namespace = "Tp", gir_version = "@SHORT_VERSION@")]
+namespace Tp {}

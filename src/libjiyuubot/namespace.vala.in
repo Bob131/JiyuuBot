@@ -1,0 +1,2 @@
+[CCode (gir_namespace = "JiyuuBot", gir_version = "@SHORT_VERSION@")]
+namespace JiyuuBot {}

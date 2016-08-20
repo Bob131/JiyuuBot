@@ -9,10 +9,14 @@ gir_DATA = Tp-$(SHORT_VERSION).gir
 typelib_DATA = Tp-$(SHORT_VERSION).typelib
 
 BUILT_SOURCES = \
+	namespace.vala \
 	tp.h \
 	tp.pc \
 	tp.vapi tp.deps \
 	Tp-$(SHORT_VERSION).gir Tp-$(SHORT_VERSION).typelib
+
+namespace.vala: namespace.vala.in
+	$(AM_V_GEN) sed -e "s|[@]SHORT_VERSION[@]|$(SHORT_VERSION)|" $< > $@
 
 tp.deps:
 	$(AM_V_GEN) printf "gio-2.0\n" > $@
@@ -27,7 +31,8 @@ libtp_la_SOURCES = \
 	connections.vala \
 	handles.vala \
 	messages.vala \
-	misc.vala
+	misc.vala \
+	namespace.vala
 libtp_la_VALAFLAGS = \
 	--library tp \
 	-H tp.h \

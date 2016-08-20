@@ -59,6 +59,7 @@ Makefile.in
 *.h
 *.pc
 *.vapi
+namespace.vala
 
 /docs/
 
