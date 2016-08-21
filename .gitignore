@@ -53,6 +53,8 @@ Makefile.in
 *.la
 .libs/
 
+*.conf
+
 *.gir
 *.typelib
 *.deps
@@ -71,4 +73,6 @@ src/jiyuubot/jiyuubot-launcher
 !**/tests/Makefile.am
 src/jiyuubot/tests/jiyuubot.vala
 
-*.conf
+src/clients/*
+!src/clients/*.vala
+!src/clients/Makefile.am
