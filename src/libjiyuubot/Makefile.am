@@ -31,8 +31,10 @@ JiyuuBot-$(SHORT_VERSION).typelib: JiyuuBot-$(SHORT_VERSION).gir
 
 libjiyuubot_la_SOURCES = \
 	$(top_srcdir)/src/libtp/tp.vapi \
-	namespace.vala \
-	libjiyuubot.vala
+	clients.vala \
+	messages.vala \
+	misc.vala \
+	namespace.vala
 libjiyuubot_la_VALAFLAGS = \
 	--library jiyuubot \
 	-H jiyuubot.h \
