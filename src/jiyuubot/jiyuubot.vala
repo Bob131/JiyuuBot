@@ -55,7 +55,7 @@ class JiyuuBot.App : Application {
             null, (connection, name) => {
                 try {
                     connection.register_object<Tp.Client>(
-                        Tp.path_from_name(name), new Client());
+                        Tp.path_from_name(name), new Handler.Client());
                     connection.register_object<Tp.Handler>(
                         Tp.path_from_name(name), handler);
                 } catch (Error e) {

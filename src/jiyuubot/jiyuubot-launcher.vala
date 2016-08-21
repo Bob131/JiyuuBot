@@ -92,8 +92,9 @@ class JiyuuBot.Launcher : Application {
                     continue;
                 var prefix = string.joinv(".", (string?[]?) parts[0:4]);
                 switch (prefix) {
-                    case "org.freedesktop.Telepathy.AccountManager":
-                    case "org.freedesktop.Telepathy.ConnectionManager":
+                    case Tp.ACCOUNT_MANAGER:
+                    case Tp.CONNECTION_MANAGER:
+                    case JiyuuBot.CLIENT:
                         var source =
                             Path.build_filename(services_path, service);
                         var dest =
