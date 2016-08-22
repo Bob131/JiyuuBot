@@ -71,7 +71,7 @@ class AccountManager : Object {
 
             foreach (var room in rooms) {
                 var props = new Tp.ChannelRequestProperties();
-                props.set_target(Tp.HandleType.ROOM, room);
+                props.set_target(Tp.HandleType.ROOM, room.strip());
                 props.channel_type = Tp.TEXT_CHANNEL;
 
                 Tp.ChannelRequest chan_req;
