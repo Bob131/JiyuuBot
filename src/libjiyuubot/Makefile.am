@@ -31,7 +31,10 @@ JiyuuBot-$(SHORT_VERSION).typelib: JiyuuBot-$(SHORT_VERSION).gir
 
 libjiyuubot_la_SOURCES = \
 	$(top_srcdir)/src/libtp/tp.vapi \
-	clients.vala \
+	client-app.vala \
+	client-list.vala \
+	clients/command-client.vala \
+	clients/tp-client.vala \
 	messages.vala \
 	misc.vala \
 	namespace.vala

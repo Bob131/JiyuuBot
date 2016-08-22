@@ -14,7 +14,7 @@ namespace JiyuuBot {
                     new HashTable<string, Variant?>(str_hash, str_equal);
             new_message.parts[1]["content-type"] =
                 new Variant("s", "text/plain");
-            new_message.parts[1]["content"] = new Variant("s", text);
+            new_message.parts[1]["content"] = new Variant("s", text.chomp());
 
             yield channel.send_message(new_message.parts,
                 Tp.MessageSendFlags.NONE);
