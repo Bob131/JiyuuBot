@@ -41,6 +41,9 @@ AC_SUBST([jiyuubot_U_VALAFLAGS], ["--pkg gio-2.0 \
           --enable-experimental-non-null \
           --fatal-warnings"])
 
+PKG_CHECK_MODULES([tp_glib], [telepathy-glib],, [HAVE_TP=xno])
+AM_CONDITIONAL([TP_GLIB_TEST], [test "x$HAVE_TP" != "xno"])
+
 AC_PATH_PROG([VALADOC], [valadoc], [xno])
 AM_CONDITIONAL([HAS_VALADOC], [test x$has_valadoc != xno])
 
@@ -53,15 +56,20 @@ dnl Files to generate
 dnl ###########################################################################
 
 AC_CONFIG_FILES([
-Makefile
-src/Makefile
-src/libtp/Makefile
-src/libtp/tp.pc
-src/libjiyuubot/Makefile
-src/libjiyuubot/tests/Makefile
-src/libjiyuubot/jiyuubot.pc
-src/jiyuubot/Makefile
-src/jiyuubot/tests/Makefile
-src/clients/Makefile
+  Makefile
+  src/Makefile
+
+  src/libtp/Makefile
+  src/libtp/tests/Makefile
+  src/libtp/tp.pc
+
+  src/libjiyuubot/Makefile
+  src/libjiyuubot/tests/Makefile
+  src/libjiyuubot/jiyuubot.pc
+
+  src/jiyuubot/Makefile
+  src/jiyuubot/tests/Makefile
+
+  src/clients/Makefile
 ])
 AC_OUTPUT

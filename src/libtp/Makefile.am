@@ -1,3 +1,5 @@
+SUBDIRS = tests
+
 lib_LTLIBRARIES = libtp.la
 
 include_HEADERS = tp.h

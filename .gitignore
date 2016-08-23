@@ -70,6 +70,7 @@ src/jiyuubot/jiyuubot-launcher
 
 **/tests/*
 !**/tests/*.vala
+!**/tests/*.vapi
 !**/tests/Makefile.am
 src/jiyuubot/tests/jiyuubot.vala
 
