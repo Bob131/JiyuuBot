@@ -5,7 +5,13 @@ SUBDIRS = src
 
 docs:
 if HAS_VALADOC
-	$(AM_V_GEN) valadoc -o docs --pkg gio-2.0 --pkg telepathy-glib src/libjiyuubot/libjiyuubot.vala
+	$(AM_V_GEN) valadoc \
+		-o docs \
+		--package-name jiyuubot \
+		--pkg gio-2.0 \
+		src/libtp/*.vala \
+		src/libjiyuubot/*.vala \
+		src/libjiyuubot/clients/*.vala
 else
 	@echo "ERROR: valadoc not found in PATH"
 	return 1
