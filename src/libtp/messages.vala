@@ -27,28 +27,35 @@ namespace Tp {
         HashTable<string, Variant?>[] parts;
 
         public string? token {owned get {
+            return_if_fail(parts.length > 0);
             return get_val(parts[0]["message-token"], 's');
         }}
         // return of '0' indicates absent value
         public int64 received_timestamp {get {
+            return_if_fail(parts.length > 0);
             return get_val(parts[0]["message-received"], 'x');
         }}
         public string? sender_nick {get {
+            return_if_fail(parts.length > 0);
             return get_val(parts[0]["sender-nickname"], 's');
         }}
         public MessageType message_type {
             get {
+                return_if_fail(parts.length > 0);
                 return get_val(parts[0]["message-type"], 'u');
             }
             set {
+                return_if_fail(parts.length > 0);
                 return_if_fail(value != MessageType.DELIVERY_REPORT);
                 parts[0]["message-type"] = new Variant("u", value);
             }
         }
         public bool scrollback {get {
+            return_if_fail(parts.length > 0);
             return get_val(parts[0]["scrollback"], 'b');
         }}
         public bool rescued {get {
+            return_if_fail(parts.length > 0);
             return get_val(parts[0]["rescued"], 'b');
         }}
 
