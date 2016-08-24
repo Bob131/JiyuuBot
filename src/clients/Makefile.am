@@ -15,8 +15,12 @@ base_client_LDADD = \
 
 servicedir = $(datadir)/dbus-1/services
 
-client_PROGRAMS = bots
-service_DATA = so.bob131.JiyuuBot.Client.bots.service
+client_PROGRAMS = \
+	bots \
+	version
+service_DATA = \
+	so.bob131.JiyuuBot.Client.bots.service \
+	so.bob131.JiyuuBot.Client.version.service
 
 $(service_DATA):
 	$(AM_GEN_V) printf "[D-BUS Service]\nName=%s\nExec=%s\n" \
@@ -27,6 +31,11 @@ bots_SOURCES = bots.vala
 bots_VALAFLAGS = $(base_client_VALAFLAGS)
 bots_CFLAGS = $(base_client_CFLAGS)
 bots_LDADD = $(base_client_LDADD)
+
+version_SOURCES = version.vala
+version_VALAFLAGS = $(base_client_VALAFLAGS)
+version_CFLAGS = $(base_client_CFLAGS)
+version_LDADD = $(base_client_LDADD)
 
 CLEANFILES = \
 	*.c \
