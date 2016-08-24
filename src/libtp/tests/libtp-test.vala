@@ -89,6 +89,57 @@ public static int main(string[] args) {
         assert ((!) message.to_text() == "this is a test message");
     });
 
+    Test.add_func("/libtp/connection-manager/list", () => {
+        var cm_names = new GenericSet<string>(str_hash, str_equal);
+
+        TestDBus.unset();
+        var bus = new TestDBus(TestDBusFlags.NONE);
+
+        var xdg_paths = Environment.get_system_data_dirs();
+        xdg_paths += Environment.get_user_data_dir();
+
+        foreach (var path in xdg_paths) {
+            path = Path.build_filename(path, "dbus-1", "services");
+
+            bus.add_service_dir(path);
+
+            Dir service_dir;
+            try {
+                service_dir = Dir.open(path);
+            } catch {
+                continue;
+            }
+
+            string? name = null;
+            while ((name = service_dir.read_name()) != null)
+                if (((!) name).has_prefix(Tp.CONNECTION_MANAGER))
+                    cm_names.add(((!) name).replace(".service", ""));
+        }
+
+        bus.up();
+
+        Tp.ConnectionManager[]? cms = null;
+        Tp.list_connection_managers.begin((obj, res) => {
+            try {
+                cms = Tp.list_connection_managers.end(res);
+            } catch (Error e) {
+                error("Failed to list connection managers: %s", e.message);
+            }
+        });
+
+        while (cms == null)
+            MainContext.default().iteration(true);
+
+        assert (((!) cms).length == cm_names.length);
+
+        foreach (var cm in (!) cms)
+            assert (cm.g_name in cm_names);
+
+        // we have to free all DBusProxies before the bus gets torn down, else
+        // we segfault
+        cms = null;
+    });
+
     Test.run();
     return 0;
 }
