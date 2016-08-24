@@ -38,11 +38,15 @@ class Handler : DBusProxy, Tp.Handler {
         Tp.Message message = {(HashTable<string, Variant?>[]) message_variant};
 
         foreach (var client in clients)
-            try {
-                yield client.handle_message({connection, channel, message});
-            } catch (Error e) {
-                warning(e.message);
-            }
+            client.handle_message.begin({connection, channel, message},
+                (obj, res) => {
+                    try {
+                        client.handle_message.end(res);
+                    } catch (Error e) {
+                        warning("Client '%s' failed to handle message: %s",
+                            ((DBusProxy) client).g_object_path, e.message);
+                    }
+                });
     }
 
     // TODO: ack pending messages
