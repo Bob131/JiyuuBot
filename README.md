@@ -18,9 +18,10 @@ components:
  * `src/jiyuubot`: The JiyuuBot daemon is the go-between for Telepathy DBus
    services and JiyuuBot clients. It handles things like connections, client
    activation, message relaying, etc.  
-   This directory also contains an application called `jiyuubot-launcher`, which
+   This directory also contains an application called `jiyuubot-launcher` which
    handles setting up a new DBus daemon separate from the user's session bus;
-   this allows JiyuuBot to be run without interfering with your chat programs.
+   this allows JiyuuBot to be run without interfering with running chat
+   programs.
 
  * `src/clients`: This is where a set of JiyuuBot clients live. JiyuuBot clients
    are similar in concept to [Telepathy clients], the difference being that
@@ -45,3 +46,27 @@ message support via [telepathy-ofono][tp-ofono].
 [tp-haze]: https://developer.pidgin.im/wiki/TelepathyHaze
 [tp-cms]: https://telepathy.freedesktop.org/wiki/Components/#connectionmanagers
 [tp-ofono]: https://code.launchpad.net/telepathy-ofono
+
+
+## TODO
+
+Currently, JiyuuBot is versioned 0.3 to indicate the tree is in a prerelease
+state. This is a list of some of the things that have to be done before 3.0:
+
+ * Tests. Lots more tests
+    * Check the accuracy of DBus bindings
+    * Start testing the daemon code
+    * Test libjiyuubot base clients
+    * Possibly introduce tests for clients themselves
+    * Ensure GI bindings install and work properly
+ * Document library interfaces
+ * Client shutdown timeout
+ * Real configuration, instead of current stopgap
+ * Automatic client/service reload
+ * Resolve sender handles to display names
+ * Add more base clients to libjiyuubot (regex, URL handlers, etc)
+ * Add more client implementations (github, youtube, etc)
+ * Implement Telepathy approver client
+ * Improved logging
+ * Systemd unit files
+ * spec file + copr repo
