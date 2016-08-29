@@ -60,7 +60,6 @@ state. This is a list of some of the things that have to be done before 3.0:
     * Possibly introduce tests for clients themselves
     * Ensure GI bindings install and work properly
  * Document library interfaces
- * Client shutdown timeout
  * Real configuration, instead of current stopgap
  * Automatic client/service reload
  * Resolve sender handles to display names

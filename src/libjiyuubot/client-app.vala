@@ -1,4 +1,27 @@
 namespace JiyuuBot {
+    internal const int QUIT_AFTER = 600;
+
+    internal class AppWatchdog : Object, Client {
+        Timer shutdown_timer = new Timer();
+
+        public async void handle_message(MessageContext context) throws Error {
+            // reset the timer
+            shutdown_timer.start();
+        }
+
+        public AppWatchdog(Application parent) {
+            // once per minute
+            Timeout.add(60000, () => {
+                if (shutdown_timer.elapsed() > QUIT_AFTER) {
+                    log("libjiyuubot", LogLevelFlags.LEVEL_MESSAGE,
+                        "Shutdown timeout elapsed, exiting");
+                    parent.quit();
+                }
+                return Source.CONTINUE;
+            });
+        }
+    }
+
     internal class RegistrarApp : Application {
         internal Client[] clients = {};
 
@@ -23,6 +46,10 @@ namespace JiyuuBot {
             }
 
             return base.dbus_register(connection, object_path);
+        }
+
+        construct {
+            clients += new AppWatchdog(this);
         }
     }
 
