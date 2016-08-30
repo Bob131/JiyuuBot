@@ -99,7 +99,8 @@ class JiyuuBot.Launcher : Application {
                             Path.build_filename(services_path, service);
                         var dest =
                             Path.build_filename(tmp_services_path, service);
-                        if (FileUtils.symlink(source, dest) == -1)
+                        if (FileUtils.symlink(source, dest) == -1
+                                && errno != Posix.EEXIST)
                             warning("Failed to symlink %s to %s: %s", source,
                                 dest, strerror(errno));
                         break;

@@ -24,6 +24,7 @@ jiyuubot_launcher_SOURCES = \
 	$(top_srcdir)/src/libjiyuubot/jiyuubot.vapi \
 	jiyuubot-launcher.vala
 jiyuubot_launcher_VALAFLAGS = \
+	--pkg posix \
 	$(jiyuubot_U_VALAFLAGS)
 jiyuubot_launcher_CFLAGS = \
 	-DDATADIR=\"$(datadir)\" \
