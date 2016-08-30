@@ -11,15 +11,17 @@ base_client_CFLAGS = \
 base_client_LDADD = \
 	$(top_srcdir)/src/libtp/libtp.la \
 	$(top_srcdir)/src/libjiyuubot/libjiyuubot.la \
-	$(jiyuubot_U_LDFLAGS)
+	$(jiyuubot_U_LIBS)
 
 servicedir = $(datadir)/dbus-1/services
 
 client_PROGRAMS = \
 	bots \
+	convert \
 	version
 service_DATA = \
 	so.bob131.JiyuuBot.Client.bots.service \
+	so.bob131.JiyuuBot.Client.convert.service \
 	so.bob131.JiyuuBot.Client.version.service
 
 $(service_DATA):
@@ -31,6 +33,21 @@ bots_SOURCES = bots.vala
 bots_VALAFLAGS = $(base_client_VALAFLAGS)
 bots_CFLAGS = $(base_client_CFLAGS)
 bots_LDADD = $(base_client_LDADD)
+
+convert_SOURCES = convert.vala
+convert_VALAFLAGS = \
+	--pkg rest-0.7 \
+	--pkg json-glib-1.0 \
+	--thread \
+	$(base_client_VALAFLAGS)
+convert_CFLAGS = \
+	$(librest_CFLAGS) \
+	$(json_glib_CFLAGS) \
+	$(base_client_CFLAGS)
+convert_LDADD = \
+	$(librest_LIBS) \
+	$(json_glib_LIBS) \
+	$(base_client_LDADD)
 
 version_SOURCES = version.vala
 version_VALAFLAGS = $(base_client_VALAFLAGS)

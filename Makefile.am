@@ -17,7 +17,9 @@ else
 	return 1
 endif
 
-EXTRA_DIST = autogen.sh
+EXTRA_DIST = \
+	$(wildcard vapi/*) \
+	autogen.sh
 
 clean-local:
 	rm -rf docs

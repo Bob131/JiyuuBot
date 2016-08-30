@@ -36,10 +36,14 @@ PKG_CHECK_MODULES(jiyuubot_U, [
 ])
 
 AC_SUBST([jiyuubot_U_VALAFLAGS], ["--pkg gio-2.0 \
+          --vapidir \$(top_srcdir)/vapi \
           --target-glib=$GLIB_REQUIRED \
           --enable-experimental \
           --enable-experimental-non-null \
           --fatal-warnings"])
+
+PKG_CHECK_MODULES(librest, [rest-0.7])
+PKG_CHECK_MODULES(json_glib, [json-glib-1.0])
 
 PKG_CHECK_MODULES([tp_glib], [telepathy-glib],, [HAVE_TP=xno])
 AM_CONDITIONAL([TP_GLIB_TEST], [test "x$HAVE_TP" != "xno"])
