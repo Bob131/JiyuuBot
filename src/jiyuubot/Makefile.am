@@ -31,11 +31,4 @@ jiyuubot_launcher_CFLAGS = \
 jiyuubot_launcher_LDADD = \
 	$(jiyuubot_LDADD)
 
-CLEANFILES = \
-	$(jiyuubot_SOURCES:%.vala=%.c) \
-	$(jiyuubot_launcher_SOURCES:%.vala=%.c) \
-	*.stamp \
-	*.stamp-t
-
-dist-hook:
-	cd $(distdir); rm -f $(CLEANFILES)
+-include $(top_srcdir)/git.mk

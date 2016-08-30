@@ -6,8 +6,6 @@ test_programs = jiyuubot-test
 jiyuubot.vala:
 	$(AM_V_GEN) $(LN_S) ../jiyuubot.vala jiyuubot.vala
 
--include ../Makefile.am
-
 jiyuubot_test_SOURCES = \
 	$(top_srcdir)/src/libtp/tp.vapi \
 	$(top_srcdir)/src/libjiyuubot/jiyuubot.vapi \
@@ -15,13 +13,16 @@ jiyuubot_test_SOURCES = \
 	jiyuubot-test.vala
 jiyuubot_test_VALAFLAGS = \
 	-D TEST \
-	$(jiyuubot_VALAFLAGS)
-jiyuubot_test_CFLAGS = $(jiyuubot_CFLAGS)
-jiyuubot_test_LDADD = $(jiyuubot_LDADD)
+	$(jiyuubot_U_VALAFLAGS)
+jiyuubot_test_CFLAGS = \
+	-I$(top_srcdir)/src/libtp \
+	-I$(top_srcdir)/src/libjiyuubot \
+	$(jiyuubot_U_CFLAGS)
+jiyuubot_test_LDADD = \
+	$(top_srcdir)/src/libtp/libtp.la \
+	$(top_srcdir)/src/libjiyuubot/libjiyuubot.la \
+	$(jiyuubot_U_LDADD)
 
+CLEANFILES += jiyuubot.vala
 
-CLEANFILES += \
-	jiyuubot.vala \
-	*.c \
-	*.stamp \
-	*.stamp-t
+-include $(top_srcdir)/git.mk

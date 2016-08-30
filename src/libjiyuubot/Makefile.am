@@ -53,13 +53,7 @@ libjiyuubot_la_LIBADD = \
 libjiyuubot_la_LDFLAGS = \
 	-release $(SHORT_VERSION)
 
-CLEANFILES = \
-	$(libjiyuubot_la_SOURCES:.vala=.c) \
-	$(BUILT_SOURCES) \
-	*.stamp
-
 clean-local:
 	rm -f *.gir *.typelib
 
-dist-hook:
-	cd $(distdir); rm -f $(CLEANFILES)
+-include $(top_srcdir)/git.mk

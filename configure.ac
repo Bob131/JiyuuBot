@@ -1,7 +1,7 @@
 AC_INIT([jiyuubot], [0.3])
 
 AC_CONFIG_AUX_DIR([build-aux])
-AC_CONFIG_MACRO_DIRS([m4])
+AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_SILENT_RULES([yes])

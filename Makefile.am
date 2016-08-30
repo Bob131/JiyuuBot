@@ -24,3 +24,14 @@ clean-local:
 
 dist-hook:
 	cd $(distdir); rm -rf docs
+
+MAINTAINERCLEANFILES = \
+	$(GITIGNORE_MAINTAINERCLEANFILES_TOPLEVEL) \
+	$(GITIGNORE_MAINTAINERCLEANFILES_MAKEFILE_IN) \
+	$(GITIGNORE_MAINTAINERCLEANFILES_M4_LIBTOOL) \
+	m4/gsettings.m4 m4/introspection.m4 m4/pkg.m4 \
+	docs
+
+DISTCLEANFILES = $(wildcard *.conf)
+
+-include git.mk

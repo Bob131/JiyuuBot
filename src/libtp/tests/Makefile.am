@@ -21,7 +21,4 @@ libtp_test_CFLAGS += $(tp_glib_CFLAGS)
 libtp_test_LDADD += $(tp_glib_LDADD)
 endif
 
-CLEANFILES += \
-	*.c \
-	*.stamp \
-	*.stamp-t
+-include $(top_srcdir)/git.mk

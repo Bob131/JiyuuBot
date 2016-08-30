@@ -38,9 +38,6 @@ version_CFLAGS = $(base_client_CFLAGS)
 version_LDADD = $(base_client_LDADD)
 
 CLEANFILES = \
-	*.c \
-	$(service_DATA) \
-	*.stamp
+	$(service_DATA)
 
-dist-hook:
-	cd $(distdir); rm -f $(CLEANFILES)
+-include $(top_srcdir)/git.mk

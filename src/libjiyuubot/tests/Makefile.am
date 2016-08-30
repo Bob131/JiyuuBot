@@ -17,7 +17,4 @@ libjiyuubot_test_LDADD = \
 	../libjiyuubot.la \
 	$(jiyuubot_U_LDADD)
 
-CLEANFILES += \
-	*.c \
-	*.stamp \
-	*.stamp-t
+-include $(top_srcdir)/git.mk

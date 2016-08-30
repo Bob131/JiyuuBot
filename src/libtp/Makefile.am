@@ -46,13 +46,7 @@ libtp_la_LIBADD = $(jiyuubot_U_LIBS)
 libtp_la_LDFLAGS = \
 	-release $(SHORT_VERSION)
 
-CLEANFILES = \
-	$(libtp_la_SOURCES:.vala=.c) \
-	$(BUILT_SOURCES) \
-	*.stamp
-
 clean-local:
 	rm -f *.gir *.typelib
 
-dist-hook:
-	cd $(distdir); rm -f $(CLEANFILES)
+-include $(top_srcdir)/git.mk
