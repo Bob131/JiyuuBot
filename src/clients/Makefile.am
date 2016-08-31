@@ -18,10 +18,12 @@ servicedir = $(datadir)/dbus-1/services
 client_PROGRAMS = \
 	bots \
 	convert \
+	uri \
 	version
 service_DATA = \
 	so.bob131.JiyuuBot.Client.bots.service \
 	so.bob131.JiyuuBot.Client.convert.service \
+	so.bob131.JiyuuBot.Client.uri.service \
 	so.bob131.JiyuuBot.Client.version.service
 
 $(service_DATA):
@@ -47,6 +49,20 @@ convert_CFLAGS = \
 convert_LDADD = \
 	$(librest_LIBS) \
 	$(json_glib_LIBS) \
+	$(base_client_LDADD)
+
+uri_SOURCES = uri.vala
+uri_VALAFLAGS = \
+	--pkg libsoup-2.4 \
+	--pkg libxml-2.0 \
+	$(base_client_VALAFLAGS)
+uri_CFLAGS = \
+	$(libsoup_CFLAGS) \
+	$(libxml_CFLAGS) \
+	$(base_client_CFLAGS)
+uri_LDADD = \
+	$(libsoup_LIBS) \
+	$(libxml_LIBS) \
 	$(base_client_LDADD)
 
 version_SOURCES = version.vala

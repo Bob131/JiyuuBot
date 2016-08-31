@@ -45,6 +45,9 @@ AC_SUBST([jiyuubot_U_VALAFLAGS], ["--pkg gio-2.0 \
 PKG_CHECK_MODULES(librest, [rest-0.7])
 PKG_CHECK_MODULES(json_glib, [json-glib-1.0])
 
+PKG_CHECK_MODULES(libsoup, [libsoup-2.4])
+PKG_CHECK_MODULES(libxml, [libxml-2.0])
+
 PKG_CHECK_MODULES([tp_glib], [telepathy-glib],, [HAVE_TP=xno])
 AM_CONDITIONAL([TP_GLIB_TEST], [test "x$HAVE_TP" != "xno"])
 
