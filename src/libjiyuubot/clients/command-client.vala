@@ -111,15 +111,22 @@ namespace JiyuuBot {
             text = text[1:text.length];
 
             string[] args;
+            ShellError? parse_error = null;
+
             try {
                 Shell.parse_argv(text, out args);
             } catch (ShellError e) {
-                yield context.reply(@"Error: $(e.message)");
-                return;
+                parse_error = e;
+                args = Regex.split_simple("\\s+", text);
             }
 
             if (!(args[0] in triggers))
                 return;
+
+            if (parse_error != null) {
+                yield context.reply(@"Error: $(((!) parse_error).message)");
+                return;
+            }
 
             var options = (CommandOptions) Object.new(typeof(T),
                 arguments: args);
