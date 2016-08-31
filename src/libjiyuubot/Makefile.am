@@ -34,6 +34,7 @@ libjiyuubot_la_SOURCES = \
 	client-app.vala \
 	client-list.vala \
 	clients/command-client.vala \
+	clients/regex-client.vala \
 	clients/tp-client.vala \
 	messages.vala \
 	misc.vala \

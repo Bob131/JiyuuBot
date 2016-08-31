@@ -96,13 +96,9 @@ namespace JiyuuBot {
         internal async void handle_message(MessageContext context)
             throws Error
         {
-            if (context.message.message_type != Tp.MessageType.NORMAL)
+            string text;
+            if (!context.is_normal(out text))
                 return;
-
-            var _text = context.message.to_text();
-            if (_text == null)
-                return;
-            var text = (!) _text;
 
             if (text.length < 1)
                 return;

@@ -19,5 +19,19 @@ namespace JiyuuBot {
             yield channel.send_message(new_message.parts,
                 Tp.MessageSendFlags.NONE);
         }
+
+        internal bool is_normal(out string text) {
+            text = "";
+
+            if (message.message_type != Tp.MessageType.NORMAL)
+                return false;
+
+            var _text = message.to_text();
+            if (_text == null)
+                return false;
+
+            text = (!) _text;
+            return true;
+        }
     }
 }
