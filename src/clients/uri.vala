@@ -63,7 +63,8 @@ async string? get_description(string uri) {
     }
 
     var data = message.response_body.flatten();
-    var type = content_sniffer.sniff(message, data, null);
+    HashTable<string, string>? @params;
+    var type = content_sniffer.sniff(message, data, out @params);
 
     var ret = type.dup();
 
@@ -72,9 +73,14 @@ async string? get_description(string uri) {
         ret += ", " + format_size(content_length, FormatSizeFlags.IEC_UNITS);
 
     if (type == "text/html") {
-        var document = Html.Doc.read_doc((string) data.data, "", null,
-                Html.ParserOption.RECOVER | Html.ParserOption.NOERROR
-                | Html.ParserOption.NOWARNING);
+        return_if_fail(@params != null);
+        string? charset = ((!) @params)["charset"];
+
+        var document = Html.Doc.read_doc((string) data.data, "",
+            charset != null ? charset : "utf-8",
+            Html.ParserOption.RECOVER | Html.ParserOption.NOERROR
+            | Html.ParserOption.NOWARNING);
+
         var titles =
             new Xml.XPath.Context(document).eval("//title")->nodesetval;
         if (titles->length() > 0)
