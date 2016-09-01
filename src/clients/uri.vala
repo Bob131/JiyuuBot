@@ -66,11 +66,17 @@ async string? get_description(string uri) {
     HashTable<string, string>? @params;
     var type = content_sniffer.sniff(message, data, out @params);
 
-    var ret = type.dup();
+    var ret = @"$(type.dup()), ";
 
     var content_length = message.response_headers.get_content_length();
-    if (content_length != 0)
-        ret += ", " + format_size(content_length, FormatSizeFlags.IEC_UNITS);
+    if (content_length == 0) {
+        // indicate the size is greater than our buffer
+        if (message.status_code == Soup.Status.CANCELLED)
+            ret += "more than ";
+        content_length = received;
+    }
+
+    ret += format_size(content_length, FormatSizeFlags.IEC_UNITS);
 
     if (type == "text/html") {
         return_if_fail(@params != null);
