@@ -34,11 +34,13 @@ servicedir = $(datadir)/dbus-1/services
 client_PROGRAMS = \
 	bots \
 	convert \
+	time \
 	uri \
 	version
 service_DATA = \
 	so.bob131.JiyuuBot.Client.bots.service \
 	so.bob131.JiyuuBot.Client.convert.service \
+	so.bob131.JiyuuBot.Client.time.service \
 	so.bob131.JiyuuBot.Client.uri.service \
 	so.bob131.JiyuuBot.Client.version.service
 
@@ -66,6 +68,11 @@ convert_LDADD = \
 	$(librest_LIBS) \
 	$(json_glib_LIBS) \
 	$(base_client_LDADD)
+
+time_SOURCES = time.vala
+time_VALAFLAGS = $(jweather_VALAFLAGS)
+time_CFLAGS = $(jweather_CFLAGS)
+time_LDADD = $(jweather_LDADD)
 
 uri_SOURCES = uri.vala
 uri_VALAFLAGS = \
