@@ -48,6 +48,8 @@ PKG_CHECK_MODULES(json_glib, [json-glib-1.0])
 PKG_CHECK_MODULES(libsoup, [libsoup-2.4])
 PKG_CHECK_MODULES(libxml, [libxml-2.0])
 
+PKG_CHECK_MODULES(libgweather, [gweather-3.0])
+
 PKG_CHECK_MODULES([tp_glib], [telepathy-glib],, [HAVE_TP=xno])
 AM_CONDITIONAL([TP_GLIB_TEST], [test "x$HAVE_TP" != "xno"])
 
@@ -78,5 +80,6 @@ AC_CONFIG_FILES([
   src/jiyuubot/tests/Makefile
 
   src/clients/Makefile
+  src/clients/libjweather/Makefile
 ])
 AC_OUTPUT

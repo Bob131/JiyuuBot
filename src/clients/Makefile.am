@@ -1,3 +1,5 @@
+SUBDIRS = libjweather
+
 base_client_VALAFLAGS = \
 	--vapidir $(top_srcdir)/src/libtp \
 	--pkg tp \
@@ -12,6 +14,20 @@ base_client_LDADD = \
 	$(top_srcdir)/src/libtp/libtp.la \
 	$(top_srcdir)/src/libjiyuubot/libjiyuubot.la \
 	$(jiyuubot_U_LIBS)
+
+jweather_VALAFLAGS = \
+	--vapidir libjweather \
+	--pkg jweather \
+	$(base_client_VALAFLAGS)
+jweather_CFLAGS = \
+	-Ilibjweather \
+	$(libsoup_CFLAGS) \
+	-DGWEATHER_I_KNOW_THIS_IS_UNSTABLE \
+	$(libgweather_CFLAGS) \
+	$(base_client_CFLAGS)
+jweather_LDADD = \
+	libjweather/libjweather.la \
+	$(base_client_LDADD)
 
 servicedir = $(datadir)/dbus-1/services
 
