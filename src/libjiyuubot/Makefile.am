@@ -38,6 +38,7 @@ libjiyuubot_la_SOURCES = \
 	clients/tp-client.vala \
 	messages.vala \
 	misc.vala \
+	reply-builder.vala \
 	namespace.vala
 libjiyuubot_la_VALAFLAGS = \
 	--library jiyuubot \
