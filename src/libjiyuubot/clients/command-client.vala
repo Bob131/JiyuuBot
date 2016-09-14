@@ -53,12 +53,29 @@ namespace JiyuuBot {
 
         }
 
-        internal void parse(ref string[] args) throws OptionError {
-            option_context.parse_strv(ref args);
-            if (remaining_args.length > 0 && !allow_extra_args)
+        internal void positional_argument_check() throws OptionError {
+            if (remaining_args.length > 0)
                 throw new OptionError.FAILED(
                     "This command does not accept positional arguments ('%s')",
                     string.joinv("', '", (string?[]?) remaining_args));
+        }
+
+        public bool extra_args(MessageContext? context = null) {
+            try {
+                positional_argument_check();
+            } catch (OptionError e) {
+                if (context != null)
+                    ((!) context).reply.begin(e.message);
+                return true;
+            }
+
+            return false;
+        }
+
+        internal void parse(ref string[] args) throws OptionError {
+            option_context.parse_strv(ref args);
+            if (!allow_extra_args)
+                positional_argument_check();
         }
 
         construct {
