@@ -36,13 +36,15 @@ client_PROGRAMS = \
 	convert \
 	time \
 	uri \
-	version
+	version \
+	weather
 service_DATA = \
 	so.bob131.JiyuuBot.Client.bots.service \
 	so.bob131.JiyuuBot.Client.convert.service \
 	so.bob131.JiyuuBot.Client.time.service \
 	so.bob131.JiyuuBot.Client.uri.service \
-	so.bob131.JiyuuBot.Client.version.service
+	so.bob131.JiyuuBot.Client.version.service \
+	so.bob131.JiyuuBot.Client.weather.service
 
 $(service_DATA):
 	$(AM_GEN_V) printf "[D-BUS Service]\nName=%s\nExec=%s\n" \
@@ -92,6 +94,15 @@ version_SOURCES = version.vala
 version_VALAFLAGS = $(base_client_VALAFLAGS)
 version_CFLAGS = $(base_client_CFLAGS)
 version_LDADD = $(base_client_LDADD)
+
+weather_SOURCES = weather.vala
+weather_VALAFLAGS = \
+	--pkg libsoup-2.4 \
+	$(jweather_VALAFLAGS)
+weather_CFLAGS = $(jweather_CFLAGS)
+weather_LDADD = \
+	$(libsoup_LIBS) \
+	$(jweather_LDADD)
 
 CLEANFILES = \
 	$(service_DATA)
