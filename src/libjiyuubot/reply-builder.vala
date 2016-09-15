@@ -1,60 +1,94 @@
 namespace JiyuuBot {
+    internal class Sentence {
+        public Array<string> words = new Array<string>();
+        public bool note;
+        public string parens;
+    }
+
     public class ReplyBuilder : Object {
-        public string prefix {construct; get; default="";}
+        public string prefix {construct; get;}
         public string word_delimiter {set; get; default=" ";}
         public string sentence_delimiter {set; get; default=" | ";}
         public bool capitalize_sentences {set; get; default=true;}
 
-        internal Array<Array<string>> sentences = new Array<Array<string>>();
-        internal Array<string> current_sentence = new Array<string>();
+        internal Array<Sentence> sentences = new Array<Sentence>();
+        internal Sentence current_sentence = new Sentence();
 
         [PrintfFormat]
         public void add(string word, ...) {
-            current_sentence.append_val(word.vprintf(va_list()));
+            current_sentence.words.append_val(word.vprintf(va_list()));
         }
 
-        public void end_sentence() {
-            if (current_sentence.length == 0)
+        public void new_sentence() {
+            if (current_sentence.words.length == 0)
                 return;
 
             sentences.append_val(current_sentence);
-            current_sentence = new Array<string>();
+            current_sentence = new Sentence();
+        }
+
+        public void new_note(string parens = "()")
+            requires (parens.char_count() == 2)
+        {
+            new_sentence();
+            current_sentence.note = true;
+            current_sentence.parens = parens;
         }
 
         public string build_reply() {
-            if (current_sentence.length > 0)
-                end_sentence();
+            if (current_sentence.words.length > 0)
+                new_sentence();
 
             string[] built_sentences = {};
-            foreach (var words in sentences.data) {
-                var sentence = string.joinv(word_delimiter,
-                    (string?[]?) words.data);
+            foreach (var sentence in sentences.data) {
+                var built_sentence = string.joinv(word_delimiter,
+                    (string?[]?) sentence.words.data);
 
-                if (sentence.length == 0)
+                if (built_sentence.length == 0)
                     continue;
 
                 if (capitalize_sentences) {
                     unichar lead;
                     int index = 0;
-                    while (sentence.get_next_char(ref index, out lead)
-                        && !lead.isgraph()) {}
+                    while (built_sentence.get_next_char(ref index, out lead)
+                        && !lead.isalnum()) {}
 
                     if (lead.isalpha()) {
                         var title_case = lead.totitle().to_string();
                         return_if_fail(title_case != null);
 
-                        sentence = sentence.splice(sentence.index_of_char(lead),
-                            index, (!) title_case);
+                        built_sentence = built_sentence.splice(
+                            built_sentence.index_of_char(lead), index,
+                            (!) title_case);
                     }
                 }
 
-                built_sentences += sentence;
+                if (sentence.note)
+                    built_sentence =
+                        (!) sentence.parens.get_char(0).to_string()
+                        + built_sentence
+                        + (!) sentence.parens.get_char(1).to_string();
+
+                built_sentences += built_sentence;
             }
 
-            sentences = new Array<Array<string>>();
+            var ret = "";
+            for (var i = 0; i < built_sentences.length; i++) {
+                ret += built_sentences[i];
+                if ((string?) built_sentences[i + 1] != null)
+                    if (sentences.data[i + 1].note)
+                        ret += word_delimiter;
+                    else
+                        ret += sentence_delimiter;
+            }
 
-            return prefix + string.joinv(sentence_delimiter,
-                (string?[]?) built_sentences);
+            sentences = new Array<Sentence*>();
+
+            return prefix + ret;
+        }
+
+        public ReplyBuilder() {
+            Object(prefix: "");
         }
 
         [PrintfFormat]

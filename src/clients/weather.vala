@@ -159,7 +159,7 @@ async void handle_invocation(
             }
     }
 
-    reply.end_sentence();
+    reply.new_sentence();
 
     if (report.clouds.length() > 0) {
         var cover = (JWeather.Metar.CloudCover) 0;
@@ -184,7 +184,7 @@ async void handle_invocation(
 
         reply.add(format, mangle_enum_name(cover,
             typeof(JWeather.Metar.CloudCover)));
-        reply.end_sentence();
+        reply.new_sentence();
     }
 
     // 6km/h should cut out 0 and 1 on the Beaufort scale
@@ -259,14 +259,14 @@ async void handle_invocation(
             reply.add("gusts of %dkm/h", (int) gust_speed);
         }
 
-        reply.end_sentence();
+        reply.new_sentence();
     }
 
     if (report.temperature != null) {
         reply.add("%d°C", (!) report.temperature);
         if (report.dew_point != null)
             reply.add("with a dew point of %d°C", (!) report.dew_point);
-        reply.end_sentence();
+        reply.new_sentence();
     }
 
     if (report.visibility != null) {
@@ -280,7 +280,7 @@ async void handle_invocation(
         else
             reply.add("%.1fkm".printf(vis / 1000d).replace(".0", ""));
 
-        reply.end_sentence();
+        reply.new_sentence();
     }
 
     if (report.automated || report.corrected)
