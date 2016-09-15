@@ -1,3 +1,5 @@
+SUBDIRS = tests
+
 pkglib_LTLIBRARIES = libjweather.la
 
 BUILT_SOURCES = jweather.deps jweather-priv.h

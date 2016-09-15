@@ -81,5 +81,6 @@ AC_CONFIG_FILES([
 
   src/clients/Makefile
   src/clients/libjweather/Makefile
+  src/clients/libjweather/tests/Makefile
 ])
 AC_OUTPUT
