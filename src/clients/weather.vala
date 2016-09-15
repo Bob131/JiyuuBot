@@ -42,12 +42,12 @@ async void handle_invocation(
     if (options.city) {
         var city = search.find_by_name(
             string.joinv(" ", (string?[]?) options.positional_arguments));
-        report = yield new JWeather.Metar.Report.from_location(city);
+        report = yield JWeather.Metar.Report.from_location(city);
     } else {
         if (options.extra_args(context))
             return;
         report =
-            yield new JWeather.Metar.Report.from_station_code(options.metar);
+            yield JWeather.Metar.Report.from_station_code(options.metar);
     }
 
     var reply = new JiyuuBot.ReplyBuilder.with_prefix("Weather %s: ",

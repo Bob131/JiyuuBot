@@ -82,7 +82,7 @@ namespace JWeather.Metar {
         internal int? _dew_point;
         public int? dew_point {get {return _dew_point;}}
 
-        // Vala generates broken code when chaining async constructors, so a lot
+        // Vala generates broken code when using async constructors, so a lot
         // of constructor logic lives in separate methods
 
         internal async string station_code_setup(string icao_station_code)
@@ -161,12 +161,12 @@ namespace JWeather.Metar {
 
         internal Report() {}
 
-        public async Report.from_location(GWeather.Location location)
+        public async static Report from_location(GWeather.Location location)
             throws IOError
         {
-            Object();
+            var report = new Report();
 
-            city_name_from_location(location);
+            report.city_name_from_location(location);
 
             GWeather.Location? _station = null;
             foreach (var possible_station in location.get_children())
@@ -178,28 +178,38 @@ namespace JWeather.Metar {
 
             if (_station == null)
                 throw new IOError.FAILED("%s does not have a METAR station",
-                    _city_name == null ? "Location" : (!) _city_name);
+                    report._city_name == null ?
+                        "Location"
+                        : (!) report._city_name);
+
             var station = (!) _station;
 
             if (station.get_code() == null)
                 throw new IOError.FAILED("METAR station for %s has no code. %s",
-                    _city_name == null ? "location" : (!) _city_name,
+                    report._city_name == null ?
+                        "location"
+                        : (!) report._city_name,
                     "This is a bug in libgweather.");
 
-            parse_metar(yield station_code_setup((!) station.get_code()));
+            report.parse_metar(yield report.station_code_setup(
+                (!) station.get_code()));
+
+            return report;
         }
 
-        public async Report.from_station_code(string icao_station_code)
+        public async static Report from_station_code(string icao_station_code)
             throws IOError
         {
-            Object();
-            parse_metar(
-                yield station_code_setup(icao_station_code.up().strip()));
+            var report = new Report();
+            report.parse_metar(yield report.station_code_setup(
+                icao_station_code.up().strip()));
+            return report;
         }
 
-        public Report.from_string(string metar_string) throws IOError {
-            Object();
-            parse_metar(metar_string);
+        public static Report from_string(string metar_string) throws IOError {
+            var report = new Report();
+            report.parse_metar(metar_string);
+            return report;
         }
     }
 }
