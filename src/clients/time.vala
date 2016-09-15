@@ -20,7 +20,8 @@ int main(string[] args) {
     var search = new JWeather.CitySearch();
 
     client.command_invoked.connect((context, options) => {
-        var reply = "The current time %s is ";
+        var reply = new JiyuuBot.ReplyBuilder();
+        reply.add("the current time");
 
         if (options.city) {
             string city_name;
@@ -36,30 +37,31 @@ int main(string[] args) {
             }
 
             options.tzid = ((!) weather_timezone).get_tzid();
-            reply = reply.printf(@"in $city_name");
+            reply.add("in %s", city_name);
         } else if (options.tzid != "") {
             if (options.extra_args(context))
                 return;
 
-            reply = reply.printf(@"for $(options.tzid)");
+            reply.add("for %s", options.tzid);
         } else
             assert_not_reached();
 
         var timezone = new TimeZone(options.tzid);
         var foreign_time = new DateTime.now(timezone);
 
-        reply += foreign_time.format("%H:%M on a %A");
-        reply += " (";
+        reply.add(foreign_time.format("is %H:%M on a %A"));
+
+        reply.new_note();
 
         if (options.city)
-            reply += @"$(options.tzid), ";
+            reply.add("%s,", options.tzid);
 
         var offset = foreign_time.get_utc_offset() / TimeSpan.SECOND;
         var offset_time = Time.gm((time_t) offset.abs());
-        reply += "UTC%c%s)".printf(offset < 0 ? '-' : '+',
+        reply.add("UTC%c%s", offset < 0 ? '-' : '+',
             offset_time.format("%H:%M"));
 
-        context.reply.begin(reply);
+        context.reply.begin(reply.build_reply());
     });
 
     var app = new JiyuuBot.ClientApp();
